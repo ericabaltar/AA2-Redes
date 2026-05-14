@@ -22,6 +22,9 @@ private:
 	sf::TcpSocket socket;
 	bool successfulLogin = false;
 
+	sf::UdpSocket udpServerSocket;
+	char buffer[1024];
+
 public:
 	void Init();
 	void Update();

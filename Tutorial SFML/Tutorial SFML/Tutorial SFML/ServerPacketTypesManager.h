@@ -6,9 +6,14 @@
 
 #define SPTM ServerPacketTypesManager::Instance()
 
-enum PacketTypes
+enum TcpPacketTypes
 {
 	HANDSHAKE, LOGIN, REGISTER, LOBBY_CREATE, LOBBY_JOIN, WAITING_ROOM_PLAYERS, RANKING, START_GAME, END_GAME
+};
+
+enum UdpPacketTypes
+{
+	MOVEMENT
 };
 
 class ServerPacketTypesManager
@@ -43,6 +48,7 @@ private:
 	~ServerPacketTypesManager() = default;
 
 	void SendData(sf::TcpSocket& socket, sf::Packet& packet);
+	void SendUdpData(sf::UdpSocket& socket, sf::Packet& packet);
 
 	void ReceiveLoginPacket(sf::Packet data);
 	void ReceiveRegisterPacket(sf::Packet data);

@@ -72,6 +72,21 @@ void ServerPacketTypesManager::SendData(sf::TcpSocket& socket, sf::Packet& packe
 	}
 }
 
+void ServerPacketTypesManager::SendUdpData(sf::UdpSocket& socket, sf::Packet& packet)
+{
+	const void* data = packet.getData();
+	std::size_t dataSize = packet.getDataSize();
+
+	if (socket.send(data, dataSize, SERVER_IP, SERVER_PORT) == sf::Socket::Status::Done)
+	{
+		std::cout << "Paquete UDP enviado..." << std::endl;
+	}
+	else
+	{
+		std::cerr << "Error al enviar paquete UDP" << std::endl;
+	}
+}
+
 void ServerPacketTypesManager::SendHandshake(sf::TcpSocket& server)
 {
 	sf::Packet packet;

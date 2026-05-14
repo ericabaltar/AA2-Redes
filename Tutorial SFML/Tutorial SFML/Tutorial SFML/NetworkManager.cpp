@@ -1,6 +1,7 @@
 #include "NetworkManager.h"
 
-void NetworkManager::Init() {
+void NetworkManager::Init()
+{
     EstablishConnectionWithServer();
 }
 
