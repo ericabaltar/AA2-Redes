@@ -33,15 +33,16 @@ sf::Packet& operator<<(sf::Packet& packet, UdpPacketTypes& type) {
 	return packet;
 }
 
-void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, sf::IpAddress& senderIp, unsigned short senderPort)
+void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, std::optional<sf::IpAddress>& senderIp, unsigned short senderPort)
 {
-	PacketTypes packetType;
+	UdpPacketTypes packetType;
 
 	packet >> packetType;
 
 	switch (packetType)
 	{
 	case MOVEMENT:
+		std::cout << "Paquete identificado como movement." << std::endl;
 		ReceiveMovementPacket(packet);
 		break;
 	default:
@@ -134,6 +135,10 @@ void ServerPacketTypesManager::ReceiveHandshakePacket(sf::Packet data)
 
 void ServerPacketTypesManager::ReceiveMovementPacket(sf::Packet data)
 {
+	int testData;
+	data >> testData;
+
+	std::cout << "Recibido movimiento: " << testData;
 }
 
 void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)

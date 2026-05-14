@@ -2,10 +2,22 @@
 #include <optional>
 #include <cmath>
 #include <vector>
+#include "NetworkManager.h"
 
 int main()
 {
+
     sf::RenderWindow window(sf::VideoMode({ 800, 600 }), "SFML Test");
+
+    NT->Init();
+
+    if (NT->GetDisconnectFromServer()) return 0;
+
+    while (true)
+    {
+        if (!NT->GetDisconnectFromServer())
+            NT->Update();
+    };
 
     sf::Texture duckTexture;
     if (!duckTexture.loadFromFile("assets/grey_duck_movement.png"))

@@ -2,7 +2,8 @@
 
 void NetworkManager::Init()
 {
-    EstablishConnectionWithServer();
+    //EstablishConnectionWithServer();
+    SPTM->SendUdpTest(udpServerSocket);
 }
 
 void NetworkManager::EstablishConnectionWithServer()

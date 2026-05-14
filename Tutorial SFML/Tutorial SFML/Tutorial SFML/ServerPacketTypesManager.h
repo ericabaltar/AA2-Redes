@@ -39,6 +39,8 @@ public:
 	void SendLobbyJoinAttempt(std::string lobbyId, sf::TcpSocket& server);
 	void SendRankingPetition(int userId, sf::TcpSocket& server);
 
+	void SendUdpTest(sf::UdpSocket& server);
+
 	inline std::vector<User> GetRanking() { return ranking; }
 
 private:

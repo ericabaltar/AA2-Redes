@@ -28,7 +28,7 @@ private:
 	std::string handshakeMessage = "Handshake realizado";
 
 public:
-	void ReceivePacket(sf::Packet packet, sf::IpAddress& senderIp, unsigned short senderPort);
+	void ReceivePacket(sf::Packet packet, std::optional<sf::IpAddress>& senderIp, unsigned short senderPort);
 	void SendHandshake(sf::TcpSocket& client);
 	void SendUpdatedPlayerCount(sf::TcpSocket& client, int playerCount);
 
