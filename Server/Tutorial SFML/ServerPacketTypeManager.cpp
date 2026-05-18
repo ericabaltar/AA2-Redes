@@ -153,6 +153,14 @@ void ServerPacketTypesManager::SendRankingPacket(sf::TcpSocket& client, std::vec
 	std::cout << "Ranking packet enviado con " << rankings.size() << " entradas." << std::endl;
 }
 
+void ServerPacketTypesManager::SendMapPacket(sf::TcpSocket& client)
+{
+	sf::Packet packet;
+	packet << PacketTypes::MAP;
+
+
+}
+
 void ServerPacketTypesManager::ReceiveHandshakePacket(sf::Packet data)
 {
 	std::string receiveMesage;

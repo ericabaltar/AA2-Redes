@@ -29,12 +29,12 @@ int main()
 
     player.setTextureRect(walkFrames[0]);
     player.setOrigin({ frameWidth / 2.f, frameHeight / 2.f });
-    player.setPosition({ 400.f, 300.f });
+    player.setPosition({ 700.f, 100.f });
     player.setScale({ scale, scale });
 
-    sf::RectangleShape ground({ 800.f, 50.f });
+    sf::RectangleShape ground({ 200.f, 50.f });
     ground.setFillColor(sf::Color(100, 100, 100));
-    ground.setPosition({ 0.f, 550.f });
+    ground.setPosition({ 300.f, 250.f });
 
     sf::Vector2f velocity(0.f, 0.f);
 
