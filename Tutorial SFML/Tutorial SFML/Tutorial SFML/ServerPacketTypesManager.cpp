@@ -154,14 +154,12 @@ void ServerPacketTypesManager::SendRankingPetition(int userId, sf::TcpSocket& se
 	SendData(server, packet);
 }
 
-void ServerPacketTypesManager::SendUdpTest(sf::UdpSocket& server)
+void ServerPacketTypesManager::SendMovement(sf::UdpSocket& server, MovementPacket movement)
 {
 	sf::Packet packet;
 
-	int test = 89231;
-
 	packet << UdpPacketTypes::MOVEMENT;
-	packet << test;
+	packet << movement;
 
 	SendUdpData(server, packet);
 }

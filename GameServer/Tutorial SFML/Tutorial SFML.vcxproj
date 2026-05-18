@@ -142,8 +142,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h" />
+    <ClInclude Include="MovementPacket.h" />
     <ClInclude Include="NetworkManager.h" />
     <ClInclude Include="ServerPacketTypeManager.h" />
+    <ClInclude Include="Vector2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

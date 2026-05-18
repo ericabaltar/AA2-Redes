@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include "User.h"
+#include "MovementPacket.h"
 
 #define SPTM ServerPacketTypesManager::Instance()
 
@@ -39,7 +40,7 @@ public:
 	void SendLobbyJoinAttempt(std::string lobbyId, sf::TcpSocket& server);
 	void SendRankingPetition(int userId, sf::TcpSocket& server);
 
-	void SendUdpTest(sf::UdpSocket& server);
+	void SendMovement(sf::UdpSocket& server, MovementPacket movement);
 
 	inline std::vector<User> GetRanking() { return ranking; }
 
@@ -54,7 +55,6 @@ private:
 
 	void ReceiveLoginPacket(sf::Packet data);
 	void ReceiveRegisterPacket(sf::Packet data);
-
 	void ReceiveHandshakePacket(sf::Packet data);
 	void ReceiveLobbyCreatePacket(sf::Packet data);
 	void ReceiveLobbyJoinPacket(sf::Packet data);

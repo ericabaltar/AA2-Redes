@@ -41,6 +41,8 @@ public:
 	void SendLobbyJoinAttemptPacket(std::string lobbyId);
 	void SendRankingPetitionServerPacket(int userId);
 
+	void SendMovementPacket(MovementPacket movementPacket);
+
 private:
 	NetworkManager() = default;
 	NetworkManager(const NetworkManager& nt) = delete;

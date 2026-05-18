@@ -1,5 +1,6 @@
 #include "ServerPacketTypeManager.h"
 #include <iostream>
+#include "MovementPacket.h"
 
 sf::Packet& operator>>(sf::Packet& packet, PacketTypes& type) {
 	int temp;
@@ -42,7 +43,6 @@ void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, std::optional<sf
 	switch (packetType)
 	{
 	case MOVEMENT:
-		std::cout << "Paquete identificado como movement." << std::endl;
 		ReceiveMovementPacket(packet);
 		break;
 	default:
@@ -135,10 +135,12 @@ void ServerPacketTypesManager::ReceiveHandshakePacket(sf::Packet data)
 
 void ServerPacketTypesManager::ReceiveMovementPacket(sf::Packet data)
 {
-	int testData;
-	data >> testData;
+	MovementPacket movement;
+	data >> movement;
 
-	std::cout << "Recibido movimiento: " << testData;
+	std::cout << "Recibido movimiento: ";
+	std::cout << "ID " << movement.ID << " | ";
+	std::cout << "(" << movement.pos.x << ", " << movement.pos.y << ")" << std::endl;
 }
 
 void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
