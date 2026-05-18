@@ -45,6 +45,9 @@
     <ClCompile Include="MovementPrediction.h">
       <Filter>Archivos de encabezado</Filter>
     </ClCompile>
+    <ClCompile Include="AnimatedSprite.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ServerPacketTypesManager.h">
@@ -69,6 +72,9 @@
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="Character.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimatedSprite.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>
