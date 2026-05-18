@@ -6,4 +6,5 @@ struct User
 	int score;
 	int userIndex;
 	int position;
+	float speed;
 };
