@@ -1,52 +1,11 @@
 #include "AnimatedSprite.h"
 #include <iostream>
 
-AnimatedSprite::AnimatedSprite(std::string textureDir, int rows, int columns)
+AnimatedSprite::AnimatedSprite(const std::string& textureDir)
 	: sprite(texture)
 {
 	if (!texture.loadFromFile(textureDir))
 		std::cout << "No se ha podido cargar el sprite." << std::endl;
-
-	for (int i = 0; i < rows; i++)
-	{
-		for (int j = 0; j < columns; j++)
-		{
-			sf::IntRect frame;
-
-			frame.position.x = j * frameWidth;
-			frame.position.y = i * frameHeight;
-
-			frame.size.x = frameWidth;
-			frame.size.y = frameHeight;
-
-			frames.push_back(frame);
-		}
-	}
-
-	sprite.setTextureRect(frames[0]);
-	sprite.setOrigin({ frameWidth / 2.f, frameHeight / 2.f });
-}
-
-void AnimatedSprite::Start()
-{
-}
-
-void AnimatedSprite::Update(float dt)
-{
-	timer += dt;
-
-	if (timer >= speed)
-	{
-		timer = 0.f;
-		currentFrame = (currentFrame + 1) % frames.size();
-		sprite.setTextureRect(frames[currentFrame]);
-	}
-}
-
-void AnimatedSprite::Stop()
-{
-	currentFrame = 0;
-	sprite.setTextureRect(frames[0]);
 }
 
 void AnimatedSprite::FlipHorizontally(bool flip)
@@ -58,19 +17,53 @@ void AnimatedSprite::FlipHorizontally(bool flip)
 
 }
 
-sf::Sprite AnimatedSprite::GetSprite()
+void AnimatedSprite::AddAnimation(const std::string& animationName, const Animation& animation)
+{
+	animations.emplace(animationName, animation);
+}
+
+void AnimatedSprite::StartAnimation(const std::string& animationName, bool restartAnimation)
+{
+	auto it = animations.find(animationName);
+	if (it == animations.end())
+		return;
+
+	Animation* newAnim = &it->second;
+
+	if (!restartAnimation && currentAnimation == newAnim)
+		return;
+
+	currentAnimation = newAnim;
+	currentAnimation->Reset();
+
+	sprite.setTextureRect(currentAnimation->GetCurrentFrame());
+	sprite.setOrigin({ currentAnimation->GetFrameWidth() / 2.f, currentAnimation->GetFrameHeight() / 2.f });
+}
+
+void AnimatedSprite::Update(float dt)
+{
+	currentAnimation->Update(dt);
+	sprite.setTextureRect(currentAnimation->GetCurrentFrame());
+}
+
+sf::Sprite& AnimatedSprite::GetSprite()
 {
 	return sprite;
 }
 
 float AnimatedSprite::GetWidth()
 {
-	return frameWidth;
+	return sprite.getLocalBounds().size.x;
 }
 
 float AnimatedSprite::GetHeight()
 {
-	return frameHeight;
+	return sprite.getLocalBounds().size.y;
+}
+
+bool AnimatedSprite::IsCurrentAnimationFinished() const
+{
+	return currentAnimation && currentAnimation->HasFinished();
 }
 
 void AnimatedSprite::SetPosition(sf::Vector2f pos)
@@ -83,3 +76,5 @@ void AnimatedSprite::SetScale(sf::Vector2f newScale)
 	scale = newScale;
 	sprite.setScale(scale);
 }
+
+

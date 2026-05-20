@@ -1,34 +1,32 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <unordered_map>
+#include "Animation.h"
 
 class AnimatedSprite
 {
 private:
-	const int frameWidth = 17;
-	const int frameHeight = 25;
-
-	std::vector<sf::IntRect> frames;
-	int currentFrame = 0;
-
-	float timer = 0.f;
-	float speed = 0.5f;
-
-	bool isPlaying = false;
-
 	sf::Texture texture;
 	sf::Sprite sprite;
 	sf::Vector2f scale = { 1.f, 1.f };
 
-public:
-	AnimatedSprite(std::string textureDir, int rows, int columns);
-	void Start();
-	void Update(float dt);
-	void Stop();
-	void FlipHorizontally(bool flip);
+	std::unordered_map<std::string, Animation> animations;
+	Animation* currentAnimation = nullptr;
+	std::string currentAnimationName;
 
-	sf::Sprite GetSprite();
+public:
+	AnimatedSprite(const std::string& textureDir);
+	
+	void AddAnimation(const std::string& animationName, const Animation& animation);
+	void StartAnimation(const std::string& animationName, bool restartAnimation = false);
+	void Update(float dt);
+
+	sf::Sprite& GetSprite();
 	float GetWidth();
 	float GetHeight();
+	bool IsCurrentAnimationFinished() const;
+
 	void SetPosition(sf::Vector2f pos);
 	void SetScale(sf::Vector2f newScale);
+	void FlipHorizontally(bool flip);
 };

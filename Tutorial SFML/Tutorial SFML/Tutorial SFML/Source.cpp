@@ -41,10 +41,9 @@ int main()
         float dt = clock.restart().asSeconds();
         float groundY = ground.getPosition().y;
 
-        player.DetectInput();
         player.Update(dt, groundY);
 
-        window.clear(sf::Color::Black);
+        window.clear(sf::Color(40,40,40));
         window.draw(ground);
         window.draw(player.GetSprite());
         window.display();

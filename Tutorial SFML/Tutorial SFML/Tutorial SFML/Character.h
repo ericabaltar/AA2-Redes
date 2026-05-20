@@ -1,11 +1,15 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <iostream>
 #include "AnimatedSprite.h"
 
 class Character
 {
 private:
+    sf::SoundBuffer quackBuffer;
+    sf::Sound quackSound;
+
 	const float scale = 4.f;
     float width;
     float height;
@@ -15,12 +19,12 @@ private:
 	sf::Vector2f position;
 	sf::Vector2f velocity;
 
-	const float acceleration = 1200.f;
-	const float maxSpeed = 300.f;
+	const float acceleration = 1800.f;
+	const float maxSpeed = 1500.f;
 	const float friction = 8.f;
 
 	const float gravity = 2000.f;
-	const float jumpForce = -700.f;
+	const float jumpForce = -900.f;
 
 	const float coyoteTime = 0.12f;
 	const float jumpBufferTime = 0.12f;
@@ -32,38 +36,25 @@ private:
 
 	bool facingRight = true;
 
-    float inputX;
+    float inputX = 0;
 
-public:
-	Character()
-		: sprite("assets/grey_duck_movement.png", 1, 5)
-	{
-		position = { 400.f, 300.f };
-		sprite.SetScale({ scale, scale });
+    bool isQuacking = false;
 
-		velocity = sf::Vector2f(0, 0);
-
-        width = sprite.GetWidth() * scale;
-        height = sprite.GetHeight() * scale;
-	}
-
-    sf::Sprite GetSprite()
+    void HandleInput(float dt)
     {
-        return sprite.GetSprite();
-    }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q) && !isQuacking && isOnGround)
+        {
+            quackSound.play();
+            isQuacking = true;
+            sprite.StartAnimation("quack", true);
+        }
 
-    sf::Vector2f GetPosition()
-    {
-        return position;
-    }
+        if (isQuacking)
+        {
+            inputX = 0.f;
+            return;
+        }
 
-    void ResetJumpBuffer()
-    {
-        jumpBufferTimer = jumpBufferTime;
-    }
-
-    void DetectInput()
-    {
         inputX = 0.f;
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
@@ -73,13 +64,25 @@ public:
             inputX += 1.f;
     }
 
-	void Update(float dt, float groundY)
-	{
-        velocity.x += inputX * acceleration * dt;
-        velocity.x *= 1.f / (1.f + friction * dt);
+    void ApplyPhysics(float dt, float groundY)
+    {
+        if (isQuacking)
+        {
+            velocity.x = 0.f;
+        }
+        else
+        {
+            velocity.x += inputX * acceleration * dt;
+            velocity.x *= 1.f / (1.f + friction * dt);
 
-        if (std::abs(velocity.x) > maxSpeed)
-            velocity.x = (velocity.x > 0.f ? 1.f : -1.f) * maxSpeed;
+            if (std::abs(velocity.x) > maxSpeed)
+                velocity.x = (velocity.x > 0.f ? 1.f : -1.f) * maxSpeed;
+
+            if (velocity.x > 5.f)
+                facingRight = true;
+            else if (velocity.x < -5.f)
+                facingRight = false;
+        }
 
         if (isOnGround)
             coyoteTimer = coyoteTime;
@@ -88,7 +91,7 @@ public:
 
         jumpBufferTimer -= dt;
 
-        if (jumpBufferTimer > 0.f && coyoteTimer > 0.f)
+        if (jumpBufferTimer > 0.f && coyoteTimer > 0.f && !isQuacking)
         {
             velocity.y = jumpForce;
             jumpBufferTimer = 0.f;
@@ -121,29 +124,83 @@ public:
             position = { 800.f - width / 2.f, position.y };
             velocity.x = 0.f;
         }
+    }
+
+    void HandleAnimation(float dt)
+    {
+        if (isQuacking)
+        {
+            sprite.Update(dt);
+
+            if (sprite.IsCurrentAnimationFinished())
+            {
+                isQuacking = false;
+                sprite.StartAnimation("idle", true);
+            }
+
+            return;
+        }
 
         bool isMoving = std::abs(velocity.x) > 20.f;
 
-        if (velocity.x > 5.f)
-            facingRight = true;
-        else if (velocity.x < -5.f)
-            facingRight = false;
-
         if (isMoving)
-        {
-            sprite.Update(dt);
-        }
+            sprite.StartAnimation("walk");
         else
-        {
-            sprite.Stop();
-        }
+            sprite.StartAnimation("idle");
 
         if (facingRight)
             sprite.FlipHorizontally(false);
         else
             sprite.FlipHorizontally(true);
 
+        sprite.Update(dt);
+    }
+
+public:
+	Character()
+		: sprite("assets/grey_duck.png"), quackSound(quackBuffer)
+	{
+		position = { 400.f, 300.f };
+		sprite.SetScale({ scale, scale });
+
+        sprite.AddAnimation("idle", Animation(32, 32, 0, 1, 0));
+        sprite.AddAnimation("walk", Animation(32, 32, 1, 6, 0.1f));
+        sprite.AddAnimation("quack", Animation(32, 32, 2, 1, 0.5f, false));
+
+        sprite.StartAnimation("idle");
+
+		velocity = sf::Vector2f(0, 0);
+
+        width = sprite.GetWidth() * scale;
+        height = sprite.GetHeight() * scale;
+
+        if (!quackBuffer.loadFromFile("assets/quack.wav"))
+            std::cout << "Error cargando quack.wav" << std::endl;
+        
+        quackSound.setVolume(20.f);
+    }
+
+    sf::Sprite GetSprite()
+    {
+        return sprite.GetSprite();
+    }
+
+    sf::Vector2f GetPosition()
+    {
+        return position;
+    }
+
+    void ResetJumpBuffer()
+    {
+        jumpBufferTimer = jumpBufferTime;
+    }
+
+    void Update(float dt, float groundY)
+    {
+        HandleInput(dt);
+        ApplyPhysics(dt, groundY);
+        HandleAnimation(dt);
         sprite.SetPosition(position);
-	}
+    }
 };
 
