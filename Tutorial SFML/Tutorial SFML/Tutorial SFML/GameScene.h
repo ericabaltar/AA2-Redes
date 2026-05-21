@@ -55,26 +55,22 @@ public:
         float dt = clock.restart().asSeconds();
         float groundY = ground.getPosition().y;
 
-        player.DetectInput();
         player.Update(dt, groundY);
 
-        if (NT->GetDisconnectFromServer())
-            return;
+        if (NT->GetDisconnectFromServer()) return;
 
         NT->Update();
 
         if (movementPrediction.ShouldSendPacket(dt))
         {
-            MovementPacket movementPacket =
-                movementPrediction.CreateMovementPacket(player.GetPosition());
-
+            MovementPacket movementPacket = movementPrediction.CreateMovementPacket(player.GetPosition());
             NT->SendMovementPacket(movementPacket);
         }
     }
 
     void Render(sf::RenderWindow& window)
     {
-        window.clear(sf::Color::Black);
+        window.clear(sf::Color(40, 40, 40));
 
         window.draw(ground);
         window.draw(player.GetSprite());
