@@ -39,21 +39,63 @@ private:
     float inputX = 0;
 
     bool isQuacking = false;
+    bool isShooting = false;
 
+public:
+    Character()
+        : sprite("assets/grey_duck.png"), quackSound(quackBuffer)
+    {
+        position = { 400.f, 300.f };
+        sprite.SetScale({ scale, scale });
+
+        sprite.AddAnimation("idle", Animation(32, 32, 0, 1, 0));
+        sprite.AddAnimation("walk", Animation(32, 32, 1, 6, 0.1f));
+        sprite.AddAnimation("shoot", Animation(32, 32, 2, 5, 0.05f, false));
+        sprite.AddAnimation("quack", Animation(32, 32, 3, 1, 0.5f, false));
+
+        sprite.StartAnimation("idle");
+
+        velocity = sf::Vector2f(0, 0);
+
+        width = sprite.GetWidth() * scale;
+        height = sprite.GetHeight() * scale;
+
+        if (!quackBuffer.loadFromFile("assets/quack.wav"))
+            std::cout << "Error cargando quack.wav" << std::endl;
+
+        quackSound.setVolume(20.f);
+    }
+
+    void Quack()
+    {
+        isQuacking = true;
+        sprite.StartAnimation("quack");
+
+        quackSound.play();
+    }
+
+    void Shoot()
+    {
+        isShooting = true;
+        sprite.StartAnimation("shoot");
+
+        // Shoot
+    }
+
+private:
     void HandleInput(float dt)
     {
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q) && !isQuacking && isOnGround)
+        bool isDoingAction = isQuacking || isShooting;
+        if (isOnGround)
         {
-            quackSound.play();
-            isQuacking = true;
-            sprite.StartAnimation("quack", true);
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q) && !isDoingAction)
+                Quack();
+
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::E) && !isDoingAction)
+                Shoot();
         }
 
-        if (isQuacking)
-        {
-            inputX = 0.f;
-            return;
-        }
+        if (isDoingAction) return;
 
         inputX = 0.f;
 
@@ -66,7 +108,7 @@ private:
 
     void ApplyPhysics(float dt, float groundY)
     {
-        if (isQuacking)
+        if (isQuacking || isShooting)
         {
             velocity.x = 0.f;
         }
@@ -91,7 +133,7 @@ private:
 
         jumpBufferTimer -= dt;
 
-        if (jumpBufferTimer > 0.f && coyoteTimer > 0.f && !isQuacking)
+        if (jumpBufferTimer > 0.f && coyoteTimer > 0.f && !isQuacking && !isShooting)
         {
             velocity.y = jumpForce;
             jumpBufferTimer = 0.f;
@@ -128,13 +170,14 @@ private:
 
     void HandleAnimation(float dt)
     {
-        if (isQuacking)
+        if (isQuacking || isShooting)
         {
             sprite.Update(dt);
 
             if (sprite.IsCurrentAnimationFinished())
             {
                 isQuacking = false;
+                isShooting = false;
                 sprite.StartAnimation("idle", true);
             }
 
@@ -157,30 +200,6 @@ private:
     }
 
 public:
-	Character()
-		: sprite("assets/grey_duck.png"), quackSound(quackBuffer)
-	{
-		position = { 400.f, 300.f };
-		sprite.SetScale({ scale, scale });
-
-        sprite.AddAnimation("idle", Animation(32, 32, 0, 1, 0));
-        sprite.AddAnimation("walk", Animation(32, 32, 1, 6, 0.1f));
-        sprite.AddAnimation("shoot", Animation(32, 32, 2, 5, 0.05f, false));
-        sprite.AddAnimation("quack", Animation(32, 32, 3, 1, 0.5f, false));
-
-        sprite.StartAnimation("idle");
-
-		velocity = sf::Vector2f(0, 0);
-
-        width = sprite.GetWidth() * scale;
-        height = sprite.GetHeight() * scale;
-
-        if (!quackBuffer.loadFromFile("assets/quack.wav"))
-            std::cout << "Error cargando quack.wav" << std::endl;
-        
-        quackSound.setVolume(20.f);
-    }
-
     sf::Sprite GetSprite()
     {
         return sprite.GetSprite();
