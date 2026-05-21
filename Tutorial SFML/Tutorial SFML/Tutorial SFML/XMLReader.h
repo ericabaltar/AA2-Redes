@@ -7,6 +7,8 @@
 #include <sstream>
 #include <iostream>
 
+#define XML XMLReader::Instance()
+
 #define NODE_MAP "map"
 #define NODE_BACKGROUND "background"
 #define NODE_POSITION "position"
@@ -49,16 +51,35 @@ struct SpawnPoint {
 class XMLReader
 {
 public:
-	XMLReader(const std::string& filename);
-	~XMLReader() = default;
+    static XMLReader* Instance() {
+        static XMLReader xml;
 
-    inline Background GetBackground() { return m_background; }
-    inline std::vector<Platform> GetPlatforms() { return m_platforms; }
-    inline std::vector<SpawnPoint> GetSpawnPoints() { return m_spawns; }
-
+        return &xml;
+    }
 private:
     Background m_background;
     std::vector<Platform> m_platforms;
     std::vector<SpawnPoint> m_spawns;
+
+private:
+    XMLReader() = default;
+    XMLReader(const XMLReader& xml) = default;
+    XMLReader& operator=(const XMLReader& xml) = delete;
+    ~XMLReader() = default;
+
+    //void ReadBackground();
+public:
+    bool SaveToFile(const std::string& filename);
+
+    inline Background GetBackground() { return m_background; }
+    inline void SetBackground(Background background) { m_background = background; }
+
+    inline std::vector<Platform> GetPlatforms() { return m_platforms; }
+    inline void SetPlatforms(std::vector<Platform> platforms) { m_platforms = platforms; }
+
+    inline std::vector<SpawnPoint> GetSpawnPoints() { return m_spawns; }
+    inline void SetSpawnPoints(std::vector<SpawnPoint> spawnPoints) { m_spawns = spawnPoints; }
+
+
 };
 

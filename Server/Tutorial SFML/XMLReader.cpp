@@ -78,9 +78,9 @@ XMLReader::XMLReader(const std::string& filename) {
 
     rapidxml::xml_node<>* spawnsNode = rootNode->first_node(NODE_SPAWNS);
     if (spawnsNode) {
-        for (rapidxml::xml_node<>* playerNode = spawnsNode->first_node(NODE_PLATFORM);
+        for (rapidxml::xml_node<>* playerNode = spawnsNode->first_node(NODE_PLAYER);
             playerNode;
-            playerNode = playerNode->next_sibling(NODE_PLATFORM)) {
+            playerNode = playerNode->next_sibling(NODE_PLAYER)) {
 
             SpawnPoint spawn;
             spawn.playerId = std::stoi(playerNode->first_attribute(NODE_PLAYER_ID)->value());

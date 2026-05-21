@@ -18,11 +18,56 @@ sf::Packet& operator<<(sf::Packet& packet, PacketTypes& tipo) {
 	return packet;
 }
 
+// ------------- Codigo generado por IA (solo la parte de estos operators
+sf::Packet& operator<<(sf::Packet& packet, const Position& pos) {
+	return packet << pos.x << pos.y;
+}
+
+sf::Packet& operator>>(sf::Packet& packet, Position& pos) {
+	return packet >> pos.x >> pos.y;
+}
+
+sf::Packet& operator<<(sf::Packet& packet, const Size& size) {
+	return packet << size.width << size.height;
+}
+
+sf::Packet& operator>>(sf::Packet& packet, Size& size) {
+	return packet >> size.width >> size.height;
+}
+
+sf::Packet& operator<<(sf::Packet& packet, const Background& bg) {
+	return packet << bg.position << bg.sprite << bg.size;
+}
+
+sf::Packet& operator>>(sf::Packet& packet, Background& bg) {
+	return packet >> bg.position >> bg.sprite >> bg.size;
+}
+
+sf::Packet& operator<<(sf::Packet& packet, const Platform& platform) {
+	return packet << platform.position << platform.sprite << platform.size;
+}
+
+sf::Packet& operator>>(sf::Packet& packet, Platform& platform) {
+	return packet >> platform.position >> platform.sprite >> platform.size;
+}
+
+sf::Packet& operator<<(sf::Packet& packet, const SpawnPoint& spawn) {
+	return packet << spawn.playerId << spawn.position;
+}
+
+sf::Packet& operator>>(sf::Packet& packet, SpawnPoint& spawn) {
+	return packet >> spawn.playerId >> spawn.position;
+}
+
+// --------------------
+
 void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, sf::TcpSocket& client)
 {
 	PacketTypes packetType;
 
 	packet >> packetType;
+
+	packetType = MAP;
 
 	switch (packetType)
 	{
@@ -49,6 +94,9 @@ void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, sf::TcpSocket& c
 		break;
 	case PacketTypes::END_GAME:
 		ReceiveEndGamePacket(packet);
+		break;
+	case PacketTypes::MAP:
+		ReceiveMapPacket(packet, client);
 		break;
 	default:
 		std::cout << "No se ha identificado el tipo de packete" << std::endl;
@@ -158,7 +206,24 @@ void ServerPacketTypesManager::SendMapPacket(sf::TcpSocket& client)
 	sf::Packet packet;
 	packet << PacketTypes::MAP;
 
+	xmlReader = new XMLReader(xmlFileName);
+	packet << xmlReader->GetBackground();
+	
+	std::vector<Platform> platforms = xmlReader->GetPlatforms();
+	packet << platforms.size();
+	for (int i = 0; i < platforms.size(); i++) {
+		packet << platforms[i];
+	}
 
+	std::vector<SpawnPoint> spawnPoints = xmlReader->GetSpawnPoints();
+	packet << spawnPoints.size();
+	for (int i = 0; i < spawnPoints.size(); i++) {
+		packet << spawnPoints[i];
+	}
+
+	SendData(client, packet);
+
+	delete xmlReader;
 }
 
 void ServerPacketTypesManager::ReceiveHandshakePacket(sf::Packet data)
@@ -265,4 +330,11 @@ void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
 
 void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)
 {
+}
+
+void ServerPacketTypesManager::ReceiveMapPacket(sf::Packet data, sf::TcpSocket& client)
+{
+	std::cout << "Recibida solicitud de paquete de Mapa" << std::endl;
+
+	SendMapPacket(client);
 }

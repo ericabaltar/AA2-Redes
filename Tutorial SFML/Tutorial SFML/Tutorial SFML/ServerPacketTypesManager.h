@@ -8,7 +8,7 @@
 
 enum PacketTypes
 {
-	HANDSHAKE, LOGIN, REGISTER, LOBBY_CREATE, LOBBY_JOIN, WAITING_ROOM_PLAYERS, RANKING, START_GAME, END_GAME
+	HANDSHAKE, LOGIN, REGISTER, LOBBY_CREATE, LOBBY_JOIN, WAITING_ROOM_PLAYERS, RANKING, START_GAME, END_GAME, MAP
 };
 
 class ServerPacketTypesManager
@@ -33,6 +33,7 @@ public:
 	void SendLobbyCreateAttempt(std::string lobbyId, sf::TcpSocket& server);
 	void SendLobbyJoinAttempt(std::string lobbyId, sf::TcpSocket& server);
 	void SendRankingPetition(int userId, sf::TcpSocket& server);
+	void SendMapPetition(int userId, sf::TcpSocket& server);
 
 	inline std::vector<User> GetRanking() { return ranking; }
 
@@ -54,4 +55,5 @@ private:
 	void ReceiveRankingPacket(sf::Packet data);
 	void ReceiveStartGamePacket(sf::Packet data);
 	void ReceiveEndGamePacket(sf::Packet data);
+	void ReceiveMapPacket(sf::Packet data);
 };

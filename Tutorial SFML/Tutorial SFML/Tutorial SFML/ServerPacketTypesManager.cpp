@@ -2,6 +2,7 @@
 #include "NetworkManager.h"
 //#include "LobbyManager.h"
 #include "User.h"
+#include "XMLReader.h"
 
 sf::Packet& operator>>(sf::Packet& packet, PacketTypes& tipo) {
 	int temp;
@@ -18,6 +19,49 @@ sf::Packet& operator<<(sf::Packet& packet, PacketTypes& tipo) {
 
 	return packet;
 }
+
+// ------------- Codigo generado por IA (solo la parte de estos operators
+sf::Packet& operator<<(sf::Packet& packet, const Position& pos) {
+	return packet << pos.x << pos.y;
+}
+
+sf::Packet& operator>>(sf::Packet& packet, Position& pos) {
+	return packet >> pos.x >> pos.y;
+}
+
+sf::Packet& operator<<(sf::Packet& packet, const Size& size) {
+	return packet << size.width << size.height;
+}
+
+sf::Packet& operator>>(sf::Packet& packet, Size& size) {
+	return packet >> size.width >> size.height;
+}
+
+sf::Packet& operator<<(sf::Packet& packet, const Background& bg) {
+	return packet << bg.position << bg.sprite << bg.size;
+}
+
+sf::Packet& operator>>(sf::Packet& packet, Background& bg) {
+	return packet >> bg.position >> bg.sprite >> bg.size;
+}
+
+sf::Packet& operator<<(sf::Packet& packet, const Platform& platform) {
+	return packet << platform.position << platform.sprite << platform.size;
+}
+
+sf::Packet& operator>>(sf::Packet& packet, Platform& platform) {
+	return packet >> platform.position >> platform.sprite >> platform.size;
+}
+
+sf::Packet& operator<<(sf::Packet& packet, const SpawnPoint& spawn) {
+	return packet << spawn.playerId << spawn.position;
+}
+
+sf::Packet& operator>>(sf::Packet& packet, SpawnPoint& spawn) {
+	return packet >> spawn.playerId >> spawn.position;
+}
+
+// --------------------
 
 void ServerPacketTypesManager::ReceivePacket(sf::Packet packet)
 {
@@ -53,6 +97,9 @@ void ServerPacketTypesManager::ReceivePacket(sf::Packet packet)
 		break;
 	case PacketTypes::END_GAME:
 		ReceiveEndGamePacket(packet);
+		break;
+	case PacketTypes::MAP:
+		ReceiveMapPacket(packet);
 		break;
 	default:
 		std::cout << "No se ha identificado el tipo de paquete" << std::endl;
@@ -135,6 +182,16 @@ void ServerPacketTypesManager::SendRankingPetition(int userId, sf::TcpSocket& se
 
 	packet << PacketTypes::RANKING;
 	packet << userId;
+
+	SendData(server, packet);
+}
+
+void ServerPacketTypesManager::SendMapPetition(int userId, sf::TcpSocket& server)
+{
+	sf::Packet packet;
+
+	packet << PacketTypes::MAP;
+	std::cout << "Pidiendo el mapa" << std::endl;
 
 	SendData(server, packet);
 }
@@ -258,4 +315,27 @@ void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
 
 void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)
 {
+}
+
+void ServerPacketTypesManager::ReceiveMapPacket(sf::Packet data)
+{
+	Background background;
+	data >> background;
+	XML->SetBackground(background);
+
+	int platFomsSize;
+	std::vector<Platform> platforms;
+	data >> platFomsSize;
+	for (int i = 0; i < platFomsSize; i++) {
+		data >> platforms[i];
+	}
+	XML->SetPlatforms(platforms);
+
+	int spawnPointsSize;
+	std::vector<SpawnPoint> spawnPoints;
+	data >> spawnPointsSize;
+	for (int i = 0; i < spawnPointsSize; i++) {
+		data >> spawnPoints[i];
+	}
+	XML->SetSpawnPoints(spawnPoints);
 }

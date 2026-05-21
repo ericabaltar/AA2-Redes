@@ -120,7 +120,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>STATIC_CONCPP;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\include</AdditionalIncludeDirectories>
@@ -139,11 +139,17 @@
     <ClCompile Include="NetworkManager.cpp" />
     <ClCompile Include="ServerPacketTypesManager.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="XMLReader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="dep\inc\xml\rapidxml.hpp" />
+    <ClInclude Include="dep\inc\xml\rapidxml_iterators.hpp" />
+    <ClInclude Include="dep\inc\xml\rapidxml_print.hpp" />
+    <ClInclude Include="dep\inc\xml\rapidxml_utils.hpp" />
     <ClInclude Include="NetworkManager.h" />
     <ClInclude Include="ServerPacketTypesManager.h" />
     <ClInclude Include="User.h" />
+    <ClInclude Include="XMLReader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
