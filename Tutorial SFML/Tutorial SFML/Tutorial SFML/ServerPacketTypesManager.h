@@ -1,11 +1,16 @@
 #pragma once
 #include <SFML/Network.hpp>
 #include <iostream>
+#include <cstdint>
 #include <string>
 #include "User.h"
 #include "MovementPacket.h"
 
 #define SPTM ServerPacketTypesManager::Instance()
+
+#define NORMAL_PACKET 0b00000000
+#define CRITICAL_PACKET 0b00000001
+#define URGENT_PACKET 0b00000010
 
 enum TcpPacketTypes
 {

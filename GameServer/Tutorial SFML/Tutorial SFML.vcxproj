@@ -145,6 +145,7 @@
     <ClInclude Include="MovementPacket.h" />
     <ClInclude Include="NetworkManager.h" />
     <ClInclude Include="ServerPacketTypeManager.h" />
+    <ClInclude Include="Task.h" />
     <ClInclude Include="Vector2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

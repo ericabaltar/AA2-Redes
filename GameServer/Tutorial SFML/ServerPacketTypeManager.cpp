@@ -1,6 +1,8 @@
 #include "ServerPacketTypeManager.h"
+#include "NetworkManager.h"
 #include <iostream>
 #include "MovementPacket.h"
+#include <thread>
 
 sf::Packet& operator>>(sf::Packet& packet, PacketTypes& type) {
 	int temp;
@@ -36,21 +38,38 @@ sf::Packet& operator<<(sf::Packet& packet, UdpPacketTypes& type) {
 
 void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, std::optional<sf::IpAddress>& senderIp, unsigned short senderPort)
 {
-	UdpPacketTypes packetType;
+	uint8_t receivedDataPriority;
 
-	packet >> packetType;
+	packet >> receivedDataPriority;
 
-	switch (packetType)
+	switch (receivedDataPriority)
 	{
-	case MOVEMENT:
-		ReceiveMovementPacket(packet);
+	case NORMAL_PACKET:
+		std::cout << "Paquete normal recibido" << std::endl;
 		break;
-	default:
-		std::cout << "No se ha identificado el tipo de packete" << std::endl;
+	case CRITICAL_PACKET:
+		std::cout << "Paquete critico recibido" << std::endl;
+		break;
+	case URGENT_PACKET:
+		std::cout << "Paquete urgente recibido" << std::endl;
+		break;
+	case URGENT_PACKET | CRITICAL_PACKET:
+		std::cout << "Paquete urgente y critico recibido" << std::endl;
 		break;
 	}
 
-	packet.clear();
+	if (receivedDataPriority == URGENT_PACKET)
+	{
+		std::thread([this, packet]() {
+			ProcessPacket(packet);
+		}).detach();
+	}
+	else
+	{
+		Task task;
+		task.packet = packet;
+		NT->AddTask(task);
+	}
 }
 
 void ServerPacketTypesManager::SendData(sf::TcpSocket& client, sf::Packet& packet)
@@ -79,30 +98,6 @@ void ServerPacketTypesManager::SendUpdatedPlayerCount(sf::TcpSocket& client, int
 	SendData(client, packet);
 }
 
-void ServerPacketTypesManager::SendLoginResponse(sf::TcpSocket& client, bool success, const std::string& username)
-{
-	sf::Packet packet;
-	packet << PacketTypes::LOGIN;
-	packet << success;
-	packet << username;
-
-	SendData(client, packet);
-
-	std::cout << "Respuesta de login enviada" << std::endl;
-}
-
-void ServerPacketTypesManager::SendRegisterResponse(sf::TcpSocket& client, bool success, const std::string& username)
-{
-	sf::Packet packet;
-	packet << PacketTypes::REGISTER;
-	packet << success;
-	packet << username;
-
-	SendData(client, packet);
-
-	std::cout << "Respuesta de registro enviada" << std::endl;
-}
-
 void ServerPacketTypesManager::SendLobbyCreateResponse(sf::TcpSocket& client, bool success)
 {
 	sf::Packet packet;
@@ -123,6 +118,25 @@ void ServerPacketTypesManager::SendLobbyJoinResponse(sf::TcpSocket& client, bool
 	SendData(client, packet);
 
 	std::cout << "Respuesta de join a lobby enviada" << std::endl;
+}
+
+void ServerPacketTypesManager::ProcessPacket(sf::Packet packet)
+{
+	UdpPacketTypes packetType;
+
+	packet >> packetType;
+
+	switch (packetType)
+	{
+	case MOVEMENT:
+		ReceiveMovementPacket(packet);
+		break;
+	default:
+		std::cout << "No se ha identificado el tipo de packete" << std::endl;
+		break;
+	}
+
+	packet.clear();
 }
 
 void ServerPacketTypesManager::ReceiveHandshakePacket(sf::Packet data)
