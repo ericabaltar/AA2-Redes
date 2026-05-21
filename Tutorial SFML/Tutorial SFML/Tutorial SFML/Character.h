@@ -165,7 +165,8 @@ public:
 
         sprite.AddAnimation("idle", Animation(32, 32, 0, 1, 0));
         sprite.AddAnimation("walk", Animation(32, 32, 1, 6, 0.1f));
-        sprite.AddAnimation("quack", Animation(32, 32, 2, 1, 0.5f, false));
+        sprite.AddAnimation("shoot", Animation(32, 32, 2, 5, 0.05f, false));
+        sprite.AddAnimation("quack", Animation(32, 32, 3, 1, 0.5f, false));
 
         sprite.StartAnimation("idle");
 
