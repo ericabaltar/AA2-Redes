@@ -3,9 +3,11 @@
 #include <iostream>
 #include <string>
 #include "ServerPacketTypesManager.h"
+#include "MovementPacket.h"
 
 #define NT NetworkManager::Instance()
 #define SERVER_PORT 55000
+
 const sf::IpAddress SERVER_IP = sf::IpAddress(127, 0, 0, 1);
 
 class NetworkManager
@@ -17,13 +19,19 @@ public:
 		return &nt;
 	}
 
+	bool GetLastValidatedMovementPacket(MovementPacket& packet);
+
 private:
-	bool disconnectFromServer;
+	bool disconnectFromServer = false;
+
 	sf::TcpSocket socket;
 	bool successfulLogin = false;
 
 	sf::UdpSocket udpServerSocket;
 	char buffer[1024];
+
+	MovementPacket lastValidatedMovementPacket;
+	bool hasValidatedMovementPacket = false;
 
 public:
 	void Init();
@@ -35,6 +43,7 @@ public:
 	inline bool GetSuccessfulLogin() { return successfulLogin; }
 
 	sf::TcpSocket* GetServerSocket();
+
 	void SendLoginAttemptServerPacket(std::string username, std::string password);
 	void SendRegisterAttemptServerPacket(std::string username, std::string password);
 	void SendLobbyCreateAttemptPacket(std::string lobbyId);
@@ -42,6 +51,17 @@ public:
 	void SendRankingPetitionServerPacket(int userId);
 
 	void SendMovementPacket(MovementPacket movementPacket);
+
+	bool GetLastValidatedMovementPacket(MovementPacket& packet)
+	{
+		if (!hasValidatedMovementPacket)
+			return false;
+
+		packet = lastValidatedMovementPacket;
+		hasValidatedMovementPacket = false;
+
+		return true;
+	}
 
 private:
 	NetworkManager() = default;

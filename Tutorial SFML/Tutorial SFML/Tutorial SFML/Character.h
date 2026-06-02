@@ -203,5 +203,16 @@ public:
         HandleAnimation(dt);
         sprite.SetPosition(position);
     }
+
+    sf::Vector2f GetPosition()
+    {
+        return position;
+    }
+
+    void SetPosition(sf::Vector2f newPosition)
+    {
+        position = newPosition;
+        sprite.SetPosition(position);
+    }
 };
 
