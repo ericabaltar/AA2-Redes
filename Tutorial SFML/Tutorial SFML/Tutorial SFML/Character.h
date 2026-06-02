@@ -43,6 +43,11 @@ public:
         return position;
     }
 
+    void SetPosition(const sf::Vector2f newPosition)
+    {
+        position = newPosition;
+    }
+
     void ResetJumpBuffer()
     {
         jumpBufferTimer = jumpBufferTime;
