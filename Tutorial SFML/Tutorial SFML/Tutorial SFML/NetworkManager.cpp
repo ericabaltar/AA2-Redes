@@ -1,7 +1,9 @@
 #include "NetworkManager.h"
 
-void NetworkManager::Init() {
-    EstablishConnectionWithServer();
+void NetworkManager::Init()
+{
+    //EstablishConnectionWithServer();
+    //SPTM->SendMovement(udpServerSocket);
 }
 
 void NetworkManager::EstablishConnectionWithServer()
@@ -48,6 +50,11 @@ void NetworkManager::SendRegisterAttemptServerPacket(std::string username, std::
 void NetworkManager::SendRankingPetitionServerPacket(int userId)
 {
     SPTM->SendRankingPetition(userId, socket);
+}
+
+void NetworkManager::SendMovementPacket(MovementPacket movementPacket)
+{
+    SPTM->SendMovement(udpServerSocket, movementPacket);
 }
 
 void NetworkManager::SendLobbyCreateAttemptPacket(std::string lobbyId)

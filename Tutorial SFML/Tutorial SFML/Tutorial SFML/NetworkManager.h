@@ -22,6 +22,9 @@ private:
 	sf::TcpSocket socket;
 	bool successfulLogin = false;
 
+	sf::UdpSocket udpServerSocket;
+	char buffer[1024];
+
 public:
 	void Init();
 	void Update();
@@ -37,6 +40,8 @@ public:
 	void SendLobbyCreateAttemptPacket(std::string lobbyId);
 	void SendLobbyJoinAttemptPacket(std::string lobbyId);
 	void SendRankingPetitionServerPacket(int userId);
+
+	void SendMovementPacket(MovementPacket movementPacket);
 
 private:
 	NetworkManager() = default;

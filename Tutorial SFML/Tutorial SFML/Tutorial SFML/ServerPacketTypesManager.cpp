@@ -3,15 +3,15 @@
 //#include "LobbyManager.h"
 #include "User.h"
 
-sf::Packet& operator>>(sf::Packet& packet, PacketTypes& tipo) {
+sf::Packet& operator>>(sf::Packet& packet, TcpPacketTypes& tipo) {
 	int temp;
 	packet >> temp;
-	tipo = static_cast<PacketTypes>(temp);
+	tipo = static_cast<TcpPacketTypes>(temp);
 
 	return packet;
 }
 
-sf::Packet& operator<<(sf::Packet& packet, PacketTypes& tipo) {
+sf::Packet& operator<<(sf::Packet& packet, TcpPacketTypes& tipo) {
 	int temp;
 	temp = static_cast<int>(tipo);
 	packet << temp;
@@ -21,37 +21,37 @@ sf::Packet& operator<<(sf::Packet& packet, PacketTypes& tipo) {
 
 void ServerPacketTypesManager::ReceivePacket(sf::Packet packet)
 {
-	PacketTypes packetType;
+	TcpPacketTypes packetType;
 
 	packet >> packetType;
 
 	switch (packetType)
 	{
-	case PacketTypes::HANDSHAKE:
+	case TcpPacketTypes::HANDSHAKE:
 		ReceiveHandshakePacket(packet);
 		break;
-	case PacketTypes::LOGIN:
+	case TcpPacketTypes::LOGIN:
 		ReceiveLoginPacket(packet);
 		break;
-	case PacketTypes::REGISTER:
+	case TcpPacketTypes::REGISTER:
 		ReceiveRegisterPacket(packet);
 		break;
-	case PacketTypes::LOBBY_CREATE:
+	case TcpPacketTypes::LOBBY_CREATE:
 		ReceiveLobbyCreatePacket(packet);
 		break;
-	case PacketTypes::LOBBY_JOIN:
+	case TcpPacketTypes::LOBBY_JOIN:
 		ReceiveLobbyJoinPacket(packet);
 		break;
-	case PacketTypes::WAITING_ROOM_PLAYERS:
+	case TcpPacketTypes::WAITING_ROOM_PLAYERS:
 		ReceivePlayerCountPacket(packet);
 		break;
-	case PacketTypes::RANKING:
+	case TcpPacketTypes::RANKING:
 		ReceiveRankingPacket(packet);
 		break;
-	case PacketTypes::START_GAME:
+	case TcpPacketTypes::START_GAME:
 		ReceiveStartGamePacket(packet);
 		break;
-	case PacketTypes::END_GAME:
+	case TcpPacketTypes::END_GAME:
 		ReceiveEndGamePacket(packet);
 		break;
 	default:
@@ -72,10 +72,25 @@ void ServerPacketTypesManager::SendData(sf::TcpSocket& socket, sf::Packet& packe
 	}
 }
 
+void ServerPacketTypesManager::SendUdpData(sf::UdpSocket& socket, sf::Packet& packet)
+{
+	const void* data = packet.getData();
+	std::size_t dataSize = packet.getDataSize();
+
+	if (socket.send(data, dataSize, SERVER_IP, SERVER_PORT) == sf::Socket::Status::Done)
+	{
+		std::cout << "Paquete UDP enviado..." << std::endl;
+	}
+	else
+	{
+		std::cerr << "Error al enviar paquete UDP" << std::endl;
+	}
+}
+
 void ServerPacketTypesManager::SendHandshake(sf::TcpSocket& server)
 {
 	sf::Packet packet;
-	packet << PacketTypes::HANDSHAKE << handshakeMessage;
+	packet << TcpPacketTypes::HANDSHAKE << handshakeMessage;
 	SendData(server, packet);
 }
 
@@ -84,7 +99,7 @@ void ServerPacketTypesManager::SendLoginAttempt(std::string username, std::strin
 	if (username.empty() || password.empty()) return;
 
 	sf::Packet packet;
-	packet << PacketTypes::LOGIN;
+	packet << TcpPacketTypes::LOGIN;
 	packet << username;
 	packet << password;
 	SendData(server, packet);
@@ -95,7 +110,7 @@ void ServerPacketTypesManager::SendRegisterAttempt(std::string username, std::st
 	if (username.empty() || password.empty()) return;
 
 	sf::Packet packet;
-	packet << PacketTypes::REGISTER;
+	packet << TcpPacketTypes::REGISTER;
 	packet << username;
 	packet << password;
 	SendData(server, packet);
@@ -107,7 +122,7 @@ void ServerPacketTypesManager::SendLobbyCreateAttempt(std::string lobbyId, sf::T
 
 	sf::Packet packet;
 
-	packet << PacketTypes::LOBBY_CREATE;
+	packet << TcpPacketTypes::LOBBY_CREATE;
 	packet << lobbyId;
 
 	//LM->SetRoomId(lobbyId);
@@ -121,7 +136,7 @@ void ServerPacketTypesManager::SendLobbyJoinAttempt(std::string lobbyId, sf::Tcp
 
 	sf::Packet packet;
 
-	packet << PacketTypes::LOBBY_JOIN;
+	packet << TcpPacketTypes::LOBBY_JOIN;
 	packet << lobbyId;
 
 	//LM->SetRoomId(lobbyId);
@@ -133,10 +148,20 @@ void ServerPacketTypesManager::SendRankingPetition(int userId, sf::TcpSocket& se
 {
 	sf::Packet packet;
 
-	packet << PacketTypes::RANKING;
+	packet << TcpPacketTypes::RANKING;
 	packet << userId;
 
 	SendData(server, packet);
+}
+
+void ServerPacketTypesManager::SendMovement(sf::UdpSocket& server, MovementPacket movement)
+{
+	sf::Packet packet;
+
+	packet << UdpPacketTypes::MOVEMENT;
+	packet << movement;
+
+	SendUdpData(server, packet);
 }
 
 void ServerPacketTypesManager::ReceiveHandshakePacket(sf::Packet data)
