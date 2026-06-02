@@ -5,7 +5,7 @@
 
 #include "NetworkManager.h"
 #include "MovementPrediction.h"
-#include "Character.h"
+#include "PlayerCharacter.h"
 
 class GameScene
 {
@@ -15,8 +15,8 @@ private:
     sf::RectangleShape ground;
     sf::Clock clock;
 
-    Character player;
-
+    PlayerCharacter player;
+    Character oponent;
 public:
     GameScene()
         : ground({ 800.f, 50.f })
@@ -56,6 +56,7 @@ public:
         float groundY = ground.getPosition().y;
 
         player.Update(dt, groundY);
+        oponent.Update(dt, groundY);
 
         if (NT->GetDisconnectFromServer()) return;
 
@@ -63,8 +64,8 @@ public:
 
         if (movementPrediction.ShouldSendPacket(dt))
         {
-            MovementPacket movementPacket = movementPrediction.CreateMovementPacket(player.GetPosition());
-            NT->SendMovementPacket(movementPacket);
+            MovementPacket playerMovementPacket = movementPrediction.CreateMovementPacket(player.GetPosition());
+            NT->SendMovementPacket(playerMovementPacket);
         }
     }
 
@@ -74,6 +75,7 @@ public:
 
         window.draw(ground);
         window.draw(player.GetSprite());
+        window.draw(oponent.GetSprite());
 
         window.display();
     }
