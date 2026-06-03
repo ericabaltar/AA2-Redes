@@ -105,9 +105,9 @@ void Character::Shoot()
     SPAWN.SpawnObject(bullet);
 }
 
-void Character::SetInterpolatedPosition(const sf::Vector2f newPosition)
+void Character::SetInterpolatedPosition(const Vector2 newPosition)
 {
-    if (newPosition.x > position.x || newPosition.x < position.x) {
+    if (newPosition.x > transform->position.x || newPosition.x < transform->position.x) {
 		velocity.x = walkAnimVelocityThreshold;
     }
     else
@@ -115,5 +115,5 @@ void Character::SetInterpolatedPosition(const sf::Vector2f newPosition)
         velocity.x = 0.f;
     }
         
-    position = newPosition;
+    transform->position = newPosition;
 }

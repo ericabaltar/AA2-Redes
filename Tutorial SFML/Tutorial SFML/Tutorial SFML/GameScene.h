@@ -76,9 +76,9 @@ public:
 		movementInterpolation.Update(dt);
 
         Vector2 interpolatedPos = movementInterpolation.GetInterpolatedPosition(opponentUser);
-        oponent->SetInterpolatedPosition(sf::Vector2f(interpolatedPos.x, interpolatedPos.y));
+        oponent->SetInterpolatedPosition(Vector2(interpolatedPos.x, interpolatedPos.y));
         oponent->Update(dt);  // Se hace dos veces este update, no parece que cause problemas por ahora pero en el futuro podria dar
-
+        
         if (NT->GetDisconnectFromServer()) return false;
 
         NT->Update();
@@ -86,7 +86,7 @@ public:
         if (movementPrediction.ShouldSendPacket(dt))
         {
             MovementPacket movementPacket =
-                movementPrediction.CreateMovementPacket(player.GetPosition());
+                movementPrediction.CreateMovementPacket(player->GetPosition());
 
             movementReconciliation.AddPendingPacket(movementPacket);
 
@@ -99,9 +99,9 @@ public:
 
         if (NT->GetLastValidatedMovementPacket(validatedPacket))
         {
-            sf::Vector2f correctedPosition = player.GetPosition();
+            Vector2 correctedPosition = player->GetPosition();
 
-            sf::Vector2f validatedPosition(
+            Vector2 validatedPosition(
                 validatedPacket.pos.x,
                 validatedPacket.pos.y
             );
@@ -112,7 +112,7 @@ public:
                 validatedPacket.ID
             );
 
-            player.SetPosition(correctedPosition);
+            player->SetPosition(correctedPosition);
         }
 
         return true;

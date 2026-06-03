@@ -19,8 +19,6 @@ public:
 		return &nt;
 	}
 
-	bool GetLastValidatedMovementPacket(MovementPacket& packet);
-
 private:
 	bool disconnectFromServer = false;
 
@@ -52,16 +50,7 @@ public:
 
 	void SendMovementPacket(MovementPacket movementPacket);
 
-	bool GetLastValidatedMovementPacket(MovementPacket& packet)
-	{
-		if (!hasValidatedMovementPacket)
-			return false;
-
-		packet = lastValidatedMovementPacket;
-		hasValidatedMovementPacket = false;
-
-		return true;
-	}
+	bool GetLastValidatedMovementPacket(MovementPacket& packet);
 
 private:
 	NetworkManager() = default;
