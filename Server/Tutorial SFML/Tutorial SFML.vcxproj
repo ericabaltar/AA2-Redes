@@ -139,21 +139,29 @@
     <ClCompile Include="Bcrypt\bcrypt.cpp" />
     <ClCompile Include="Bcrypt\blowfish.cpp" />
     <ClCompile Include="Database.cpp" />
+    <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="MatchMakingManager.cpp" />
+    <ClCompile Include="MovementManager.cpp" />
+    <ClCompile Include="MovementPacket.cpp" />
     <ClCompile Include="NetworkManager.cpp" />
     <ClCompile Include="ServerPacketTypeManager.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bcrypt\bcrypt.h" />
     <ClInclude Include="Bcrypt\node_blf.h" />
     <ClInclude Include="Bcrypt\openbsd.h" />
     <ClInclude Include="Database.h" />
-    <ClInclude Include="Game.h" />
+    <ClInclude Include="GameManager.h" />
+    <ClInclude Include="GameRoom.h" />
     <ClInclude Include="MatchMakingManager.h" />
+    <ClInclude Include="MovementManager.h" />
+    <ClInclude Include="MovementPacket.h" />
     <ClInclude Include="NetworkManager.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="ServerPacketTypeManager.h" />
+    <ClInclude Include="Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

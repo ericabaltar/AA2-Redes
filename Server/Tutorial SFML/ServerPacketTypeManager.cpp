@@ -1,6 +1,9 @@
 #include "ServerPacketTypeManager.h"
 #include "MatchmakingManager.h"
 #include <iostream>
+#include "MovementPacket.h"
+#include "User.h"
+#include "MovementManager.h"
 
 sf::Packet& operator>>(sf::Packet& packet, PacketTypes& tipo) {
 	int temp;
@@ -40,6 +43,9 @@ void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, sf::TcpSocket& c
 		break;
 	case PacketTypes::LOBBY_JOIN:
 		ReceiveLobbyJoinPacket(packet, client);
+		break;
+	case PacketTypes::MOVEMENT:
+		ReceiveMovementPacket(packet, client);
 		break;
 	case PacketTypes::RANKING:
 		ReceiveRankingPacket(packet, client);
@@ -236,6 +242,15 @@ void ServerPacketTypesManager::ReceiveLobbyJoinPacket(sf::Packet data, sf::TcpSo
 	}
 
 	SendLobbyJoinResponse(client, successfulLobbyJoin);
+}
+
+void ServerPacketTypesManager::ReceiveMovementPacket(sf::Packet data, sf::TcpSocket& client) {
+	MovementPacket movement;
+	data >> movement;
+
+	User u; //from client
+
+	MovM->AddPacket(u, movement);
 }
 
 void ServerPacketTypesManager::ReceiveRankingPacket(sf::Packet data, sf::TcpSocket& client)
