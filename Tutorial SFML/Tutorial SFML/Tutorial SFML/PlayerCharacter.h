@@ -22,14 +22,13 @@ private:
 
 
 public:
-    PlayerCharacter() : Character("assets/white_duck.png") {
+    PlayerCharacter(): Character("assets/white_duck.png") {
         position = { 100.f, 300.f };
     }
 
-    void Update(float dt, float groundY) override {
-        HandleInput(dt);
-        ApplyPhysics(dt, groundY);
-        Character::Update(dt, groundY);
-    }
+    void Update(float dt, float groundY) override; 
+
+    inline void ResetJumpBuffer() { jumpBufferTimer = jumpBufferTime; }
+
 };
 

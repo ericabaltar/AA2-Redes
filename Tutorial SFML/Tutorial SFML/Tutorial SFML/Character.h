@@ -33,46 +33,14 @@ protected:
 public:
     Character(const std::string& texturePath = "assets/grey_duck.png");
 
-    void Quack()
-    {
-        isQuacking = true;
-        sprite.StartAnimation("quack");
+    virtual void Update(float dt, float groundY);
 
-        quackSound.play();
-    }
+    void Quack();
 
-    void Shoot()
-    {
-        isShooting = true;
-        sprite.StartAnimation("shoot");
+    void Shoot();
 
-        // Shoot
-    }
-
-    sf::Sprite GetSprite()
-    {
-        return sprite.GetSprite();
-    }
-
-    sf::Vector2f GetPosition()
-    {
-        return position;
-    }
-
-    void SetPosition(const sf::Vector2f newPosition)
-    {
-        position = newPosition;
-    }
-
-    void ResetJumpBuffer()
-    {
-        jumpBufferTimer = jumpBufferTime;
-    }
-
-    virtual void Update(float dt, float groundY)
-    {
-        HandleAnimation(dt);
-        sprite.SetPosition(position);
-    }
+    inline sf::Sprite GetSprite() { return sprite.GetSprite(); }
+    inline sf::Vector2f GetPosition() { return position; }
+    inline void SetPosition(const sf::Vector2f newPosition) { position = newPosition; }
 };
 

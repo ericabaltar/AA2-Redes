@@ -53,3 +53,25 @@ Character::Character(const std::string& texturePath) : sprite(texturePath), quac
 
     quackSound.setVolume(20.f);
 }
+
+void Character::Update(float dt, float groundY)
+{
+    HandleAnimation(dt);
+    sprite.SetPosition(position);
+}
+
+void Character::Quack()
+{
+    isQuacking = true;
+    sprite.StartAnimation("quack");
+
+    quackSound.play();
+}
+
+void Character::Shoot()
+{
+    isShooting = true;
+    sprite.StartAnimation("shoot");
+
+    // Shoot
+}

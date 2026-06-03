@@ -84,3 +84,10 @@ void PlayerCharacter::ApplyPhysics(float dt, float groundY)
         velocity.x = 0.f;
     }
 }
+
+void PlayerCharacter::Update(float dt, float groundY)
+{
+    HandleInput(dt);
+    ApplyPhysics(dt, groundY);
+    Character::Update(dt, groundY);
+}
