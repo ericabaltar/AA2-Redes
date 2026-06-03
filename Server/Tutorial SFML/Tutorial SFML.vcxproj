@@ -139,6 +139,7 @@
     <ClCompile Include="Bcrypt\bcrypt.cpp" />
     <ClCompile Include="Bcrypt\blowfish.cpp" />
     <ClCompile Include="Database.cpp" />
+    <ClCompile Include="MapReader.cpp" />
     <ClCompile Include="MatchMakingManager.cpp" />
     <ClCompile Include="MovementManager.cpp" />
     <ClCompile Include="MovementPacket.cpp" />
@@ -161,6 +162,7 @@
     <ClInclude Include="dep\inc\xml\rapidxml_print.hpp" />
     <ClInclude Include="dep\inc\xml\rapidxml_utils.hpp" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="MapReader.h" />
     <ClInclude Include="MatchMakingManager.h" />
     <ClInclude Include="MovementManager.h" />
     <ClInclude Include="MovementPacket.h" />
@@ -174,7 +176,7 @@
     <ClInclude Include="XMLReader.h" />
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="gameConfig.xml" />
+    <Text Include="gameConfig.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

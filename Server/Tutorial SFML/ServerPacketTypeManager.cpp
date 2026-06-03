@@ -21,56 +21,38 @@ sf::Packet& operator<<(sf::Packet& packet, PacketTypes& tipo) {
 	return packet;
 }
 
-//// ------------- Codigo generado por IA (solo la parte de estos operators
-//sf::Packet& operator<<(sf::Packet& packet, const Position& pos) {
-//	return packet << pos.x << pos.y;
-//}
-//
-//sf::Packet& operator>>(sf::Packet& packet, Position& pos) {
-//	return packet >> pos.x >> pos.y;
-//}
-//
-//sf::Packet& operator<<(sf::Packet& packet, const Size& size) {
-//	return packet << size.width << size.height;
-//}
-//
-//sf::Packet& operator>>(sf::Packet& packet, Size& size) {
-//	return packet >> size.width >> size.height;
-//}
-//
-//sf::Packet& operator<<(sf::Packet& packet, const Background& bg) {
-//	return packet << bg.position << bg.sprite << bg.size;
-//}
-//
-//sf::Packet& operator>>(sf::Packet& packet, Background& bg) {
-//	return packet >> bg.position >> bg.sprite >> bg.size;
-//}
-//
-//sf::Packet& operator<<(sf::Packet& packet, const Platform& platform) {
-//	return packet << platform.position << platform.sprite << platform.size;
-//}
-//
-//sf::Packet& operator>>(sf::Packet& packet, Platform& platform) {
-//	return packet >> platform.position >> platform.sprite >> platform.size;
-//}
-//
-//sf::Packet& operator<<(sf::Packet& packet, const SpawnPoint& spawn) {
-//	return packet << spawn.playerId << spawn.position;
-//}
-//
-//sf::Packet& operator>>(sf::Packet& packet, SpawnPoint& spawn) {
-//	return packet >> spawn.playerId >> spawn.position;
-//}
-//
-//// --------------------
+inline sf::Packet& operator<<(sf::Packet& packet, TileType type) {
+	return packet << static_cast<char>(type);
+}
+
+sf::Packet& operator>>(sf::Packet& packet, TileType& type) {
+	int value;
+	packet >> value;
+	char charValue = static_cast<char>(value);
+	type = static_cast<TileType>(charValue);
+	return packet;
+}
+
+inline sf::Packet& operator<<(sf::Packet& packet, const Tile& tile) {
+	return packet << tile.type << tile.x << tile.y << tile.originalChar;
+}
+
+sf::Packet& operator>>(sf::Packet& packet, Tile& tile) {
+	Tile tempTile(TileType::FLOOR, 0, 0, ' ');
+	packet >> tempTile.type >> tempTile.x >> tempTile.y;
+
+	int tempValue;
+	packet >> tempValue;
+	char charValue = static_cast<char>(tempValue);
+	tile.originalChar = charValue;
+	return packet;
+}
 
 void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, sf::TcpSocket& client)
 {
 	PacketTypes packetType;
 
 	packet >> packetType;
-
-	packetType = MAP;
 
 	switch (packetType)
 	{
@@ -101,8 +83,8 @@ void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, sf::TcpSocket& c
 	case PacketTypes::END_GAME:
 		ReceiveEndGamePacket(packet);
 		break;
-	case PacketTypes::MAP:
-		ReceiveMapPacket(packet, client);
+	case PacketTypes::MAP_CHECK:
+		ManageMapPacket(packet, client);
 		break;
 	default:
 		std::cout << "No se ha identificado el tipo de packete" << std::endl;
@@ -205,31 +187,6 @@ void ServerPacketTypesManager::SendRankingPacket(sf::TcpSocket& client, std::vec
 
 	SendData(client, packet);
 	std::cout << "Ranking packet enviado con " << rankings.size() << " entradas." << std::endl;
-}
-
-void ServerPacketTypesManager::SendMapPacket(sf::TcpSocket& client)
-{
-	sf::Packet packet;
-	packet << PacketTypes::MAP;
-
-	xmlReader = new XMLReader(xmlFileName);
-	packet << xmlReader->GetBackground();
-	
-	std::vector<Platform> platforms = xmlReader->GetPlatforms();
-	packet << platforms.size();
-	for (int i = 0; i < platforms.size(); i++) {
-		packet << platforms[i];
-	}
-
-	std::vector<SpawnPoint> spawnPoints = xmlReader->GetSpawnPoints();
-	packet << spawnPoints.size();
-	for (int i = 0; i < spawnPoints.size(); i++) {
-		packet << spawnPoints[i];
-	}
-
-	SendData(client, packet);
-
-	delete xmlReader;
 }
 
 void ServerPacketTypesManager::ReceiveHandshakePacket(sf::Packet data)
@@ -347,9 +304,54 @@ void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)
 {
 }
 
-void ServerPacketTypesManager::ReceiveMapPacket(sf::Packet data, sf::TcpSocket& client)
+void ServerPacketTypesManager::ManageMapPacket(sf::Packet data, sf::TcpSocket& client)
 {
 	std::cout << "Recibida solicitud de paquete de Mapa" << std::endl;
 
-	SendMapPacket(client);
+	mapReader = new MapReader();
+	mapReader->Init();
+
+	int width, height;
+	data >> width >> height;
+
+	int tileCount = 0;
+	data >> tileCount;
+
+	std::vector<Tile> tempTileVector;
+
+	for (int i = 0; i < tileCount; i++) {
+		Tile tile;
+		data >> tile;
+		tempTileVector.push_back(tile);
+	}
+
+	bool isInformationValid = mapReader->CheckIfInformationIsCorrect(width, height, tempTileVector);
+
+	sf::Packet packet;
+	packet << PacketTypes::MAP_CHECK;
+	if (isInformationValid) {
+		std::cout << "El mapa enviado por el cliente es correcto" << std::endl;
+		packet << true;
+	}
+	else {
+		std::cout << "El mapa enviado por el cliente es incorrecto" << std::endl;
+		packet << false;
+
+		packet << mapReader->GetWidth() << mapReader->GetHeight();
+
+		int validTileCount = 0;
+		for (Tile* tile : mapReader->GetTiles()) {
+			if (tile != nullptr) validTileCount++;
+		}
+
+		packet << validTileCount;
+
+		for (Tile* tile : mapReader->GetTiles()) {
+			if (tile != nullptr) {
+				packet << *tile;
+			}
+		}
+	}
+
+	SendData(client, packet);
 }

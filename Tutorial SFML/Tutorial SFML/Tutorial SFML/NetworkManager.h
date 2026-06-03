@@ -40,6 +40,7 @@ public:
 	void SendLobbyCreateAttemptPacket(std::string lobbyId);
 	void SendLobbyJoinAttemptPacket(std::string lobbyId);
 	void SendRankingPetitionServerPacket(int userId);
+	void SendMapPetitionServerPacket();
 
 	void SendMovementPacket(MovementPacket movementPacket);
 

@@ -1,6 +1,6 @@
 #include "MapReader.h"
 
-bool MapReader::LoadFromFile(const std::string& filename) {
+bool MapReader::Init() {
     std::ifstream file(filename);
     if (!file.is_open()) {
         std::cerr << "Error: No se pudo abrir el archivo " << filename << std::endl;
@@ -57,7 +57,7 @@ void MapReader::ProcessTile(char tileChar, int col, int row) {
     case 'P':
         type = TileType::PLAYER;
         break;
-    case 'E':
+    case 'O':
         type = TileType::OPONENT;
         break;
     case ' ':

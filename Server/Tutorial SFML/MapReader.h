@@ -19,13 +19,21 @@ struct Tile {
     Tile(TileType t, int col, int row, char c)
         : type(t), x(col), y(row), originalChar(c) {
     }
+
+    Tile() {
+        type = TileType::FLOOR;
+        x = 0;
+        y = 0;
+        originalChar = ' ';
+    }
 };
 
 class MapReader {
 public:
     MapReader() = default;
 
-    bool LoadFromFile(const std::string& filename);
+    bool Init();
+    bool CheckIfInformationIsCorrect(int width, int height, std::vector<Tile> tiles);
 
     const std::vector<std::vector<Tile*>>& GetGrid() const { return m_grid; }
     const std::vector<Tile*>& GetTiles() const { return m_tiles; }
@@ -46,6 +54,8 @@ private:
     std::vector<Tile*> m_tiles;
     int m_width = 0;
     int m_height = 0;
+    bool informationIsCorrect;
+    const std::string& filename = "gameConfig.txt";
 
     void ProcessTile(char tileChar, int col, int row);
 };

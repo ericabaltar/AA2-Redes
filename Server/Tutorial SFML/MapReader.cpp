@@ -1,6 +1,6 @@
 #include "MapReader.h"
 
-bool MapReader::LoadFromFile(const std::string& filename) {
+bool MapReader::Init() {
     std::ifstream file(filename);
     if (!file.is_open()) {
         std::cerr << "Error: No se pudo abrir el archivo " << filename << std::endl;
@@ -43,6 +43,22 @@ bool MapReader::LoadFromFile(const std::string& filename) {
 
     std::cout << "Mapa cargado correctamente: " << m_width << "x" << m_height
         << ", " << m_tiles.size() << " tiles activos" << std::endl;
+
+    return true;
+}
+
+bool MapReader::CheckIfInformationIsCorrect(int width, int height, std::vector<Tile> tiles)
+{
+    if(width = m_width || height != m_height) {
+        return false;
+	}
+
+    for(int i = 0; i < tiles.size(); i++) {
+        if (tiles[i].x != m_tiles[i]->x || tiles[i].y != m_tiles[i]->y || tiles[i].type != m_tiles[i]->type || 
+            tiles[i].originalChar != m_tiles[i]->originalChar) {
+            return false;
+        }
+    }
 
     return true;
 }

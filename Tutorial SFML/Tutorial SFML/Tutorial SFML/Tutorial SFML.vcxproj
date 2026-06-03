@@ -188,6 +188,9 @@
   <ItemGroup>
     <Media Include="assets\quack.wav" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="gameConfig.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -12,10 +12,18 @@ int main() {
 	//sf::RenderWindow* window = new sf::RenderWindow(sf::VideoMode({ WINDOW_WIDTH, WINDOW_HEIGHT }), WINDOW_NAME);
 
 	//SceneManager sm = SceneManager();
+	bool firstTime = true;
+
 	while (true)
 	{
-		if (!NT->GetDisconnectFromServer())
+	if (!NT->GetDisconnectFromServer()) {
 			NT->Update();
+
+			if (firstTime) {
+				NT->SendMapPetitionServerPacket();
+				firstTime = false;
+			}
+		}
 
 	};
 

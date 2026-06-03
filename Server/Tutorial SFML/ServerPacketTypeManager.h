@@ -10,7 +10,7 @@
 
 enum PacketTypes
 {
-	HANDSHAKE, LOGIN, REGISTER, LOBBY_CREATE, LOBBY_JOIN, WAITING_ROOM_PLAYERS, MOVEMENT, RANKING, START_GAME, END_GAME, MAP
+	HANDSHAKE, LOGIN, REGISTER, LOBBY_CREATE, LOBBY_JOIN, WAITING_ROOM_PLAYERS, MOVEMENT, RANKING, START_GAME, END_GAME, MAP_CHECK
 };
 
 class ServerPacketTypesManager
@@ -25,7 +25,7 @@ public:
 private:
 	std::string handshakeMessage = "Handshake realizado";
 	std::string xmlFileName = "gameConfig.xml";
-	MapReader* xmlReader;
+	MapReader* mapReader;
 
 public:
 	void ReceivePacket(sf::Packet packet, sf::TcpSocket& client);
@@ -45,7 +45,6 @@ private:
 	void SendLobbyCreateResponse(sf::TcpSocket& client, bool success);
 	void SendLobbyJoinResponse(sf::TcpSocket& client, bool success);
 	void SendRankingPacket(sf::TcpSocket& client, std::vector<Database::RankingEntry>& rankings);
-	void SendMapPacket(sf::TcpSocket& client);
 
 	void ReceiveHandshakePacket(sf::Packet data);
 	void ReceiveLoginPacket(sf::Packet data, sf::TcpSocket& client);
@@ -56,5 +55,6 @@ private:
 	void ReceiveRankingPacket(sf::Packet data, sf::TcpSocket& client);
 	void ReceiveStartGamePacket(sf::Packet data);
 	void ReceiveEndGamePacket(sf::Packet data);
-	void ReceiveMapPacket(sf::Packet data, sf::TcpSocket& client);
+
+	void ManageMapPacket(sf::Packet data, sf::TcpSocket& client);
 };

@@ -52,6 +52,11 @@ void NetworkManager::SendRankingPetitionServerPacket(int userId)
     SPTM->SendRankingPetition(userId, socket);
 }
 
+void NetworkManager::SendMapPetitionServerPacket()
+{
+    SPTM->SendMapPetition(socket);
+}
+
 void NetworkManager::SendMovementPacket(MovementPacket movementPacket)
 {
     SPTM->SendMovement(udpServerSocket, movementPacket);

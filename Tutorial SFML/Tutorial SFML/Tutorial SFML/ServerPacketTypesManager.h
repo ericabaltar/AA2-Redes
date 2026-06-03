@@ -10,7 +10,7 @@
 
 enum TcpPacketTypes
 {
-	HANDSHAKE, LOGIN, REGISTER, LOBBY_CREATE, LOBBY_JOIN, WAITING_ROOM_PLAYERS, RANKING, START_GAME, END_GAME, MAP
+	HANDSHAKE, LOGIN, REGISTER, LOBBY_CREATE, LOBBY_JOIN, WAITING_ROOM_PLAYERS, RANKING, START_GAME, END_GAME, MAP_CHECK
 };
 
 enum UdpPacketTypes
@@ -40,7 +40,7 @@ public:
 	void SendLobbyCreateAttempt(std::string lobbyId, sf::TcpSocket& server);
 	void SendLobbyJoinAttempt(std::string lobbyId, sf::TcpSocket& server);
 	void SendRankingPetition(int userId, sf::TcpSocket& server);
-	void SendMapPetition(int userId, sf::TcpSocket& server);
+	void SendMapPetition(sf::TcpSocket& server);
 
 	void SendMovement(sf::UdpSocket& server, MovementPacket movement);
 

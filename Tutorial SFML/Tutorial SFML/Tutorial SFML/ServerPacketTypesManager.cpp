@@ -83,7 +83,7 @@ void ServerPacketTypesManager::ReceivePacket(sf::Packet packet)
 	case TcpPacketTypes::END_GAME:
 		ReceiveEndGamePacket(packet);
 		break;
-	case TcpPacketTypes::MAP:
+	case TcpPacketTypes::MAP_CHECK:
 		ReceiveMapPacket(packet);
 		break;
 	default:
@@ -196,11 +196,28 @@ void ServerPacketTypesManager::SendMovement(sf::UdpSocket& server, MovementPacke
 	SendUdpData(server, packet);
 }
 
-void ServerPacketTypesManager::SendMapPetition(int userId, sf::TcpSocket& server)
+void ServerPacketTypesManager::SendMapPetition(sf::TcpSocket& server)
 {
+	MAP->Init();
+
 	sf::Packet packet;
 
-	packet << TcpPacketTypes::MAP;
+	packet << TcpPacketTypes::MAP_CHECK;
+	packet << MAP->GetWidth() << MAP->GetHeight();
+
+	int validTileCount = 0;
+	for (Tile* tile : MAP->GetTiles()) {
+		if (tile != nullptr) validTileCount++;
+	}
+
+	packet << validTileCount;
+
+	for (Tile* tile : MAP->GetTiles()) {
+		if (tile != nullptr) {
+			packet << *tile;
+		}
+	}
+
 	std::cout << "Enviando mapa para comprobacion" << std::endl;
 
 	SendData(server, packet);
@@ -329,33 +346,32 @@ void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)
 
 void ServerPacketTypesManager::ReceiveMapPacket(sf::Packet data)
 {
-	//Background background;
-	//data >> background;
-	//XML->SetBackground(background);
+	bool informationIsCorrect;
 
-	//int platFomsSize = 0;
-	//data >> platFomsSize;
+	data >> informationIsCorrect;
 
-	//std::vector<Platform> platforms;
-	//platforms.reserve(std::max(0, platFomsSize));
+	if (informationIsCorrect) {
+		std::cout << "El mapa es correcto" << std::endl;
+	}
+	else {
+		std::cout << "El mapa no es correcto, cogiendo mapa del servidor" << std::endl;
 
-	//for (int i = 0; i < platFomsSize; i++) {
-	//	Platform p;
-	//	data >> p;
-	//	platforms.push_back(p);
-	//}
-	//XML->SetPlatforms(platforms);
+		int width, height;
+		data >> width >> height;
 
-	//int spawnPointsSize = 0;
-	//data >> spawnPointsSize;
+		int tileCount = 0;
+		data >> tileCount;
 
-	//std::vector<SpawnPoint> spawnPoints;
-	//spawnPoints.reserve(std::max(0, spawnPointsSize));
+		std::vector<Tile> tempTileVector;
 
-	//for (int i = 0; i < spawnPointsSize; i++) {
-	//	SpawnPoint sp;
-	//	data >> sp;
-	//	spawnPoints.push_back(sp);
-	//}
-	//XML->SetSpawnPoints(spawnPoints);
+		for (int i = 0; i < tileCount; i++) {
+			Tile tile;
+			data >> tile;
+			tempTileVector.push_back(tile);
+		}
+
+		MAP->SetHeight(height);
+		MAP->SetWidth(width);
+		MAP->SetTiles(std::vector<Tile*>(tempTileVector.size(), nullptr));
+	}
 }
