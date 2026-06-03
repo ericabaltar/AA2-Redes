@@ -27,7 +27,7 @@ MovementInterpolation::MovementInterpolation()
 
 	Vector2 startPos(100.f, 200.f);
 	interpolatedPositions[testUser] = startPos;
-	currentMovementPacketIDList[testUser] = -1;
+	currentMovementPacketIDList[testUser] = notStartedInterpolatingID;
 
 	MovementPacket p1; p1.ID = 1; p1.pos = Vector2(200.f, 200.f);
 	MovementPacket p2; p2.ID = 2; p2.pos = Vector2(300.f, 400.f);
@@ -46,7 +46,7 @@ void MovementInterpolation::AddPacket(const User& user, const MovementPacket& pa
 	if (packetList.find(user) == packetList.end())
 	{
 		packetList[user] = std::vector<MovementPacket>();
-		currentMovementPacketIDList[user] = -1;
+		currentMovementPacketIDList[user] = notStartedInterpolatingID;
 		interpolatedPositions[user] = packet.pos;
 		interpolationTimeMap[user] = 0.f;
 		interpolationDurationMap[user] = 0.f;
@@ -125,11 +125,11 @@ void MovementInterpolation::ExecuteInterpolation(float dt)
 
 			float t = interpolationDurationMap[user] > 0.f ? interpolationTimeMap[user] / interpolationDurationMap[user] : 1.f;
 			if (t > 1.f) t = 1.f;
-			float tEff = t * t * (3.0f - 2.0f * t);
+			float tEff = Smoothstep(t);
 
 			interpolatedPositions[user] = Lerp(interpolationStartMap[user], target.pos, tEff);
 
-			if (interpolationTimeMap[user] >= interpolationDurationMap[user] - 1e-6f)
+			if (interpolationTimeMap[user] >= interpolationDurationMap[user] - interPolationTimeThreshold)
 			{
 				currentMovementPacketIDList[user] = target.ID;
 

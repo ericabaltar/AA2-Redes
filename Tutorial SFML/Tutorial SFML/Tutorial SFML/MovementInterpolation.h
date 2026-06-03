@@ -25,6 +25,9 @@ private:
 	float speedMultiplier = 25.0f;
 	bool useSmoothstep = true;
 
+	int notStartedInterpolatingID = -1;
+	int interPolationTimeThreshold = 1e-6f;
+
 public:
 	MovementInterpolation();
 

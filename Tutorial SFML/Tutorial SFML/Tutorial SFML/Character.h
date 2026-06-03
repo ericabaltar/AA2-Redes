@@ -30,6 +30,8 @@ protected:
     bool isQuacking = false;
     bool isShooting = false;
 
+    float walkAnimVelocityThreshold = 20.f;
+
 
 public:
     Character(const std::string& texturePath = "assets/grey_duck.png");
@@ -47,7 +49,7 @@ public:
     void Render(sf::RenderWindow& window) override { window.draw(sprite.GetSprite()); }
     
     inline sf::Vector2f GetPosition() { return position; }
-    inline void SetPosition(const sf::Vector2f newPosition) { position = newPosition; }
+    void SetInterpolatedPosition(const sf::Vector2f newPosition);
     void HandleEvent(const sf::Event& event) override {}
 };
 

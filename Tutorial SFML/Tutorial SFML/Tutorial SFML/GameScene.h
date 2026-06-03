@@ -76,7 +76,7 @@ public:
 		movementInterpolation.Update(dt);
 
         Vector2 interpolatedPos = movementInterpolation.GetInterpolatedPosition(opponentUser);
-        oponent->SetPosition(sf::Vector2f(interpolatedPos.x, interpolatedPos.y));
+        oponent->SetInterpolatedPosition(sf::Vector2f(interpolatedPos.x, interpolatedPos.y));
         oponent->Update(dt);  // Se hace dos veces este update, no parece que cause problemas por ahora pero en el futuro podria dar
 
         if (NT->GetDisconnectFromServer()) return false;
