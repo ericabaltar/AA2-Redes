@@ -140,6 +140,7 @@
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Character.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MapReader.cpp" />
     <ClCompile Include="MovementInterpolation.cpp" />
     <ClCompile Include="MovementPacket.cpp" />
     <ClCompile Include="MovementPrediction.h" />
@@ -163,6 +164,7 @@
     <ClInclude Include="dep\inc\xml\rapidxml_print.hpp" />
     <ClInclude Include="dep\inc\xml\rapidxml_utils.hpp" />
     <ClInclude Include="GameScene.h" />
+    <ClInclude Include="MapReader.h" />
     <ClInclude Include="MovementInterpolation.h" />
     <ClInclude Include="MovementPacket.h" />
     <ClInclude Include="MovementValidation.h" />

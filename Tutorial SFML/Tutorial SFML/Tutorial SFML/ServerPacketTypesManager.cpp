@@ -20,48 +20,33 @@ sf::Packet& operator<<(sf::Packet& packet, TcpPacketTypes& tipo) {
 	return packet;
 }
 
-// ------------- Codigo generado por IA (solo la parte de estos operators
-sf::Packet& operator<<(sf::Packet& packet, const Position& pos) {
-	return packet << pos.x << pos.y;
+inline sf::Packet& operator<<(sf::Packet& packet, TileType type) {
+	return packet << static_cast<char>(type);
 }
 
-sf::Packet& operator>>(sf::Packet& packet, Position& pos) {
-	return packet >> pos.x >> pos.y;
+sf::Packet& operator>>(sf::Packet& packet, TileType& type) {
+	int value;
+	packet >> value;
+	char charValue = static_cast<char>(value);
+	type = static_cast<TileType>(charValue);
+	return packet;
 }
 
-sf::Packet& operator<<(sf::Packet& packet, const Size& size) {
-	return packet << size.width << size.height;
+inline sf::Packet& operator<<(sf::Packet& packet, const Tile& tile) {
+	return packet << tile.type << tile.x << tile.y << tile.originalChar;
 }
 
-sf::Packet& operator>>(sf::Packet& packet, Size& size) {
-	return packet >> size.width >> size.height;
+sf::Packet& operator>>(sf::Packet& packet, Tile& tile) {
+	Tile tempTile(TileType::FLOOR, 0, 0, ' ');
+	packet >> tempTile.type >> tempTile.x >> tempTile.y;
+
+	int tempValue;
+	packet >> tempValue;
+	char charValue = static_cast<char>(tempValue);
+	tile.originalChar = charValue;
+	return packet;
 }
 
-sf::Packet& operator<<(sf::Packet& packet, const Background& bg) {
-	return packet << bg.position << bg.sprite << bg.size;
-}
-
-sf::Packet& operator>>(sf::Packet& packet, Background& bg) {
-	return packet >> bg.position >> bg.sprite >> bg.size;
-}
-
-sf::Packet& operator<<(sf::Packet& packet, const Platform& platform) {
-	return packet << platform.position << platform.sprite << platform.size;
-}
-
-sf::Packet& operator>>(sf::Packet& packet, Platform& platform) {
-	return packet >> platform.position >> platform.sprite >> platform.size;
-}
-
-sf::Packet& operator<<(sf::Packet& packet, const SpawnPoint& spawn) {
-	return packet << spawn.playerId << spawn.position;
-}
-
-sf::Packet& operator>>(sf::Packet& packet, SpawnPoint& spawn) {
-	return packet >> spawn.playerId >> spawn.position;
-}
-
-// --------------------
 
 void ServerPacketTypesManager::ReceivePacket(sf::Packet packet)
 {
@@ -216,7 +201,7 @@ void ServerPacketTypesManager::SendMapPetition(int userId, sf::TcpSocket& server
 	sf::Packet packet;
 
 	packet << TcpPacketTypes::MAP;
-	std::cout << "Pidiendo el mapa" << std::endl;
+	std::cout << "Enviando mapa para comprobacion" << std::endl;
 
 	SendData(server, packet);
 }
@@ -344,33 +329,33 @@ void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)
 
 void ServerPacketTypesManager::ReceiveMapPacket(sf::Packet data)
 {
-	Background background;
-	data >> background;
-	XML->SetBackground(background);
+	//Background background;
+	//data >> background;
+	//XML->SetBackground(background);
 
-	int platFomsSize = 0;
-	data >> platFomsSize;
+	//int platFomsSize = 0;
+	//data >> platFomsSize;
 
-	std::vector<Platform> platforms;
-	platforms.reserve(std::max(0, platFomsSize));
+	//std::vector<Platform> platforms;
+	//platforms.reserve(std::max(0, platFomsSize));
 
-	for (int i = 0; i < platFomsSize; i++) {
-		Platform p;
-		data >> p;
-		platforms.push_back(p);
-	}
-	XML->SetPlatforms(platforms);
+	//for (int i = 0; i < platFomsSize; i++) {
+	//	Platform p;
+	//	data >> p;
+	//	platforms.push_back(p);
+	//}
+	//XML->SetPlatforms(platforms);
 
-	int spawnPointsSize = 0;
-	data >> spawnPointsSize;
+	//int spawnPointsSize = 0;
+	//data >> spawnPointsSize;
 
-	std::vector<SpawnPoint> spawnPoints;
-	spawnPoints.reserve(std::max(0, spawnPointsSize));
+	//std::vector<SpawnPoint> spawnPoints;
+	//spawnPoints.reserve(std::max(0, spawnPointsSize));
 
-	for (int i = 0; i < spawnPointsSize; i++) {
-		SpawnPoint sp;
-		data >> sp;
-		spawnPoints.push_back(sp);
-	}
-	XML->SetSpawnPoints(spawnPoints);
+	//for (int i = 0; i < spawnPointsSize; i++) {
+	//	SpawnPoint sp;
+	//	data >> sp;
+	//	spawnPoints.push_back(sp);
+	//}
+	//XML->SetSpawnPoints(spawnPoints);
 }

@@ -2,7 +2,7 @@
 #include <SFML/Network.hpp>
 #include "Bcrypt/bcrypt.h"
 #include "Database.h"
-#include "XMLReader.h"
+#include "MapReader.h"
 
 #include <string>
 
@@ -25,7 +25,7 @@ public:
 private:
 	std::string handshakeMessage = "Handshake realizado";
 	std::string xmlFileName = "gameConfig.xml";
-	XMLReader* xmlReader;
+	MapReader* xmlReader;
 
 public:
 	void ReceivePacket(sf::Packet packet, sf::TcpSocket& client);

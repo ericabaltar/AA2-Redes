@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include "User.h"
+#include "MapReader.h"
 #include "MovementPacket.h"
 
 #define SPTM ServerPacketTypesManager::Instance()
