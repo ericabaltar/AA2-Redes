@@ -18,6 +18,8 @@ private:
 
 	float lifeTime = 5.f;
 
+	Object* owner = nullptr;
+
 public:
 	Bullet(const std::string& texturePath = "assets/bullet.png")
 		: texture(texturePath), sprite(texture)
@@ -28,10 +30,14 @@ public:
 		velocity = Vector2(0, 0);
 		width = sprite.getLocalBounds().size.x * scale;
 		height = sprite.getLocalBounds().size.y * scale;
+
+		collider->SetSize(Vector2(width, height));
 	}
 
-	void Init(Vector2 pos, bool facingRight)
+	void Init(Object* ownerObj, Vector2 pos, bool facingRight)
 	{
+		owner = ownerObj;
+
 		transform->position = pos;
 
 		float signedSpeed = facingRight ? speed : -speed;
@@ -52,11 +58,21 @@ public:
 
 		if (lifeTime <= 0.f)
 			Destroy();
+
+		collider->SetTopLeft(transform->position - Vector2(width / 2.f, height / 2.f));
 	}
 
 	void Render(sf::RenderWindow& window) override
 	{
 		window.draw(sprite);
+	}
+
+	void OnCollisionEnter(Object* other)
+	{
+		if (other == owner)
+			return;
+
+		Destroy();
 	}
 };
 

@@ -29,12 +29,20 @@ protected:
     bool isQuacking = false;
     bool isShooting = false;
 
+    Vector2 colliderOffset;
+
+    const int lives = 3;
+    const int healthPoints = 5;
+    int currentLives = lives;
+    int currentHealthPoints = healthPoints;
 
 public:
     Character(const std::string& texturePath = "assets/grey_duck.png");
 
 protected:
     void HandleAnimation(float dt);
+
+    void ReceiveHit();
 
 public:
     void Update(float dt) override;
@@ -45,6 +53,8 @@ public:
 
     void Render(sf::RenderWindow& window) override { window.draw(sprite.GetSprite()); }
     
+    inline bool IsDead() { return lives <= 0; }
+
     inline Vector2 GetPosition() { return transform->position; }
     inline void SetPosition(const Vector2 newPosition) { transform->position = newPosition; }
     void HandleEvent(const sf::Event& event) override {}

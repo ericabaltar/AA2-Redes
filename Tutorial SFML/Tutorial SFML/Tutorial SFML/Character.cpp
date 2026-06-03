@@ -33,6 +33,17 @@ void Character::HandleAnimation(float dt)
     sprite.Update(dt);
 }
 
+void Character::ReceiveHit()
+{
+    currentHealthPoints--;
+
+    if (currentHealthPoints <= 0)
+    {
+        currentLives--;
+        currentHealthPoints = 5;
+    }
+}
+
 Character::Character(const std::string& texturePath) : sprite(texturePath), quackSound(quackBuffer)
 {
     transform->position = { 400.f, 300.f };
@@ -50,6 +61,16 @@ Character::Character(const std::string& texturePath) : sprite(texturePath), quac
     width = sprite.GetWidth() * scale;
     height = sprite.GetHeight() * scale;
 
+    float colliderWidth = width * 0.5f;
+    float colliderHeight = height * (2.f / 3.f);
+
+    collider->SetSize(Vector2(colliderWidth, colliderHeight));
+
+    float offsetY = (height / 2.f) - (colliderHeight / 2.f);
+    colliderOffset = -Vector2(colliderWidth / 2.f, colliderHeight / 2.f) + Vector2(0.f, offsetY);       
+    
+    collider->SetTopLeft(transform->position + colliderOffset);
+
     if (!quackBuffer.loadFromFile("assets/quack.wav"))
         std::cout << "Error cargando quack.wav" << std::endl;
 
@@ -59,6 +80,7 @@ Character::Character(const std::string& texturePath) : sprite(texturePath), quac
 void Character::Update(float dt)
 {
     HandleAnimation(dt);
+    collider->SetTopLeft(transform->position + colliderOffset);
     sprite.SetPosition(transform->position);
 }
 
@@ -78,7 +100,7 @@ void Character::Shoot()
     Bullet* bullet = new Bullet();
     float offset = facingRight ? 40.f : -40.f;
     Vector2 position = Vector2(transform->position.x + offset, transform->position.y);
-    bullet->Init(position, facingRight);
+    bullet->Init(this, position, facingRight);
 
     SPAWN.SpawnObject(bullet);
 }
