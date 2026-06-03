@@ -12,15 +12,16 @@ int main()
     sf::RenderWindow window(sf::VideoMode({ 800, 600 }), "AA3 Shooter");
 
     GameScene gameScene;
+    gameScene.Enter(nullptr);
 
-    if (!gameScene.Init())
-        return 0;
+    sf::Clock clock;
 
     while (window.isOpen())
     {
+        float dt = clock.restart().asSeconds();
+
         gameScene.HandleEvents(window);
-        gameScene.Update();
-        gameScene.Render(window);
+        gameScene.Update(window, dt);
     }
 
     return 0;
