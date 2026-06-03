@@ -40,21 +40,20 @@ public:
 
 		scenes[SceneOption::GAME] = new GameScene();
 		scenes[SceneOption::LOGIN] = new LoginScene();
-		scenes[SceneOption::LOBBY] = new LobbyScene();
 		scenes[SceneOption::WAITING_ROOM] = new LobbyWaitingScene();
 		scenes[SceneOption::RANKING] = new RankingScene();
 		curScene = scenes[SceneOption::LOGIN];
-		curScene->enter(sharedMemory);
+		curScene->Enter(sharedMemory);
 	}
 
 	bool update(sf::RenderWindow& window) {
 		if (curScene->nextScene != SceneOption::NONE) {
-			curScene->exit();
+			curScene->Exit();
 			curScene = scenes[curScene->nextScene];
-			curScene->enter(sharedMemory);
+			curScene->Enter(sharedMemory);
 		}
 
-		return curScene->update(window);
+		return curScene->Update(window);
 	}
 };
 
