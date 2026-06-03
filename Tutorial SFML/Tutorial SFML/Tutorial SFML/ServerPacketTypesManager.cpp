@@ -348,19 +348,29 @@ void ServerPacketTypesManager::ReceiveMapPacket(sf::Packet data)
 	data >> background;
 	XML->SetBackground(background);
 
-	int platFomsSize;
-	std::vector<Platform> platforms;
+	int platFomsSize = 0;
 	data >> platFomsSize;
+
+	std::vector<Platform> platforms;
+	platforms.reserve(std::max(0, platFomsSize));
+
 	for (int i = 0; i < platFomsSize; i++) {
-		data >> platforms[i];
+		Platform p;
+		data >> p;
+		platforms.push_back(p);
 	}
 	XML->SetPlatforms(platforms);
 
-	int spawnPointsSize;
-	std::vector<SpawnPoint> spawnPoints;
+	int spawnPointsSize = 0;
 	data >> spawnPointsSize;
+
+	std::vector<SpawnPoint> spawnPoints;
+	spawnPoints.reserve(std::max(0, spawnPointsSize));
+
 	for (int i = 0; i < spawnPointsSize; i++) {
-		data >> spawnPoints[i];
+		SpawnPoint sp;
+		data >> sp;
+		spawnPoints.push_back(sp);
 	}
 	XML->SetSpawnPoints(spawnPoints);
 }
