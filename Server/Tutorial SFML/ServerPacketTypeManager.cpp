@@ -54,6 +54,8 @@ void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, sf::TcpSocket& c
 
 	packet >> packetType;
 
+	std::cout << "Recibiendo paquete del cliente, tipo: " << static_cast<int>(packetType) << std::endl;
+
 	switch (packetType)
 	{
 	case PacketTypes::HANDSHAKE:

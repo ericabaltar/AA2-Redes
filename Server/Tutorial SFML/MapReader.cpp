@@ -73,7 +73,7 @@ void MapReader::ProcessTile(char tileChar, int col, int row) {
     case 'P':
         type = TileType::PLAYER;
         break;
-    case 'E':
+    case 'O':
         type = TileType::OPONENT;
         break;
     case ' ':

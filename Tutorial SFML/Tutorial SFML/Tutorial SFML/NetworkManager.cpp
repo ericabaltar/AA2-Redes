@@ -2,7 +2,7 @@
 
 void NetworkManager::Init()
 {
-    //EstablishConnectionWithServer();
+    EstablishConnectionWithServer();
     //SPTM->SendMovement(udpServerSocket);
 }
 
@@ -16,7 +16,7 @@ void NetworkManager::EstablishConnectionWithServer()
     }
     else {
         socket.setBlocking(false);
-        SPTM->SendHandshake(socket);
+        SPTM->SendMapPetition(socket);
         HandleReceivedPackets();
         std::cout << "Conectado al servidor" << std::endl;
     }
