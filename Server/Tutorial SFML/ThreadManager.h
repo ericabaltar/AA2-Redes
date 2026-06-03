@@ -23,42 +23,42 @@ public:
 	}
 
 	void Init() {
-		for (int i = 0; i < THREAD_COUNT; ++i) threads.emplace_back(Worker);
+		//for (int i = 0; i < THREAD_COUNT; ++i) threads.emplace_back(Worker);
 	}
 
 	void AddTask(Task* task) {
-		tasksMutex.lock();
-		tasks.emplace_back(task);
-		tasksMutex.unlock();
+		//tasksMutex.lock();
+		//tasks.emplace_back(task);
+		//tasksMutex.unlock();
 	}
 
 	void AddUrgentTask(Task* task) {
-		tasksMutex.lock();
-		tasks.emplace_front(task);
-		tasksMutex.unlock();
+		//tasksMutex.lock();
+		//tasks.emplace_front(task);
+		//tasksMutex.unlock();
 	}
 
 private:
 
 	void Worker() {
-		bool closeThread = false;
+		//bool closeThread = false;
 
-		while (!closeThread) {
+		//while (!closeThread) {
 
-			Task* task;
+		//	Task* task;
 
-			tasksMutex.lock();
-			if (!tasks.empty()) {
-				task = tasks.front();
-				tasks.pop_front();
-			}
-			else {
-				closeThread = true;
-			}
-			tasksMutex.unlock();
+		//	tasksMutex.lock();
+		//	if (!tasks.empty()) {
+		//		task = tasks.front();
+		//		tasks.pop_front();
+		//	}
+		//	else {
+		//		closeThread = true;
+		//	}
+		//	tasksMutex.unlock();
 
-			if(task) task->Invoke();
-		}
+		//	if(task) task->Invoke();
+		//}
 	}
 };
 

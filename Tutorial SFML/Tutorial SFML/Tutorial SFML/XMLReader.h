@@ -69,6 +69,7 @@ private:
 
     //void ReadBackground();
 public:
+    void ReadFile(const std::string& filename);
     bool SaveToFile(const std::string& filename);
 
     inline Background GetBackground() { return m_background; }

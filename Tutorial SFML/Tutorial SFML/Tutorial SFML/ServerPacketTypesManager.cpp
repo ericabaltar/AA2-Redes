@@ -98,7 +98,7 @@ void ServerPacketTypesManager::ReceivePacket(sf::Packet packet)
 	case TcpPacketTypes::END_GAME:
 		ReceiveEndGamePacket(packet);
 		break;
-	case PacketTypes::MAP:
+	case TcpPacketTypes::MAP:
 		ReceiveMapPacket(packet);
 		break;
 	default:
@@ -215,7 +215,7 @@ void ServerPacketTypesManager::SendMapPetition(int userId, sf::TcpSocket& server
 {
 	sf::Packet packet;
 
-	packet << PacketTypes::MAP;
+	packet << TcpPacketTypes::MAP;
 	std::cout << "Pidiendo el mapa" << std::endl;
 
 	SendData(server, packet);
