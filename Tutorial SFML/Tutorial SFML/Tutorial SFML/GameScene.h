@@ -5,24 +5,36 @@
 
 #include "NetworkManager.h"
 #include "MovementPrediction.h"
-#include "Character.h"
+#include "MovementInterpolation.h"
+#include "PlayerCharacter.h"
+
 
 class GameScene
 {
 private:
     MovementPrediction movementPrediction;
+	MovementInterpolation movementInterpolation;
 
     sf::RectangleShape ground;
     sf::Clock clock;
 
-    Character player;
+    PlayerCharacter player;
+    Character oponent;
 
+    User opponentUser;
 public:
     GameScene()
         : ground({ 800.f, 50.f })
     {
         ground.setFillColor(sf::Color(100, 100, 100));
         ground.setPosition({ 0.f, 550.f });
+
+        // Usuario de prueba
+        opponentUser.nickname = "testOpponent";
+        opponentUser.score = 0;
+        opponentUser.userIndex = 999;
+        opponentUser.position = 0;
+        opponentUser.speed = 1.f;
     }
 
     bool Init()
@@ -57,14 +69,21 @@ public:
 
         player.Update(dt, groundY);
 
+		movementInterpolation.Update(dt);
+
+        Vector2 interpolatedPos = movementInterpolation.GetInterpolatedPosition(opponentUser);
+        oponent.SetPosition(sf::Vector2f(interpolatedPos.x, interpolatedPos.y));
+		std::cout << "Posición interpolada del oponente: (" << interpolatedPos.x << ", " << interpolatedPos.y << ")" << std::endl;
+        oponent.Update(dt, groundY);
+ 
         if (NT->GetDisconnectFromServer()) return;
 
         NT->Update();
 
         if (movementPrediction.ShouldSendPacket(dt))
         {
-            MovementPacket movementPacket = movementPrediction.CreateMovementPacket(player.GetPosition());
-            NT->SendMovementPacket(movementPacket);
+            MovementPacket playerMovementPacket = movementPrediction.CreateMovementPacket(player.GetPosition());
+            NT->SendMovementPacket(playerMovementPacket);
         }
     }
 
@@ -74,6 +93,7 @@ public:
 
         window.draw(ground);
         window.draw(player.GetSprite());
+        window.draw(oponent.GetSprite());
 
         window.display();
     }
