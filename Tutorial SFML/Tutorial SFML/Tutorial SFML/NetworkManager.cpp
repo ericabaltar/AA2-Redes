@@ -64,6 +64,11 @@ void NetworkManager::SendMovementPacket(MovementPacket movementPacket)
     SPTM->SendMovement(udpServerSocket, movementPacket);
 }
 
+void NetworkManager::SendTaunt()
+{
+    SPTM->SendTaunt(udpServerSocket);
+}
+
 void NetworkManager::SendLobbyCreateAttemptPacket(std::string lobbyId)
 {
     SPTM->SendLobbyCreateAttempt(lobbyId, socket);

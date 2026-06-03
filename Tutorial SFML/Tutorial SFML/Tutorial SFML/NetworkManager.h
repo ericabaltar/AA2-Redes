@@ -49,6 +49,7 @@ public:
 	void SendRankingPetitionServerPacket(int userId);
 
 	void SendMovementPacket(MovementPacket movementPacket);
+	void SendTaunt();
 
 	bool GetLastValidatedMovementPacket(MovementPacket& packet);
 

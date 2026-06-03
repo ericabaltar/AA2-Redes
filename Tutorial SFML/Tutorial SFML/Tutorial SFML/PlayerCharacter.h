@@ -28,6 +28,9 @@ public:
 
     void Update(float dt) override; 
 
+    void Quack() override;
+    void Shoot() override;
+
     inline void ResetJumpBuffer() { jumpBufferTimer = jumpBufferTime; }
 
 };

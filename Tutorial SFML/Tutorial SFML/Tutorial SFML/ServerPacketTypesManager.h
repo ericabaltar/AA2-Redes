@@ -1,11 +1,16 @@
 #pragma once
 #include <SFML/Network.hpp>
 #include <iostream>
+#include <cstdint>
 #include <string>
 #include "User.h"
 #include "MovementPacket.h"
 
 #define SPTM ServerPacketTypesManager::Instance()
+
+#define NORMAL_PACKET 0b00000000
+#define CRITICAL_PACKET 0b00000001
+#define URGENT_PACKET 0b00000010
 
 enum TcpPacketTypes
 {
@@ -14,7 +19,7 @@ enum TcpPacketTypes
 
 enum UdpPacketTypes
 {
-	MOVEMENT
+	MOVEMENT, SHOT, TAUNT
 };
 
 class ServerPacketTypesManager
@@ -41,6 +46,8 @@ public:
 	void SendRankingPetition(int userId, sf::TcpSocket& server);
 
 	void SendMovement(sf::UdpSocket& server, MovementPacket movement);
+	void SendShot(sf::UdpSocket& server);
+	void SendTaunt(sf::UdpSocket& server);
 
 	inline std::vector<User> GetRanking() { return ranking; }
 
