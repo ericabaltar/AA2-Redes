@@ -11,7 +11,7 @@
 class ThreadManager
 {
 private:
-	std::vector<std::thread*> threads;
+	std::vector<std::thread> threads;
 	std::deque<Task*> tasks;
 	std::mutex tasksMutex;
 
@@ -23,7 +23,9 @@ public:
 	}
 
 	void Init() {
-		for (int i = 0; i < THREAD_COUNT; ++i) threads.push_back(new std::thread(Worker));
+		for (int i = 0; i < THREAD_COUNT; ++i) threads.emplace_back(Worker);
+
+		for (int i = 0; i < THREAD_COUNT; ++i) threads[i].detach();
 	}
 
 	void AddTask(Task* task) {
