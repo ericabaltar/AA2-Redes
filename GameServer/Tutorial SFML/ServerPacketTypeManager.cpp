@@ -1,6 +1,7 @@
 #include "ServerPacketTypeManager.h"
 #include <iostream>
 #include "MovementPacket.h"
+#include "User.h"
 
 sf::Packet& operator>>(sf::Packet& packet, PacketTypes& type) {
 	int temp;
@@ -45,6 +46,9 @@ void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, std::optional<sf
 	case MOVEMENT:
 		ReceiveMovementPacket(packet);
 		break;
+		case INTERPOLATION;
+			ReceiveInterpolationPacket(packet);
+			break;
 	default:
 		std::cout << "No se ha identificado el tipo de packete" << std::endl;
 		break;
@@ -141,6 +145,15 @@ void ServerPacketTypesManager::ReceiveMovementPacket(sf::Packet data)
 	std::cout << "Recibido movimiento: ";
 	std::cout << "ID " << movement.ID << " | ";
 	std::cout << "(" << movement.pos.x << ", " << movement.pos.y << ")" << std::endl;
+}
+
+void ServerPacketTypesManager::ReceiveInterpolationPacket(sf::Packet data)
+{
+	User user;
+	data >> user.nickname >> user.score >> user.userIndex >> user.position >> user.speed;
+
+	std::cout << "Recibida peticion de interpolacion: " << user.userIndex << std::endl;
+
 }
 
 void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)

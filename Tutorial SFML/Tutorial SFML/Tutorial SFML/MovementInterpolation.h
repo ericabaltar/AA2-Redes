@@ -38,4 +38,13 @@ public:
 	Vector2 GetInterpolatedPosition(const User& user) const;
 
 	void ExecuteInterpolation(float dt);
+
+	User CreateMovementPacket(User user)
+	{
+		User oponent;
+
+		std::cout << "Creado paquete pidiendo paquete de movimiento de " << user.nickname << std::endl;
+
+		return oponent;
+	}
 };

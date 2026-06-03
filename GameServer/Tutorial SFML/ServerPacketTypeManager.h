@@ -12,7 +12,7 @@ enum PacketTypes
 
 enum UdpPacketTypes
 {
-	MOVEMENT
+	MOVEMENT, INTERPOLATION
 };
 
 class ServerPacketTypesManager
@@ -47,6 +47,7 @@ private:
 
 	void ReceiveHandshakePacket(sf::Packet data);
 	void ReceiveMovementPacket(sf::Packet data);
+	void ReceiveInterpolationPacket(sf::Packet data);
 	/*
 	void ReceiveLoginPacket(sf::Packet data, sf::TcpSocket& client);
 	void ReceiveRegisterPacket(sf::Packet data, sf::TcpSocket& client);

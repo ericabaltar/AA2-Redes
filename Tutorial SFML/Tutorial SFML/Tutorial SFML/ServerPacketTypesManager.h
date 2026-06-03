@@ -14,7 +14,7 @@ enum TcpPacketTypes
 
 enum UdpPacketTypes
 {
-	MOVEMENT
+	MOVEMENT, INTERPOLATION
 };
 
 class ServerPacketTypesManager
@@ -41,6 +41,7 @@ public:
 	void SendRankingPetition(int userId, sf::TcpSocket& server);
 
 	void SendMovement(sf::UdpSocket& server, MovementPacket movement);
+	void SendInterpolation(sf::UdpSocket& server, User user);
 
 	inline std::vector<User> GetRanking() { return ranking; }
 

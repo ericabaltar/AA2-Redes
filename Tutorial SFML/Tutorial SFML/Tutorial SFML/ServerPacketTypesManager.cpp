@@ -164,6 +164,16 @@ void ServerPacketTypesManager::SendMovement(sf::UdpSocket& server, MovementPacke
 	SendUdpData(server, packet);
 }
 
+void ServerPacketTypesManager::SendInterpolation(sf::UdpSocket& server, User user)
+{
+	sf::Packet packet;
+
+	packet << UdpPacketTypes::INTERPOLATION;
+	packet << user;
+
+	SendUdpData(server, packet);
+}
+
 void ServerPacketTypesManager::ReceiveHandshakePacket(sf::Packet data)
 {
 	std::string receiveMesage;
