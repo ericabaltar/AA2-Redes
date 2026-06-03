@@ -7,6 +7,7 @@
 #include "MovementPrediction.h"
 #include "MovementInterpolation.h"
 #include "PlayerCharacter.h"
+#include "Bullet.h"
 #include "Scene.h"
 
 
@@ -48,6 +49,9 @@ public:
 
         oponent = new Character();
         objects.push_back(oponent);
+
+        Bullet* bullet = new Bullet();
+        objects.push_back(bullet);
     }
 
     void HandleEvents(sf::RenderWindow& window)
