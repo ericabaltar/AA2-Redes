@@ -4,8 +4,8 @@
 class Object
 {
 public:
-	virtual void update() {}
-	virtual void render(sf::RenderWindow& window) {}
-	virtual void handleEvent(const sf::Event& event) {}
+	virtual void Update(float dt) {}
+	virtual void Render(sf::RenderWindow& window) {}
+	virtual void HandleEvent(const sf::Event& event) {}
 };
 
