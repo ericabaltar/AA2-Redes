@@ -57,6 +57,9 @@
     <ClCompile Include="MovementInterpolation.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
+    <ClCompile Include="Bullet.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ServerPacketTypesManager.h">
@@ -111,6 +114,12 @@
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="MovementInterpolation.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Bullet.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="MovementReconciliation.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>

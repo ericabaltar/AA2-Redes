@@ -52,17 +52,6 @@ public:
 
 	void SendMovementPacket(MovementPacket movementPacket);
 
-	bool GetLastValidatedMovementPacket(MovementPacket& packet)
-	{
-		if (!hasValidatedMovementPacket)
-			return false;
-
-		packet = lastValidatedMovementPacket;
-		hasValidatedMovementPacket = false;
-
-		return true;
-	}
-
 private:
 	NetworkManager() = default;
 	NetworkManager(const NetworkManager& nt) = delete;

@@ -160,6 +160,7 @@
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="MovementInterpolation.h" />
     <ClInclude Include="MovementPacket.h" />
+    <ClInclude Include="MovementReconciliation.h" />
     <ClInclude Include="MovementValidation.h" />
     <ClInclude Include="NetworkManager.h" />
     <ClInclude Include="Object.h" />

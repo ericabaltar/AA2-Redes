@@ -89,7 +89,7 @@ public:
         if (movementPrediction.ShouldSendPacket(dt))
         {
             MovementPacket movementPacket =
-                movementPrediction.CreateMovementPacket(player.GetPosition());
+                movementPrediction.CreateMovementPacket(player->GetPosition());
 
             movementReconciliation.AddPendingPacket(movementPacket);
 
@@ -102,7 +102,7 @@ public:
 
         if (NT->GetLastValidatedMovementPacket(validatedPacket))
         {
-            sf::Vector2f correctedPosition = player.GetPosition();
+            sf::Vector2f correctedPosition = player->GetPosition();
 
             sf::Vector2f validatedPosition(
                 validatedPacket.pos.x,
@@ -115,7 +115,7 @@ public:
                 validatedPacket.ID
             );
 
-            player.SetPosition(correctedPosition);
+            player->SetInterpolatedPosition(correctedPosition);
         }
 
         return true;
