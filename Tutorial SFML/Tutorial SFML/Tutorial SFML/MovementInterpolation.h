@@ -6,6 +6,8 @@
 #include "MovementPacket.h"
 #include "Vector2.h"
 
+//Código proporcionado por IA ligeramente modificado
+
 class MovementInterpolation
 {
 private:
@@ -32,5 +34,5 @@ public:
 
 	Vector2 GetInterpolatedPosition(const User& user) const;
 
-	bool HasActiveInterpolation(const User& user) const;
+	void ExecuteInterpolation(float dt);
 };
