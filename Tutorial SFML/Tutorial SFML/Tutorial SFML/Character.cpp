@@ -18,7 +18,7 @@ void Character::HandleAnimation(float dt)
         return;
     }
 
-    bool isMoving = std::abs(velocity.x) > 20.f;
+    bool isMoving = std::abs(velocity.x) >= walkAnimVelocityThreshold;
 
     if (isMoving)
         sprite.StartAnimation("walk");
@@ -103,4 +103,17 @@ void Character::Shoot()
     bullet->Init(this, position, facingRight);
 
     SPAWN.SpawnObject(bullet);
+}
+
+void Character::SetInterpolatedPosition(const sf::Vector2f newPosition)
+{
+    if (newPosition.x > position.x || newPosition.x < position.x) {
+		velocity.x = walkAnimVelocityThreshold;
+    }
+    else
+    {
+        velocity.x = 0.f;
+    }
+        
+    position = newPosition;
 }

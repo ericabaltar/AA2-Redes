@@ -5,6 +5,8 @@
 
 #include "NetworkManager.h"
 #include "MovementPrediction.h"
+#include "MovementReconciliation.h"
+#include "Character.h"
 #include "MovementInterpolation.h"
 #include "PlayerCharacter.h"
 #include "Bullet.h"
@@ -15,6 +17,7 @@ class GameScene : Scene
 {
 private:
     MovementPrediction movementPrediction;
+    MovementReconciliation movementReconciliation;
 	MovementInterpolation movementInterpolation;
 
     sf::RectangleShape ground;
@@ -73,8 +76,7 @@ public:
 		movementInterpolation.Update(dt);
 
         Vector2 interpolatedPos = movementInterpolation.GetInterpolatedPosition(opponentUser);
-        oponent->SetPosition(Vector2(interpolatedPos.x, interpolatedPos.y));
-		std::cout << "Posición interpolada del oponente: (" << interpolatedPos.x << ", " << interpolatedPos.y << ")" << std::endl;
+        oponent->SetInterpolatedPosition(sf::Vector2f(interpolatedPos.x, interpolatedPos.y));
         oponent->Update(dt);  // Se hace dos veces este update, no parece que cause problemas por ahora pero en el futuro podria dar
 
         if (NT->GetDisconnectFromServer()) return false;
@@ -83,8 +85,34 @@ public:
 
         if (movementPrediction.ShouldSendPacket(dt))
         {
+            MovementPacket movementPacket =
+                movementPrediction.CreateMovementPacket(player.GetPosition());
+
+            movementReconciliation.AddPendingPacket(movementPacket);
+
+            NT->SendMovementPacket(movementPacket);
             MovementPacket playerMovementPacket = movementPrediction.CreateMovementPacket(player->GetPosition());
             NT->SendMovementPacket(playerMovementPacket);
+        }
+
+        MovementPacket validatedPacket;
+
+        if (NT->GetLastValidatedMovementPacket(validatedPacket))
+        {
+            sf::Vector2f correctedPosition = player.GetPosition();
+
+            sf::Vector2f validatedPosition(
+                validatedPacket.pos.x,
+                validatedPacket.pos.y
+            );
+
+            movementReconciliation.Reconcile(
+                correctedPosition,
+                validatedPosition,
+                validatedPacket.ID
+            );
+
+            player.SetPosition(correctedPosition);
         }
 
         return true;

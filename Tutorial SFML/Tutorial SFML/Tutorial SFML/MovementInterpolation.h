@@ -6,6 +6,8 @@
 #include "MovementPacket.h"
 #include "Vector2.h"
 
+//Código proporcionado por IA ligeramente modificado
+
 class MovementInterpolation
 {
 private:
@@ -23,6 +25,9 @@ private:
 	float speedMultiplier = 25.0f;
 	bool useSmoothstep = true;
 
+	int notStartedInterpolatingID = -1;
+	int interPolationTimeThreshold = 1e-6f;
+
 public:
 	MovementInterpolation();
 
@@ -32,5 +37,5 @@ public:
 
 	Vector2 GetInterpolatedPosition(const User& user) const;
 
-	bool HasActiveInterpolation(const User& user) const;
+	void ExecuteInterpolation(float dt);
 };

@@ -51,6 +51,50 @@ public:
 
     void Shoot();
 
+		velocity = sf::Vector2f(0, 0);
+
+        width = sprite.GetWidth() * scale;
+        height = sprite.GetHeight() * scale;
+
+        if (!quackBuffer.loadFromFile("assets/quack.wav"))
+            std::cout << "Error cargando quack.wav" << std::endl;
+        
+        quackSound.setVolume(20.f);
+    }
+
+    sf::Sprite GetSprite()
+    {
+        return sprite.GetSprite();
+    }
+
+    sf::Vector2f GetPosition()
+    {
+        return position;
+    }
+
+    void ResetJumpBuffer()
+    {
+        jumpBufferTimer = jumpBufferTime;
+    }
+
+    void Update(float dt, float groundY)
+    {
+        HandleInput(dt);
+        ApplyPhysics(dt, groundY);
+        HandleAnimation(dt);
+        sprite.SetPosition(position);
+    }
+
+    sf::Vector2f GetPosition()
+    {
+        return position;
+    }
+
+    void SetPosition(sf::Vector2f newPosition)
+    {
+        position = newPosition;
+        sprite.SetPosition(position);
+    }
     void Render(sf::RenderWindow& window) override { window.draw(sprite.GetSprite()); }
     
     inline bool IsDead() { return lives <= 0; }
