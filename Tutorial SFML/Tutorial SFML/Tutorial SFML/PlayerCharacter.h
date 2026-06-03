@@ -23,7 +23,7 @@ private:
 
 public:
     PlayerCharacter(): Character("assets/white_duck.png") {
-        position = { 100.f, 300.f };
+        transform->position = { 100.f, 300.f };
     }
 
     void Update(float dt) override; 

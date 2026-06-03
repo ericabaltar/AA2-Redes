@@ -19,8 +19,6 @@ public:
 		return &nt;
 	}
 
-	bool GetLastValidatedMovementPacket(MovementPacket& packet);
-
 private:
 	bool disconnectFromServer = false;
 
@@ -51,6 +49,8 @@ public:
 	void SendRankingPetitionServerPacket(int userId);
 
 	void SendMovementPacket(MovementPacket movementPacket);
+
+	bool GetLastValidatedMovementPacket(MovementPacket& packet);
 
 private:
 	NetworkManager() = default;

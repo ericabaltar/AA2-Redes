@@ -52,9 +52,6 @@ public:
 
         oponent = new Character();
         objects.push_back(oponent);
-
-        Bullet* bullet = new Bullet();
-        objects.push_back(bullet);
     }
 
     void HandleEvents(sf::RenderWindow& window)
@@ -74,14 +71,23 @@ public:
 
     virtual bool Update(sf::RenderWindow& window, float dt) override
     {
+        if (player->IsDead())
+        {
+            std::cout << "DERROTA" << std::endl;
+        }
+        else if (oponent->IsDead())
+        {
+            std::cout << "VICTORIA" << std::endl;
+        }
+
         Scene::Update(window, dt);
 
 		movementInterpolation.Update(dt);
 
         Vector2 interpolatedPos = movementInterpolation.GetInterpolatedPosition(opponentUser);
-        oponent->SetInterpolatedPosition(sf::Vector2f(interpolatedPos.x, interpolatedPos.y));
+        oponent->SetInterpolatedPosition(Vector2(interpolatedPos.x, interpolatedPos.y));
         oponent->Update(dt);  // Se hace dos veces este update, no parece que cause problemas por ahora pero en el futuro podria dar
-
+        
         if (NT->GetDisconnectFromServer()) return false;
 
         NT->Update();
@@ -102,9 +108,9 @@ public:
 
         if (NT->GetLastValidatedMovementPacket(validatedPacket))
         {
-            sf::Vector2f correctedPosition = player->GetPosition();
+            Vector2 correctedPosition = player->GetPosition();
 
-            sf::Vector2f validatedPosition(
+            Vector2 validatedPosition(
                 validatedPacket.pos.x,
                 validatedPacket.pos.y
             );
