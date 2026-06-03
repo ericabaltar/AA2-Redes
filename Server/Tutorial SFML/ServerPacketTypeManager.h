@@ -10,7 +10,7 @@
 
 enum PacketTypes
 {
-	HANDSHAKE, LOGIN, REGISTER, LOBBY_CREATE, LOBBY_JOIN, WAITING_ROOM_PLAYERS, RANKING, START_GAME, END_GAME, MAP
+	HANDSHAKE, LOGIN, REGISTER, LOBBY_CREATE, LOBBY_JOIN, WAITING_ROOM_PLAYERS, MOVEMENT, RANKING, START_GAME, END_GAME, MAP
 };
 
 class ServerPacketTypesManager
@@ -52,6 +52,7 @@ private:
 	void ReceiveRegisterPacket(sf::Packet data, sf::TcpSocket& client);
 	void ReceiveLobbyCreatePacket(sf::Packet data, sf::TcpSocket& client);
 	void ReceiveLobbyJoinPacket(sf::Packet data, sf::TcpSocket& client);
+	void ReceiveMovementPacket(sf::Packet data, sf::TcpSocket& client);
 	void ReceiveRankingPacket(sf::Packet data, sf::TcpSocket& client);
 	void ReceiveStartGamePacket(sf::Packet data);
 	void ReceiveEndGamePacket(sf::Packet data);
