@@ -25,8 +25,6 @@ void PlayerCharacter::HandleInput(float dt)
 
 void PlayerCharacter::ApplyPhysics(float dt, float groundY)
 {
-    std::cout << "Posicion inicial: " << transform->position.x << "   " << transform->position.y << std::endl;
-
     if (isQuacking || isShooting)
     {
         velocity.x = 0.f;
@@ -85,9 +83,6 @@ void PlayerCharacter::ApplyPhysics(float dt, float groundY)
         transform->position = { 800.f - width / 2.f, transform->position.y };
         velocity.x = 0.f;
     }
-
-    std::cout << "Posicion final: " << transform->position.x << "   " << transform->position.y << std::endl;
-
 }
 
 void PlayerCharacter::Update(float dt)

@@ -1,8 +1,14 @@
 #pragma once
-#include <SFML/Network.hpp>
+#include <functional>
 
 class Task
 {
+private:
+	std::function<void()> task;
+
 public:
-	sf::Packet packet;
+	Task(std::function<void()> t) : task(std::move(t)) {}
+
+	void Invoke() { task(); }
 };
+

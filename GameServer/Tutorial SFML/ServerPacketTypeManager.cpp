@@ -2,6 +2,7 @@
 #include "NetworkManager.h"
 #include <iostream>
 #include "MovementPacket.h"
+#include "ThreadManager.h"
 #include <thread>
 
 sf::Packet& operator>>(sf::Packet& packet, PacketTypes& type) {
@@ -42,33 +43,30 @@ void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, std::optional<sf
 
 	packet >> receivedDataPriority;
 
-	switch (receivedDataPriority)
+	if (receivedDataPriority == 0)
 	{
-	case NORMAL_PACKET:
-		std::cout << "Paquete normal recibido" << std::endl;
-		break;
-	case CRITICAL_PACKET:
-		std::cout << "Paquete critico recibido" << std::endl;
-		break;
-	case URGENT_PACKET:
-		std::cout << "Paquete urgente recibido" << std::endl;
-		break;
-	case URGENT_PACKET | CRITICAL_PACKET:
-		std::cout << "Paquete urgente y critico recibido" << std::endl;
-		break;
-	}
-
-	if (receivedDataPriority == URGENT_PACKET)
-	{
-		std::thread([this, packet]() {
-			ProcessPacket(packet);
-		}).detach();
+		std::cout << "Normal" << std::endl;
 	}
 	else
 	{
-		Task task;
-		task.packet = packet;
-		NT->AddTask(task);
+		if (receivedDataPriority & URGENT_PACKET)
+			std::cout << "Urgente" << std::endl;
+
+		if (receivedDataPriority & CRITICAL_PACKET)
+			std::cout << "Crítico" << std::endl;
+	}
+
+	if (receivedDataPriority & URGENT_PACKET)
+	{
+		ThrdM->AddUrgentTask(new Task([this, packet]() mutable {
+			this->ProcessPacket(packet);
+			}));
+	}
+	else
+	{
+		ThrdM->AddTask(new Task([this, packet]() mutable {
+			this->ProcessPacket(packet);
+			}));
 	}
 }
 

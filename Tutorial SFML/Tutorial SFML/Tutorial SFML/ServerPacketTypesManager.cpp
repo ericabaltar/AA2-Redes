@@ -157,7 +157,9 @@ void ServerPacketTypesManager::SendRankingPetition(int userId, sf::TcpSocket& se
 void ServerPacketTypesManager::SendMovement(sf::UdpSocket& server, MovementPacket movement)
 {
 	sf::Packet packet;
+	uint8_t priority = NORMAL_PACKET;
 
+	packet << priority;
 	packet << UdpPacketTypes::MOVEMENT;
 	packet << movement;
 
