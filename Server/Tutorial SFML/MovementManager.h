@@ -12,7 +12,7 @@ class MovementManager
 	std::vector<User> gameUsers = { {"eauna", 0, 0, 0, 1.0f} };
 
 private:
-	std::map<User, std::vector<MovementPacket>> packetList;
+	std::map<int, std::vector<MovementPacket>> packetList;
 	float validationTolerance = 0.5f;
 	sf::Clock clock;
 
@@ -24,15 +24,15 @@ public:
 	}
 
 	void ValidatePackets() {
-		std::map<User, MovementPacket> validatedPackets;
+		std::map<int, MovementPacket> validatedPackets;
 		for (User user : gameUsers) {
-			validatedPackets[user] = ValidateUserPackets(user);
-			packetList[user].clear();
-			packetList[user].push_back(validatedPackets[user]);
+			validatedPackets[user.userIndex] = ValidateUserPackets(user);
+			packetList[user.userIndex].clear();
+			packetList[user.userIndex].push_back(validatedPackets[user.userIndex]);
 		}
 	}
 
-	void AddPacket(User user, MovementPacket packet) { packetList[user].push_back(packet); }
+	void AddPacket(User user, MovementPacket packet) { packetList[user.userIndex].push_back(packet); }
 
 	void Update() {
 		if (clock.getElapsedTime().asMilliseconds() < MOVEMENT_VALIDATION_TIME_IN_MILLISECONDS) return;
@@ -43,21 +43,21 @@ public:
 
 private:
 	MovementPacket ValidateUserPackets(User user) {
-		MovementPacket resultPacket = packetList[user][0];
-		for (int i = 1; i < packetList[user].size(); ++i) {
+		MovementPacket resultPacket = packetList[user.userIndex][0];
+		for (int i = 1; i < packetList[user.userIndex].size(); ++i) {
 
-			if (packetList[user][i].ID < resultPacket.ID) continue;
+			if (packetList[user.userIndex][i].ID < resultPacket.ID) continue;
 
-			int physicsMult = packetList[user][i].ID - resultPacket.ID;
+			int physicsMult = packetList[user.userIndex][i].ID - resultPacket.ID;
 
 			//Early exit to error
-			if (std::abs((packetList[user][i].pos - resultPacket.pos).SqrMagnitude() - physicsMult * physicsMult * user.speed * user.speed)
+			if (std::abs((packetList[user.userIndex][i].pos - resultPacket.pos).SqrMagnitude() - physicsMult * physicsMult * user.speed * user.speed)
 			> validationTolerance) {
 				//TODO: Send notification to reconcile!!!
 				return resultPacket;
 			}
 
-			resultPacket = packetList[user][i];
+			resultPacket = packetList[user.userIndex][i];
 		}
 	}
 };
