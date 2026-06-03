@@ -17,8 +17,7 @@ protected:
 
     AnimatedSprite sprite;
 
-	sf::Vector2f position;
-	sf::Vector2f velocity;
+	Vector2 velocity;
 
 	const float jumpBufferTime = 0.12f;
 	float jumpBufferTimer = 0.f;
@@ -46,8 +45,8 @@ public:
 
     void Render(sf::RenderWindow& window) override { window.draw(sprite.GetSprite()); }
     
-    inline sf::Vector2f GetPosition() { return position; }
-    inline void SetPosition(const sf::Vector2f newPosition) { position = newPosition; }
+    inline Vector2 GetPosition() { return transform->position; }
+    inline void SetPosition(const Vector2 newPosition) { transform->position = newPosition; }
     void HandleEvent(const sf::Event& event) override {}
 };
 

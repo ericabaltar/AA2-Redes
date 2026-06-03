@@ -66,9 +66,9 @@ bool AnimatedSprite::IsCurrentAnimationFinished() const
 	return currentAnimation && currentAnimation->HasFinished();
 }
 
-void AnimatedSprite::SetPosition(sf::Vector2f pos)
+void AnimatedSprite::SetPosition(Vector2 pos)
 {
-	sprite.setPosition(pos);
+	sprite.setPosition(sf::Vector2f(pos.x, pos.y));
 }
 
 void AnimatedSprite::SetScale(sf::Vector2f newScale)

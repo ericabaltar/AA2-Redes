@@ -49,9 +49,6 @@ public:
 
         oponent = new Character();
         objects.push_back(oponent);
-
-        Bullet* bullet = new Bullet();
-        objects.push_back(bullet);
     }
 
     void HandleEvents(sf::RenderWindow& window)
@@ -76,7 +73,7 @@ public:
 		movementInterpolation.Update(dt);
 
         Vector2 interpolatedPos = movementInterpolation.GetInterpolatedPosition(opponentUser);
-        oponent->SetPosition(sf::Vector2f(interpolatedPos.x, interpolatedPos.y));
+        oponent->SetPosition(Vector2(interpolatedPos.x, interpolatedPos.y));
 		std::cout << "Posición interpolada del oponente: (" << interpolatedPos.x << ", " << interpolatedPos.y << ")" << std::endl;
         oponent->Update(dt);  // Se hace dos veces este update, no parece que cause problemas por ahora pero en el futuro podria dar
 

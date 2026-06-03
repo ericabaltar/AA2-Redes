@@ -1,4 +1,6 @@
 #include "Character.h"
+#include "Bullet.h"
+#include "Spawner.h"
 
 void Character::HandleAnimation(float dt)
 {
@@ -33,7 +35,7 @@ void Character::HandleAnimation(float dt)
 
 Character::Character(const std::string& texturePath) : sprite(texturePath), quackSound(quackBuffer)
 {
-    position = { 400.f, 300.f };
+    transform->position = { 400.f, 300.f };
     sprite.SetScale({ scale, scale });
 
     sprite.AddAnimation("idle", Animation(32, 32, 0, 1, 0));
@@ -43,7 +45,7 @@ Character::Character(const std::string& texturePath) : sprite(texturePath), quac
 
     sprite.StartAnimation("idle");
 
-    velocity = sf::Vector2f(0, 0);
+    velocity = Vector2(0,0);
 
     width = sprite.GetWidth() * scale;
     height = sprite.GetHeight() * scale;
@@ -57,7 +59,7 @@ Character::Character(const std::string& texturePath) : sprite(texturePath), quac
 void Character::Update(float dt)
 {
     HandleAnimation(dt);
-    sprite.SetPosition(position);
+    sprite.SetPosition(transform->position);
 }
 
 void Character::Quack()
@@ -73,5 +75,10 @@ void Character::Shoot()
     isShooting = true;
     sprite.StartAnimation("shoot");
 
-    // Shoot
+    Bullet* bullet = new Bullet();
+    float offset = facingRight ? 40.f : -40.f;
+    Vector2 position = Vector2(transform->position.x + offset, transform->position.y);
+    bullet->Init(position, facingRight);
+
+    SPAWN.SpawnObject(bullet);
 }
