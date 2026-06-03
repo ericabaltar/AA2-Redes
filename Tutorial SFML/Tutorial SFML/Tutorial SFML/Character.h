@@ -29,11 +29,15 @@ protected:
     bool isQuacking = false;
     bool isShooting = false;
 
-    void HandleAnimation(float dt);
+
 public:
     Character(const std::string& texturePath = "assets/grey_duck.png");
 
-    virtual void Update(float dt, float groundY);
+protected:
+    void HandleAnimation(float dt);
+
+public:
+    virtual void Update(float dt);
 
     void Quack();
 

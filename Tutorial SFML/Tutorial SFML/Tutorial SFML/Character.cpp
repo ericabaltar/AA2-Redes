@@ -54,7 +54,7 @@ Character::Character(const std::string& texturePath) : sprite(texturePath), quac
     quackSound.setVolume(20.f);
 }
 
-void Character::Update(float dt, float groundY)
+void Character::Update(float dt)
 {
     HandleAnimation(dt);
     sprite.SetPosition(position);

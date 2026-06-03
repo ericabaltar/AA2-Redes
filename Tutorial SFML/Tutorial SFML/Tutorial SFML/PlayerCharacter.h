@@ -26,7 +26,7 @@ public:
         position = { 100.f, 300.f };
     }
 
-    void Update(float dt, float groundY) override; 
+    void Update(float dt) override; 
 
     inline void ResetJumpBuffer() { jumpBufferTimer = jumpBufferTime; }
 

@@ -85,9 +85,11 @@ void PlayerCharacter::ApplyPhysics(float dt, float groundY)
     }
 }
 
-void PlayerCharacter::Update(float dt, float groundY)
+void PlayerCharacter::Update(float dt)
 {
+    float groundY = 550; // PENDIENTE QUITAR ESTO CUANDO HAYA COLISIONES REALES CON SUELO POR TILES
+
     HandleInput(dt);
     ApplyPhysics(dt, groundY);
-    Character::Update(dt, groundY);
+    Character::Update(dt);
 }

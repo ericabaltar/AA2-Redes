@@ -7,16 +7,16 @@
 #include "MovementPrediction.h"
 #include "MovementInterpolation.h"
 #include "PlayerCharacter.h"
+#include "Scene.h"
 
 
-class GameScene
+class GameScene : Scene
 {
 private:
     MovementPrediction movementPrediction;
 	MovementInterpolation movementInterpolation;
 
     sf::RectangleShape ground;
-    sf::Clock clock;
 
     PlayerCharacter player;
     Character oponent;
@@ -24,8 +24,15 @@ private:
     User opponentUser;
 public:
     GameScene()
-        : ground({ 800.f, 50.f })
+        : ground({ 800.f, 50.f }) {}
+
+    void Enter(SharedMemory* _sharedMemory) override
     {
+        NT->Init();
+
+        if (NT->GetDisconnectFromServer())
+            std::cout << "Disconnect from server";
+
         ground.setFillColor(sf::Color(100, 100, 100));
         ground.setPosition({ 0.f, 550.f });
 
@@ -35,16 +42,6 @@ public:
         opponentUser.userIndex = 999;
         opponentUser.position = 0;
         opponentUser.speed = 1.f;
-    }
-
-    bool Init()
-    {
-        NT->Init();
-
-        if (NT->GetDisconnectFromServer())
-            return false;
-
-        return true;
     }
 
     void HandleEvents(sf::RenderWindow& window)
@@ -62,21 +59,20 @@ public:
         }
     }
 
-    void Update()
+    virtual bool Update(sf::RenderWindow& window, float dt) override
     {
-        float dt = clock.restart().asSeconds();
-        float groundY = ground.getPosition().y;
+        Scene::Update(window, dt);
 
-        player.Update(dt, groundY);
+        player.Update(dt);
 
 		movementInterpolation.Update(dt);
 
         Vector2 interpolatedPos = movementInterpolation.GetInterpolatedPosition(opponentUser);
         oponent.SetPosition(sf::Vector2f(interpolatedPos.x, interpolatedPos.y));
 		std::cout << "Posición interpolada del oponente: (" << interpolatedPos.x << ", " << interpolatedPos.y << ")" << std::endl;
-        oponent.Update(dt, groundY);
+        oponent.Update(dt);
  
-        if (NT->GetDisconnectFromServer()) return;
+        if (NT->GetDisconnectFromServer()) return false;
 
         NT->Update();
 
@@ -85,11 +81,13 @@ public:
             MovementPacket playerMovementPacket = movementPrediction.CreateMovementPacket(player.GetPosition());
             NT->SendMovementPacket(playerMovementPacket);
         }
+
+        return true;
     }
 
-    void Render(sf::RenderWindow& window)
+    void Render(sf::RenderWindow& window) override
     {
-        window.clear(sf::Color(40, 40, 40));
+        Scene::Render(window);
 
         window.draw(ground);
         window.draw(player.GetSprite());
