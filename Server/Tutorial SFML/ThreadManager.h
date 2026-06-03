@@ -4,61 +4,87 @@
 #include "Task.h"
 #include <mutex>
 #include <deque>
+#include <condition_variable>
 
-#define THREAD_COUNT 100
 #define ThrdM ThreadManager::Instance()
 
 class ThreadManager
 {
 private:
-	std::vector<std::thread*> threads;
-	std::deque<Task*> tasks;
-	std::mutex tasksMutex;
+    std::vector<std::thread> threads;
+    std::deque<Task*> tasks;
+
+    std::mutex tasksMutex;
+    std::condition_variable cv;
+
+    bool stop = false;
 
 public:
-	static ThreadManager* Instance() {
-		static ThreadManager tm;
+    static ThreadManager* Instance() {
+        static ThreadManager tm;
+        return &tm;
+    }
 
-		return &tm;
-	}
+    ~ThreadManager() {
+        {
+            std::lock_guard<std::mutex> lock(tasksMutex);
+            stop = true;
+        }
+        cv.notify_all();
 
-	void Init() {
-		for (int i = 0; i < THREAD_COUNT; ++i) threads.emplace_back(Worker);
-	}
+        for (auto& t : threads)
+            if (t.joinable())
+                t.join();
+    }
 
-	void AddTask(Task* task) {
-		tasksMutex.lock();
-		tasks.emplace_back(task);
-		tasksMutex.unlock();
-	}
+    void Init() {
+        int count = std::thread::hardware_concurrency();
 
-	void AddUrgentTask(Task* task) {
-		tasksMutex.lock();
-		tasks.emplace_front(task);
-		tasksMutex.unlock();
-	}
+        for (int i = 0; i < count; ++i)
+            threads.emplace_back(&ThreadManager::Worker, this);
+    }
+
+    void AddTask(Task* task) {
+        {
+            std::lock_guard<std::mutex> lock(tasksMutex);
+            tasks.push_back(task);
+        }
+        cv.notify_one();
+    }
+
+    void AddUrgentTask(Task* task) {
+        {
+            std::lock_guard<std::mutex> lock(tasksMutex);
+            tasks.push_front(task);
+        }
+        cv.notify_one();
+    }
 
 private:
 
-	void Worker() {
-		bool closeThread = false;
+    void Worker() {
+        while (true) {
+            Task* task = nullptr;
 
-		while (!closeThread) {
+            {
+                std::unique_lock<std::mutex> lock(tasksMutex);
 
-			Task* task;
+                cv.wait(lock, [&] {
+                    return stop || !tasks.empty();
+                    });
 
-			tasksMutex.lock();
-			if (!tasks.empty()) {
-				task = tasks.front();
-				tasks.pop_front();
-			}
-			else {
-				closeThread = true;
-			}
-			tasksMutex.unlock();
+                if (stop && tasks.empty())
+                    return;
 
-			if(task) task->Invoke();
-		}
-	}
+                task = tasks.front();
+                tasks.pop_front();
+            }
+
+            if (task != nullptr)
+            {
+                task->Invoke();
+                delete task;
+            }
+        }
+    }
 };
-

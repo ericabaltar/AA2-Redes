@@ -28,7 +28,7 @@ public:
 		return false;
 	}
 
-	MovementPacket CreateMovementPacket(sf::Vector2f position)
+	MovementPacket CreateMovementPacket(Vector2 position)
 	{
 		MovementPacket movementPacket;
 		

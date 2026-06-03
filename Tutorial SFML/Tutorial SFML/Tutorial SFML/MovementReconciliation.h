@@ -17,8 +17,8 @@ public:
     }
 
     void Reconcile(
-        sf::Vector2f& clientPosition,
-        const sf::Vector2f& serverPosition,
+        Vector2 clientPosition,
+        const Vector2& serverPosition,
         int lastValidatedPacketID
     )
     {

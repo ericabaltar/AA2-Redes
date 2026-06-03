@@ -25,6 +25,8 @@ void PlayerCharacter::HandleInput(float dt)
 
 void PlayerCharacter::ApplyPhysics(float dt, float groundY)
 {
+    std::cout << "Posicion inicial: " << transform->position.x << "   " << transform->position.y << std::endl;
+
     if (isQuacking || isShooting)
     {
         velocity.x = 0.f;
@@ -59,11 +61,11 @@ void PlayerCharacter::ApplyPhysics(float dt, float groundY)
     }
 
     velocity.y += gravity * dt;
-    position += velocity * dt;
+    transform->position = transform->position + velocity * dt;
 
-    if (position.y + width / 2.f >= groundY)
+    if (transform->position.y + width / 2.f >= groundY)
     {
-        position = { position.x, groundY - height / 2.f };
+        transform->position = { transform->position.x, groundY - height / 2.f };
         velocity.y = 0.f;
         isOnGround = true;
     }
@@ -72,17 +74,20 @@ void PlayerCharacter::ApplyPhysics(float dt, float groundY)
         isOnGround = false;
     }
 
-    if (position.x - width / 2.f < 0.f)
+    if (transform->position.x - width / 2.f < 0.f)
     {
-        position = { width / 2.f, position.y };
+        transform->position = { width / 2.f, transform->position.y };
         velocity.x = 0.f;
     }
 
-    if (position.x + width / 2.f > 800.f)
+    if (transform->position.x + width / 2.f > 800.f)
     {
-        position = { 800.f - width / 2.f, position.y };
+        transform->position = { 800.f - width / 2.f, transform->position.y };
         velocity.x = 0.f;
     }
+
+    std::cout << "Posicion final: " << transform->position.x << "   " << transform->position.y << std::endl;
+
 }
 
 void PlayerCharacter::Update(float dt)
