@@ -105,6 +105,11 @@ void Character::Shoot()
     SPAWN.SpawnObject(bullet);
 }
 
+void Character::OnCollisionEnter(Object* other)
+{
+    ReceiveHit();
+}
+
 void Character::SetInterpolatedPosition(const Vector2 newPosition)
 {
     if (newPosition.x > transform->position.x || newPosition.x < transform->position.x) {

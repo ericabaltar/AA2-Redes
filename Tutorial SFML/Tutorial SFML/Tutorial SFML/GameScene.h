@@ -71,6 +71,15 @@ public:
 
     virtual bool Update(sf::RenderWindow& window, float dt) override
     {
+        if (player->IsDead())
+        {
+            std::cout << "DERROTA" << std::endl;
+        }
+        else if (oponent->IsDead())
+        {
+            std::cout << "VICTORIA" << std::endl;
+        }
+
         Scene::Update(window, dt);
 
 		movementInterpolation.Update(dt);

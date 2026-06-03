@@ -67,7 +67,7 @@ public:
 		window.draw(sprite);
 	}
 
-	void OnCollisionEnter(Object* other)
+	void OnCollisionEnter(Object* other) override
 	{
 		if (other == owner)
 			return;

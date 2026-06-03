@@ -54,6 +54,8 @@ public:
 
     void Render(sf::RenderWindow& window) override { window.draw(sprite.GetSprite()); }
     
+    void OnCollisionEnter(Object* other) override;
+
     inline bool IsDead() { return lives <= 0; }
 
     inline Vector2 GetPosition() { return transform->position; }
