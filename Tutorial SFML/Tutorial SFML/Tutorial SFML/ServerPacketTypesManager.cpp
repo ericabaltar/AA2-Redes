@@ -166,6 +166,18 @@ void ServerPacketTypesManager::SendMovement(sf::UdpSocket& server, MovementPacke
 	SendUdpData(server, packet);
 }
 
+void ServerPacketTypesManager::SendTaunt(sf::UdpSocket& server)
+{
+	sf::Packet packet;
+	uint8_t priority = URGENT_PACKET;
+
+	packet << priority;
+	packet << UdpPacketTypes::TAUNT;
+
+	SendUdpData(server, packet);
+}
+
+
 void ServerPacketTypesManager::ReceiveHandshakePacket(sf::Packet data)
 {
 	std::string receiveMesage;

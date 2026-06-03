@@ -16,7 +16,7 @@ enum PacketTypes
 
 enum UdpPacketTypes
 {
-	MOVEMENT
+	MOVEMENT, SHOT, TAUNT
 };
 
 class ServerPacketTypesManager
@@ -50,7 +50,9 @@ private:
 	void ProcessPacket(sf::Packet packet);
 
 	void ReceiveHandshakePacket(sf::Packet data);
+
 	void ReceiveMovementPacket(sf::Packet data);
+	void ReceiveTauntPacket(sf::Packet data);
 
 	void ReceiveStartGamePacket(sf::Packet data);
 	void ReceiveEndGamePacket(sf::Packet data);

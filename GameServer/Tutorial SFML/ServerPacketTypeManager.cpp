@@ -129,6 +129,11 @@ void ServerPacketTypesManager::ProcessPacket(sf::Packet packet)
 	case MOVEMENT:
 		ReceiveMovementPacket(packet);
 		break;
+	case SHOT:
+		break;
+	case TAUNT:
+		ReceiveTauntPacket(packet);
+		break;
 	default:
 		std::cout << "No se ha identificado el tipo de packete" << std::endl;
 		break;
@@ -153,6 +158,11 @@ void ServerPacketTypesManager::ReceiveMovementPacket(sf::Packet data)
 	std::cout << "Recibido movimiento: ";
 	std::cout << "ID " << movement.ID << " | ";
 	std::cout << "(" << movement.pos.x << ", " << movement.pos.y << ")" << std::endl;
+}
+
+void ServerPacketTypesManager::ReceiveTauntPacket(sf::Packet data)
+{
+	std::cout << "Burla recibida" << std::endl;
 }
 
 void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)

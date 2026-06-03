@@ -98,8 +98,10 @@ void Character::Shoot()
     sprite.StartAnimation("shoot");
 
     Bullet* bullet = new Bullet();
+
     float offset = facingRight ? 40.f : -40.f;
     Vector2 position = Vector2(transform->position.x + offset, transform->position.y);
+    
     bullet->Init(this, position, facingRight);
 
     SPAWN.SpawnObject(bullet);

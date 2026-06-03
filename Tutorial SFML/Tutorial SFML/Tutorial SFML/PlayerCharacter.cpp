@@ -1,4 +1,5 @@
 #include "PlayerCharacter.h"
+#include "NetworkManager.h"
 
 void PlayerCharacter::HandleInput(float dt)
 {
@@ -92,4 +93,15 @@ void PlayerCharacter::Update(float dt)
     HandleInput(dt);
     ApplyPhysics(dt, groundY);
     Character::Update(dt);
+}
+
+void PlayerCharacter::Quack()
+{
+    Character::Quack();
+    NT->SendTaunt();
+}
+
+void PlayerCharacter::Shoot()
+{
+    Character::Shoot();
 }
