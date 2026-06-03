@@ -11,7 +11,7 @@ protected:
     sf::SoundBuffer quackBuffer;
     sf::Sound quackSound;
 
-	const float scale = 4.f;
+    const float scale = 4.f;
     float width;
     float height;
 
@@ -20,12 +20,12 @@ protected:
 
 	Vector2 velocity;
 
-	const float jumpBufferTime = 0.12f;
-	float jumpBufferTimer = 0.f;
+    const float jumpBufferTime = 0.12f;
+    float jumpBufferTimer = 0.f;
 
-	bool isOnGround = false;
+    bool isOnGround = false;
 
-	bool facingRight = true;
+    bool facingRight = true;
 
     bool isQuacking = false;
     bool isShooting = false;

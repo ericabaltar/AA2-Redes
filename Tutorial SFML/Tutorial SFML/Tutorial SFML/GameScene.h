@@ -112,7 +112,7 @@ public:
                 validatedPacket.ID
             );
 
-            player->SetPosition(correctedPosition);
+            player->SetInterpolatedPosition(correctedPosition);
         }
 
         return true;
