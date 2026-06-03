@@ -23,18 +23,18 @@ public:
 	}
 
 	void Init() {
-		for (int i = 0; i < THREAD_COUNT; ++i) threads.emplace_back(Worker);
+		for (int i = 0; i < THREAD_COUNT; ++i) threads.push_back(new std::thread(Worker));
 	}
 
 	void AddTask(Task* task) {
 		tasksMutex.lock();
-		tasks.emplace_back(task);
+		tasks.push_back(task);
 		tasksMutex.unlock();
 	}
 
 	void AddUrgentTask(Task* task) {
 		tasksMutex.lock();
-		tasks.emplace_front(task);
+		tasks.push_front(task);
 		tasksMutex.unlock();
 	}
 
