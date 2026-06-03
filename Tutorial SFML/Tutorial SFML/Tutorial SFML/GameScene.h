@@ -18,8 +18,8 @@ private:
 
     sf::RectangleShape ground;
 
-    PlayerCharacter player;
-    Character oponent;
+    PlayerCharacter* player;
+    Character* oponent;
 
     User opponentUser;
 public:
@@ -42,6 +42,12 @@ public:
         opponentUser.userIndex = 999;
         opponentUser.position = 0;
         opponentUser.speed = 1.f;
+
+        player = new PlayerCharacter();
+        objects.push_back(player);
+
+        oponent = new Character();
+        objects.push_back(oponent);
     }
 
     void HandleEvents(sf::RenderWindow& window)
@@ -54,7 +60,7 @@ public:
             if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
             {
                 if (keyPressed->scancode == sf::Keyboard::Scancode::Space)
-                    player.ResetJumpBuffer();
+                    player->ResetJumpBuffer();
             }
         }
     }
@@ -63,22 +69,20 @@ public:
     {
         Scene::Update(window, dt);
 
-        player.Update(dt);
-
 		movementInterpolation.Update(dt);
 
         Vector2 interpolatedPos = movementInterpolation.GetInterpolatedPosition(opponentUser);
-        oponent.SetPosition(sf::Vector2f(interpolatedPos.x, interpolatedPos.y));
+        oponent->SetPosition(sf::Vector2f(interpolatedPos.x, interpolatedPos.y));
 		std::cout << "Posición interpolada del oponente: (" << interpolatedPos.x << ", " << interpolatedPos.y << ")" << std::endl;
-        oponent.Update(dt);
- 
+        oponent->Update(dt);  // Se hace dos veces este update, no parece que cause problemas por ahora pero en el futuro podria dar
+
         if (NT->GetDisconnectFromServer()) return false;
 
         NT->Update();
 
         if (movementPrediction.ShouldSendPacket(dt))
         {
-            MovementPacket playerMovementPacket = movementPrediction.CreateMovementPacket(player.GetPosition());
+            MovementPacket playerMovementPacket = movementPrediction.CreateMovementPacket(player->GetPosition());
             NT->SendMovementPacket(playerMovementPacket);
         }
 
@@ -90,8 +94,6 @@ public:
         Scene::Render(window);
 
         window.draw(ground);
-        window.draw(player.GetSprite());
-        window.draw(oponent.GetSprite());
 
         window.display();
     }

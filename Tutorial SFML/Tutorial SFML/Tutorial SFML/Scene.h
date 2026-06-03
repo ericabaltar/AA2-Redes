@@ -28,7 +28,7 @@ public:
 		while (const std::optional event = window.pollEvent())
 			HandleEvent(*event, window);
 
-		for (Object* obj : objects) obj->update();
+		for (Object* obj : objects) obj->Update(dt);
 
 		Render(window);
 
@@ -43,7 +43,7 @@ protected:
 	virtual void Render(sf::RenderWindow& window) {
 		window.clear(sf::Color(40, 40, 40));
 
-		for (Object* obj : objects) obj->render(window);
+		for (Object* obj : objects) obj->Render(window);
 
 		//window.display();
 	}
@@ -52,7 +52,7 @@ protected:
 		if (event.is<sf::Event::Closed>())
 			window.close();
 
-		for (Object* obj : objects) obj->handleEvent(event);
+		for (Object* obj : objects) obj->HandleEvent(event);
 	}
 };
 

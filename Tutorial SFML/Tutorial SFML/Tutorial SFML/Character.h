@@ -3,8 +3,9 @@
 #include <SFML/Audio.hpp>
 #include <iostream>
 #include "AnimatedSprite.h"
+#include "Object.h"
 
-class Character
+class Character : public Object
 {
 protected:
     sf::SoundBuffer quackBuffer;
@@ -37,14 +38,16 @@ protected:
     void HandleAnimation(float dt);
 
 public:
-    virtual void Update(float dt);
+    void Update(float dt) override;
 
     void Quack();
 
     void Shoot();
 
-    inline sf::Sprite GetSprite() { return sprite.GetSprite(); }
+    void Render(sf::RenderWindow& window) override { window.draw(sprite.GetSprite()); }
+    
     inline sf::Vector2f GetPosition() { return position; }
     inline void SetPosition(const sf::Vector2f newPosition) { position = newPosition; }
+    void HandleEvent(const sf::Event& event) override {}
 };
 
