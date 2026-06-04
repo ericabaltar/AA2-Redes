@@ -36,7 +36,6 @@ public:
 
 private:
 	std::string handshakeMessage = "Handshake realizado";
-	std::vector<User> ranking;
 
 public:
 	void ReceivePacket(sf::Packet packet);
@@ -51,8 +50,6 @@ public:
 	void SendMovement(sf::UdpSocket& server, MovementPacket movement);
 	void SendShot(sf::UdpSocket& server);
 	void SendTaunt(sf::UdpSocket& server);
-
-	inline std::vector<User> GetRanking() { return ranking; }
 
 private:
 	ServerPacketTypesManager() = default;
