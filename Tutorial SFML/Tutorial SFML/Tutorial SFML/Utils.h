@@ -1,5 +1,6 @@
 #pragma once
-class Utils
-{
+enum class GameMode {
+	FRIENDLY = 0,
+	COMPETITIVE = 1
 };
 

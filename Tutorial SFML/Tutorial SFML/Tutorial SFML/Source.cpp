@@ -2,17 +2,16 @@
 #include <optional>
 #include <cmath>
 #include <vector>
-#include "GameScene.h"
 #include "NetworkManager.h"
 #include "MovementPrediction.h"
 #include "Character.h"
+#include "SceneManager.h"
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode({ 800, 600 }), "AA3 Shooter");
+    sf::RenderWindow window(sf::VideoMode({ WINDOW_WIDTH, WINDOW_HEIGHT }), "AA3 Shooter");
 
-    GameScene gameScene;
-    gameScene.Enter(nullptr);
+    SceneManager sceneManager = SceneManager();
 
     sf::Clock clock;
 
@@ -22,8 +21,7 @@ int main()
         if (dt > 0.05f)
             dt = 0.05f;
 
-        gameScene.HandleEvents(window);
-        gameScene.Update(window, dt);
+        sceneManager.update(window, dt);
     }
 
     return 0;

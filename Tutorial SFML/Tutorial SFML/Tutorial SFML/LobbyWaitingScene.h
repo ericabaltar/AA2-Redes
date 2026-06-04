@@ -12,8 +12,7 @@ class LobbyWaitingScene : public Scene
 {
 	sf::Font* arial;
 
-	std::string id = "";
-	int playerCount = 1;
+	float timeElapsed = 0.0f;
 	Button* playerAmountText;
 	Button* roomTitle;
 
@@ -26,7 +25,7 @@ public:
 		titleRect.setSize({ WINDOW_WIDTH * 0.8f, WINDOW_HEIGHT * 0.3f });
 		titleRect.setPosition({ WINDOW_WIDTH * 0.49f - titleRect.getSize().x / 2.f, WINDOW_HEIGHT * 0.3f });
 		titleRect.setFillColor(sf::Color::Transparent);
-		std::string titleText = "LOBBY WAITING ROOM (" + id + ")";
+		std::string titleText = "LOBBY WAITING ROOM";
 		roomTitle = new Button(titleRect, sf::Text(*arial, titleText), []() {});
 
 		objects.push_back(roomTitle);
@@ -36,7 +35,7 @@ public:
 		playerAmountRect.setSize({ WINDOW_WIDTH * 0.5f, WINDOW_HEIGHT * 0.15f });
 		playerAmountRect.setPosition({ WINDOW_WIDTH * 0.5f - playerAmountRect.getSize().x / 2.f, WINDOW_HEIGHT * 0.5f });
 		playerAmountRect.setFillColor(sf::Color::Transparent);
-		std::string playerCountText = std::to_string(playerCount) + "/4";
+		std::string playerCountText = "Time elapsed: " + std::to_string((int)std::floor(timeElapsed));
 		playerAmountText = new Button(playerAmountRect, sf::Text(*arial, playerCountText), []() {});
 
 		objects.push_back(playerAmountText);
@@ -46,6 +45,9 @@ public:
 	{
 		if (LM->GetGameStarted())
 			nextScene = SceneOption::GAME;
+
+		timeElapsed += dt;
+		playerAmountText->label.setString("Time elapsed: " + std::to_string((int)std::floor(timeElapsed)));
 
 		return Scene::Update(window, dt);
 	}

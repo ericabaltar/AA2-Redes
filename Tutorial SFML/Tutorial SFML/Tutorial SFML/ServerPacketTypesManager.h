@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cstdint>
 #include <string>
+#include "Utils.h"
 #include "User.h"
 #include "MovementPacket.h"
 
@@ -19,7 +20,7 @@ enum TcpPacketTypes
 
 enum UdpPacketTypes
 {
-	MOVEMENT, SHOT, TAUNT
+	MOVEMENT, SHOT, TAUNT, LOBBY
 };
 
 class ServerPacketTypesManager
@@ -42,9 +43,9 @@ public:
 	void SendLoginAttempt(std::string username, std::string password, sf::TcpSocket& server);
 	void SendRegisterAttempt(std::string username, std::string password, sf::TcpSocket& server);
 	void SendLobbyCreateAttempt(std::string lobbyId, sf::TcpSocket& server);
-	void SendLobbyJoinAttempt(std::string lobbyId, sf::TcpSocket& server);
 	void SendRankingPetition(int userId, sf::TcpSocket& server);
 
+	void SendLobbyJoinAttempt(GameMode mode, sf::UdpSocket& server);
 	void SendMovement(sf::UdpSocket& server, MovementPacket movement);
 	void SendShot(sf::UdpSocket& server);
 	void SendTaunt(sf::UdpSocket& server);

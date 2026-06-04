@@ -2,6 +2,7 @@
 #include "NetworkManager.h"
 //#include "LobbyManager.h"
 #include "User.h"
+#include "LobbyManager.h"
 
 sf::Packet& operator>>(sf::Packet& packet, TcpPacketTypes& tipo) {
 	int temp;
@@ -130,18 +131,16 @@ void ServerPacketTypesManager::SendLobbyCreateAttempt(std::string lobbyId, sf::T
 	SendData(server, packet);
 }
 
-void ServerPacketTypesManager::SendLobbyJoinAttempt(std::string lobbyId, sf::TcpSocket& server)
+void ServerPacketTypesManager::SendLobbyJoinAttempt(GameMode mode, sf::UdpSocket& server)
 {
-	if (lobbyId.empty()) return;
-
 	sf::Packet packet;
 
-	packet << TcpPacketTypes::LOBBY_JOIN;
-	packet << lobbyId;
+	packet << UdpPacketTypes::LOBBY;
+	packet << (int)mode;
 
 	//LM->SetRoomId(lobbyId);
 
-	SendData(server, packet);
+	SendUdpData(server, packet);
 }
 
 void ServerPacketTypesManager::SendRankingPetition(int userId, sf::TcpSocket& server)
@@ -293,6 +292,7 @@ void ServerPacketTypesManager::ReceiveRankingPacket(sf::Packet data)
 
 void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
 {
+	LM->StartGame();
 }
 
 void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)
