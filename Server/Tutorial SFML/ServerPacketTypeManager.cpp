@@ -89,33 +89,46 @@ void ServerPacketTypesManager::SendUpdatedPlayerCount(sf::TcpSocket& client, int
 	SendData(client, packet);
 }
 
-void ServerPacketTypesManager::SendInfoToStartGame(GameRoom game)
+void ServerPacketTypesManager::SendInfoToStartGame(GameRoom game, int roomId)
 {
 	const float playerAmount = 2;
+
+	// Info for game server
+	sf::Packet packet;
+
+	packet << PacketTypes::START_GAME;
+	
+	packet << roomId;
+	packet << (int)game.GetMode();
+	
+	for (int i = 0; i < playerAmount; i++)
+	{
+		int playerIndex = i;
+		std::optional<sf::IpAddress> ip = game.GetPlayer(i)->client->getRemoteAddress();
+		unsigned short port = game.GetPlayer(i)->client->getRemotePort();
+		std::string username = game.GetPlayer(i)->name;
+		int points = game.GetPlayer(i)->points;
+
+		packet << playerIndex;
+		packet << ip->toString();
+		packet << port;
+		packet << username;
+		packet << points;
+	}
+
+	SendData(*NT->GetGameServerSocket(), packet);
+	std::cout << "Enviada información al game server " << std::endl;
+
+	// Info for player clients
 
 	for (int i = 0; i < playerAmount; i++)
 	{
 		sf::Packet packet;
 
 		packet << PacketTypes::START_GAME;
-		packet << (int)game.GetMode();
-
-		for (int j = 0; j < playerAmount; j++)
-		{
-			if (j == i) continue;
-
-			int playerIndex = j;
-			std::optional<sf::IpAddress> ip = game.GetPlayer(j)->client->getRemoteAddress();
-			unsigned short port = game.GetPlayer(j)->client->getRemotePort();
-			std::string username = game.GetPlayer(j)->name;
-			int points = game.GetPlayer(j)->points;
-
-			packet << playerIndex;
-			packet << ip->toString();
-			packet << port;
-			packet << username;
-			packet << points;
-		}
+		
+		packet << roomId;
+		packet << i;
 
 		SendData(*game.GetPlayer(i)->client, packet);
 		std::cout << "Enviada información a jugador " << i << " de la sala.";

@@ -38,6 +38,7 @@ public:
 	inline bool CheckIfSocketsAreReadyToReceive() { return selector.wait(); }
 
 	inline void SetGameServerSocket(sf::TcpSocket* socket) { gameServer = socket; }
+	inline sf::TcpSocket* GetGameServerSocket() { return gameServer; }
 
 private:
 	NetworkManager() = default;

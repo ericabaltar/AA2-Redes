@@ -8,6 +8,9 @@
 
 class GameManager
 {
+private:
+	int currentRoomId = 0;
+
 public: 
 	static GameManager* Instance() {
 		static GameManager gm;
@@ -18,9 +21,11 @@ public:
 	void AddRoom(GameRoom room) { 
 		std::cout << "Sala creada" << std::endl;
 
-		SPTM->SendInfoToStartGame(room);
-		
-		//TODO: Send Room to GameServer
+		SPTM->SendInfoToStartGame(room, currentRoomId);
+	
+		currentRoomId++;
 	}
+
+	inline int GetCurrentRoomId() { return currentRoomId; }
 };
 

@@ -30,7 +30,7 @@ public:
 	void ReceivePacket(sf::Packet packet, sf::TcpSocket& client);
 	void SendHandshake(sf::TcpSocket& client);
 	void SendUpdatedPlayerCount(sf::TcpSocket& client, int playerCount);
-	void SendInfoToStartGame(GameRoom game);
+	void SendInfoToStartGame(GameRoom game, int roomId);
 
 private:
 	ServerPacketTypesManager() = default;
