@@ -60,7 +60,7 @@ public:
 
 	bool Update(sf::RenderWindow& window, float dt) override
 	{
-		if (!MapM->GetDirtyState() && !isEnterVisible) {
+		if (!MAP->GetInformationHasBeenChecked() && !isEnterVisible) {
 			objects.push_back(enterButton);
 			isEnterVisible = true;
 		}

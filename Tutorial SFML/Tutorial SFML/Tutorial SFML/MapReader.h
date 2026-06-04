@@ -47,7 +47,9 @@ public:
     const Tileset& GetTiles() const { return m_tiles; }
     int GetWidth() const { return m_width; }
     int GetHeight() const { return m_height; }
+    bool GetInformationHasBeenChecked() const { return informationHasBeenChecked; }
 
+    void SetInformationHasBeenChecked(bool checked) { informationHasBeenChecked = checked; }
     void SetWidth(int correctWidth) { m_width = correctWidth;}
     void SetHeight(int correctHeight) { m_height = correctHeight;}
 	void SetTiles(const Tileset& correctTiles) { m_tiles = correctTiles; }
@@ -69,6 +71,7 @@ private:
     Tileset m_tiles;
     int m_width = 0;
     int m_height = 0;
+	bool informationHasBeenChecked = false;
 
     const std::string& filename = "gameConfig.txt";
 
