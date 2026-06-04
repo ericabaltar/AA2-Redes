@@ -7,4 +7,9 @@ struct User
 	int userIndex;
 	int position;
 	float speed;
+
+	bool operator<(const User& other) const
+	{
+		return userIndex < other.userIndex;
+	}
 };

@@ -23,7 +23,7 @@ void NetworkManager::EstablishConnectionWithServer()
     }
     else {
         socket.setBlocking(false);
-        SPTM->SendHandshake(socket);
+        SPTM->SendMapPetition(socket);
         HandleReceivedPackets();
         std::cout << "Conectado al servidor" << std::endl;
     }
@@ -57,6 +57,11 @@ void NetworkManager::SendRegisterAttemptServerPacket(std::string username, std::
 void NetworkManager::SendRankingPetitionServerPacket(int userId)
 {
     SPTM->SendRankingPetition(userId, socket);
+}
+
+void NetworkManager::SendMapPetitionServerPacket()
+{
+    SPTM->SendMapPetition(socket);
 }
 
 void NetworkManager::SendMovementPacket(MovementPacket movementPacket)

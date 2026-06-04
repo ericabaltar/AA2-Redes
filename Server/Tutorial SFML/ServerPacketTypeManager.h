@@ -2,6 +2,7 @@
 #include <SFML/Network.hpp>
 #include "Bcrypt/bcrypt.h"
 #include "Database.h"
+#include "MapReader.h"
 
 #include <string>
 
@@ -9,7 +10,7 @@
 
 enum PacketTypes
 {
-	HANDSHAKE, LOGIN, REGISTER, LOBBY_CREATE, LOBBY_JOIN, WAITING_ROOM_PLAYERS, MOVEMENT, RANKING, START_GAME, END_GAME
+	HANDSHAKE, LOGIN, REGISTER, LOBBY_CREATE, LOBBY_JOIN, WAITING_ROOM_PLAYERS, MOVEMENT, RANKING, START_GAME, END_GAME, MAP_CHECK
 };
 
 class ServerPacketTypesManager
@@ -23,6 +24,8 @@ public:
 
 private:
 	std::string handshakeMessage = "Handshake realizado";
+	std::string xmlFileName = "gameConfig.xml";
+	MapReader* mapReader;
 
 public:
 	void ReceivePacket(sf::Packet packet, sf::TcpSocket& client);
@@ -52,4 +55,6 @@ private:
 	void ReceiveRankingPacket(sf::Packet data, sf::TcpSocket& client);
 	void ReceiveStartGamePacket(sf::Packet data);
 	void ReceiveEndGamePacket(sf::Packet data);
+
+	void ManageMapPacket(sf::Packet data, sf::TcpSocket& client);
 };

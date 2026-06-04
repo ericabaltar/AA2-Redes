@@ -1,6 +1,7 @@
 #pragma once
 #include <unordered_map>
 #include "Scene.h"
+#include "LauncherScene.h"
 #include "GameScene.h"
 #include "LoginScene.h"
 #include "LobbyWaitingScene.h"
@@ -38,12 +39,13 @@ public:
 					sharedMemory->saveUser("user" + i, otherUsers[j]);
 		}
 
+		scenes[SceneOption::LAUNCHER] = new LauncherScene();
 		scenes[SceneOption::GAME] = new GameScene();
 		scenes[SceneOption::LOGIN] = new LoginScene();
 		scenes[SceneOption::LOBBY] = new MatchmakingScene();
 		scenes[SceneOption::WAITING_ROOM] = new LobbyWaitingScene();
 		scenes[SceneOption::RANKING] = new RankingScene();
-		curScene = scenes[SceneOption::LOBBY];
+		curScene = scenes[SceneOption::LAUNCHER];
 		curScene->Enter(sharedMemory);
 	}
 
