@@ -11,6 +11,7 @@
 
 enum class SceneOption {
 	NONE,
+	LAUNCHER,
 	LOGIN,
 	LOBBY,
 	WAITING_ROOM,

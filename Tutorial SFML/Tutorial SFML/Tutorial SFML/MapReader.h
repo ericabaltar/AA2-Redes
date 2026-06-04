@@ -30,6 +30,9 @@ struct Tile {
     }
 };
 
+typedef std::vector<Tile*> Tileset;
+typedef std::vector<std::vector<Tile*>> Grid;
+
 class MapReader {
 public:
     static MapReader* Instance() {
@@ -40,16 +43,16 @@ public:
 
     bool Init();
 
-    const std::vector<std::vector<Tile*>>& GetGrid() const { return m_grid; }
-    const std::vector<Tile*>& GetTiles() const { return m_tiles; }
+    const Grid& GetGrid() const { return m_grid; }
+    const Tileset& GetTiles() const { return m_tiles; }
     int GetWidth() const { return m_width; }
     int GetHeight() const { return m_height; }
 
     void SetWidth(int correctWidth) { m_width = correctWidth;}
     void SetHeight(int correctHeight) { m_height = correctHeight;}
-	void SetTiles(const std::vector<Tile*>& correctTiles) { m_tiles = correctTiles; }
+	void SetTiles(const Tileset& correctTiles) { m_tiles = correctTiles; }
 
-    std::vector<Tile*> GetTilesByType(TileType type) const;
+    Tileset GetTilesByType(TileType type) const;
 
     Tile* GetPlayerSpawn() const;
     Tile* GetEnemySpawns() const;
@@ -62,8 +65,8 @@ private:
     MapReader& operator=(const MapReader& map) = delete;
     ~MapReader() = default;
 
-    std::vector<std::vector<Tile*>> m_grid;
-    std::vector<Tile*> m_tiles;
+    Grid m_grid;
+    Tileset m_tiles;
     int m_width = 0;
     int m_height = 0;
 

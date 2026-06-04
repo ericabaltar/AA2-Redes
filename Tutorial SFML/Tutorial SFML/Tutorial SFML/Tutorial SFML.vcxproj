@@ -143,11 +143,14 @@
     <ClCompile Include="GameStyle.cpp" />
     <ClCompile Include="Ground.cpp" />
     <ClCompile Include="InputField.cpp" />
+    <ClCompile Include="LauncherScene.cpp" />
     <ClCompile Include="LobbyManager.cpp" />
     <ClCompile Include="LobbyWaitingScene.cpp" />
     <ClCompile Include="LoginScene.cpp" />
     <ClCompile Include="LoginStyle.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MapManager.cpp" />
+    <ClCompile Include="MapReader.cpp" />
     <ClCompile Include="MatchmakingScene.cpp" />
     <ClCompile Include="MovementInterpolation.cpp" />
     <ClCompile Include="MovementPacket.cpp" />
@@ -165,6 +168,7 @@
     <ClCompile Include="XMLReader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AABB.h" />
     <ClInclude Include="AnimatedSprite.h" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="Bullet.h" />
@@ -179,10 +183,13 @@
     <ClInclude Include="GameStyle.h" />
     <ClInclude Include="Ground.h" />
     <ClInclude Include="InputField.h" />
+    <ClInclude Include="LauncherScene.h" />
     <ClInclude Include="LobbyManager.h" />
     <ClInclude Include="LobbyWaitingScene.h" />
     <ClInclude Include="LoginScene.h" />
     <ClInclude Include="LoginStyle.h" />
+    <ClInclude Include="MapManager.h" />
+    <ClInclude Include="MapReader.h" />
     <ClInclude Include="MatchmakingScene.h" />
     <ClInclude Include="MovementInterpolation.h" />
     <ClInclude Include="MovementPacket.h" />
@@ -194,10 +201,12 @@
     <ClInclude Include="Ranking.h" />
     <ClInclude Include="RankingScene.h" />
     <ClInclude Include="RankingStyle.h" />
+    <ClInclude Include="RigidBody.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="ServerPacketTypesManager.h" />
     <ClInclude Include="SharedMemory.h" />
+    <ClInclude Include="Spawner.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="User.h" />
     <ClInclude Include="Utils.h" />
@@ -214,6 +223,9 @@
   </ItemGroup>
   <ItemGroup>
     <Font Include="arial.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="gameConfig.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

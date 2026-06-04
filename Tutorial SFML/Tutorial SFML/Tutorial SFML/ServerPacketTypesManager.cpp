@@ -3,6 +3,7 @@
 //#include "LobbyManager.h"
 #include "User.h"
 #include "LobbyManager.h"
+#include "MapManager.h"
 
 sf::Packet& operator>>(sf::Packet& packet, TcpPacketTypes& tipo) {
 	int temp;
@@ -333,31 +334,12 @@ void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)
 void ServerPacketTypesManager::ReceiveMapPacket(sf::Packet data)
 {
 	bool informationIsCorrect;
-
 	data >> informationIsCorrect;
 
-	if (informationIsCorrect) {
-		std::cout << "El mapa es correcto" << std::endl;
-	}
-	else {
+	MapM->SetDirtyState(informationIsCorrect);
+
+	if (!informationIsCorrect) {
 		std::cout << "El mapa no es correcto, cogiendo mapa del servidor" << std::endl;
-
-		int width, height;
-		data >> width >> height;
-
-		int tileCount = 0;
-		data >> tileCount;
-
-		std::vector<Tile> tempTileVector;
-
-		for (int i = 0; i < tileCount; i++) {
-			Tile tile;
-			data >> tile;
-			tempTileVector.push_back(tile);
-		}
-
-		MAP->SetHeight(height);
-		MAP->SetWidth(width);
-		MAP->SetTiles(std::vector<Tile*>(tempTileVector.size(), nullptr));
+		MapM->ReceiveMap(data);
 	}
 }

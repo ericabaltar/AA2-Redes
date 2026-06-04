@@ -31,7 +31,7 @@ bool MapReader::Init() {
         m_width = std::max(m_width, (int)l.length());
     }
 
-    m_grid.assign(m_height, std::vector<Tile*>(m_width, nullptr));
+    m_grid.assign(m_height, Tileset(m_width, nullptr));
 
     for (int row = 0; row < m_height; ++row) {
         const std::string& currentLine = lines[row];
@@ -73,8 +73,8 @@ void MapReader::ProcessTile(char tileChar, int col, int row) {
     m_grid[row][col] = tile;
 }
 
-std::vector<Tile*> MapReader::GetTilesByType(TileType type) const {
-    std::vector<Tile*> result;
+Tileset MapReader::GetTilesByType(TileType type) const {
+    Tileset result;
     for (Tile* tile : m_tiles) {
         if (tile->type == type) {
             result.push_back(tile);

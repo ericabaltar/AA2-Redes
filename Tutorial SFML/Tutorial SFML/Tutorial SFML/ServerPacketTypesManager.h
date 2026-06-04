@@ -45,7 +45,7 @@ public:
 	void SendRegisterAttempt(std::string username, std::string password, sf::TcpSocket& server);
 	void SendLobbyCreateAttempt(std::string lobbyId, sf::TcpSocket& server);
 	void SendRankingPetition(int userId, sf::TcpSocket& server);
-	void SendMapPetition(sf::TcpSocket& server);
+	void SendMapPetition(sf::TcpSocket& server) {}
 
 	void SendLobbyJoinAttempt(GameMode mode, sf::UdpSocket& server);
 	void SendMovement(sf::UdpSocket& server, MovementPacket movement);
