@@ -30,11 +30,6 @@ public:
 
     void Enter(SharedMemory* _sharedMemory) override
     {
-        NT->Init();
-
-        if (NT->GetDisconnectFromServer())
-            std::cout << "Disconnect from server";
-
         // Usuario de prueba
         opponentUser.nickname = "testOpponent";
         opponentUser.score = 0;

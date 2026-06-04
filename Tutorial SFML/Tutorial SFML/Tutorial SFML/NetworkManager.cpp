@@ -16,8 +16,11 @@ void NetworkManager::Init()
 void NetworkManager::EstablishConnectionWithServer()
 {
     disconnectFromServer = false;
+    
+    sf::Socket::Status status = socket.connect(SERVER_IP, SERVER_PORT);
 
-    if (socket.connect(SERVER_IP, SERVER_PORT) != sf::Socket::Status::Done) {
+    std::cout << "[TCP] receive status = " << (int)status << std::endl;
+    if (status != sf::Socket::Status::Done) {
         std::cerr << "Error al conectar con el servidor" << std::endl;
         disconnectFromServer = true;
     }
