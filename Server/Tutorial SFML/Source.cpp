@@ -12,7 +12,7 @@ void main()
     while (!NT->GetCloseServer()) {
         if (NT->CheckIfSocketsAreReadyToReceive()) {
             NT->Update();
-            //MovM->Update();
+            MovM->Update();
         }
     }
     DB->Disconnect();
