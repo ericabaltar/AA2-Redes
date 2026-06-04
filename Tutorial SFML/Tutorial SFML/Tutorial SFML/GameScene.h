@@ -42,14 +42,45 @@ public:
         opponentUser.position = 0;
         opponentUser.speed = 1.f;
 
-        player = new PlayerCharacter();
-        objects.push_back(player);
+        if(MAP->GetTiles().empty()) {
+			MAP->Init();
+		}
 
-        oponent = new Character();
-        objects.push_back(oponent);
+        Vector2 playerPos;
+        Vector2 opponentPos;
+        float tileSize = 0.f;
+        for (Tile* tile : MAP->GetTiles()) {
+            if (tile != nullptr) {
+                switch (tile->type)
+                {
+                case TileType::PLAYER:
+                    player = new PlayerCharacter();
+					playerPos = Vector2(tile->x * MAP->GetDefaultTileSize(), tile->y * MAP->GetDefaultTileSize());
+                    player->SetPosition(playerPos);
+                    objects.push_back(player);
+					break;
 
-        objects.push_back(new Ground({ 0.f, 450.f }, {800.f, 50.f}));
-        objects.push_back(new Ground({ 400.f, 400.f }, { 50, 200.f }));
+                case TileType::OPONENT:
+                    oponent = new Character();
+					opponentUser.position = tile->x * MAP->GetDefaultTileSize();
+                    opponentPos = Vector2(tile->x * MAP->GetDefaultTileSize(), tile->y * MAP->GetDefaultTileSize());
+                    oponent->SetPosition(opponentPos);
+                    objects.push_back(oponent);
+                    break;
+				case TileType::FLOOR:
+                    tileSize = MAP->GetDefaultTileSize();
+                    objects.push_back(new Ground({ tile->x * MAP->GetDefaultTileSize(), tile->y * MAP->GetDefaultTileSize() }, 
+                        { tileSize, tileSize}));
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+
+
+
+
     }
 
     void HandleEvents(sf::RenderWindow& window)

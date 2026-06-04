@@ -186,6 +186,33 @@ void ServerPacketTypesManager::SendRankingPetition(int userId, sf::TcpSocket& se
 	SendData(server, packet);
 }
 
+void ServerPacketTypesManager::SendMapPetition(sf::TcpSocket& server)
+{
+	MAP->Init();
+
+	sf::Packet packet;
+
+	packet << TcpPacketTypes::MAP_CHECK;
+	packet << MAP->GetWidth() << MAP->GetHeight();
+
+	int validTileCount = 0;
+	for (Tile* tile : MAP->GetTiles()) {
+		if (tile != nullptr) validTileCount++;
+	}
+
+	packet << validTileCount;
+
+	for (Tile* tile : MAP->GetTiles()) {
+		if (tile != nullptr) {
+			packet << *tile;
+		}
+	}
+
+	std::cout << "Enviando mapa para comprobacion" << std::endl;
+
+	SendData(server, packet);
+}
+
 void ServerPacketTypesManager::SendMovement(sf::UdpSocket& server, MovementPacket movement)
 {
 	sf::Packet packet;
@@ -339,12 +366,33 @@ void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)
 void ServerPacketTypesManager::ReceiveMapPacket(sf::Packet data)
 {
 	bool informationIsCorrect;
+
 	data >> informationIsCorrect;
 
-	MapM->SetDirtyState(informationIsCorrect);
-
-	if (!informationIsCorrect) {
-		std::cout << "El mapa no es correcto, cogiendo mapa del servidor" << std::endl;
-		MapM->ReceiveMap(data);
+	if (informationIsCorrect) {
+		std::cout << "El mapa es correcto" << std::endl;
 	}
+	else {
+		std::cout << "El mapa no es correcto, cogiendo mapa del servidor" << std::endl;
+
+		int width, height;
+		data >> width >> height;
+
+		int tileCount = 0;
+		data >> tileCount;
+
+		std::vector<Tile> tempTileVector;
+
+		for (int i = 0; i < tileCount; i++) {
+			Tile tile;
+			data >> tile;
+			tempTileVector.push_back(tile);
+		}
+
+		MAP->SetHeight(height);
+		MAP->SetWidth(width);
+		MAP->SetTiles(std::vector<Tile*>(tempTileVector.size(), nullptr));
+	}
+
+	MAP->SetInformationHasBeenChecked(true);
 }

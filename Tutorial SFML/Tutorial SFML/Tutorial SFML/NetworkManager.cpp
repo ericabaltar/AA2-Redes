@@ -23,7 +23,7 @@ void NetworkManager::EstablishConnectionWithServer()
     }
     else {
         socket.setBlocking(false);
-        SPTM->SendMapPetition(socket);
+        SPTM->SendHandshake(socket);
         HandleReceivedPackets();
         std::cout << "Conectado al servidor" << std::endl;
     }
