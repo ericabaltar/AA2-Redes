@@ -147,6 +147,7 @@
     <ClCompile Include="LoginScene.cpp" />
     <ClCompile Include="LoginStyle.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MatchmakingScene.cpp" />
     <ClCompile Include="MovementInterpolation.cpp" />
     <ClCompile Include="MovementPacket.cpp" />
     <ClCompile Include="MovementPrediction.h" />
@@ -175,6 +176,7 @@
     <ClInclude Include="LobbyWaitingScene.h" />
     <ClInclude Include="LoginScene.h" />
     <ClInclude Include="LoginStyle.h" />
+    <ClInclude Include="MatchmakingScene.h" />
     <ClInclude Include="MovementInterpolation.h" />
     <ClInclude Include="MovementPacket.h" />
     <ClInclude Include="MovementReconciliation.h" />
@@ -189,6 +191,7 @@
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="ServerPacketTypesManager.h" />
     <ClInclude Include="SharedMemory.h" />
+    <ClInclude Include="Transform.h" />
     <ClInclude Include="User.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Vector2.h" />
@@ -200,6 +203,9 @@
   </ItemGroup>
   <ItemGroup>
     <Media Include="assets\quack.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="arial.ttf" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -86,7 +86,7 @@ protected:
 
 		for (Object* obj : objects) obj->Render(window);
 
-		//window.display();
+		window.display();
 	}
 
 	virtual void HandleEvent(const sf::Event& event, sf::RenderWindow& window) {

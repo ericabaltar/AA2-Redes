@@ -1,6 +1,6 @@
 #pragma once
 enum class GameMode {
-	FRIENDLY,
-	COMPETITIVE
+	FRIENDLY = 0,
+	COMPETITIVE = 1
 };
 
