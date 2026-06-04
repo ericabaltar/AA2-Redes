@@ -55,4 +55,6 @@ private:
 	void ReceiveRankingPacket(sf::Packet data, sf::TcpSocket& client);
 	void ReceiveStartGamePacket(sf::Packet data);
 	void ReceiveEndGamePacket(sf::Packet data);
+
+	void ManageMapPacket(sf::Packet data, sf::TcpSocket& client);
 };

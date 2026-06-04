@@ -23,11 +23,40 @@ sf::Packet& operator<<(sf::Packet& packet, PacketTypes& tipo) {
 	return packet;
 }
 
+inline sf::Packet& operator<<(sf::Packet& packet, TileType type) {
+	return packet << static_cast<char>(type);
+}
+
+sf::Packet& operator>>(sf::Packet& packet, TileType& type) {
+	int value;
+	packet >> value;
+	char charValue = static_cast<char>(value);
+	type = static_cast<TileType>(charValue);
+	return packet;
+}
+
+inline sf::Packet& operator<<(sf::Packet& packet, const Tile& tile) {
+	return packet << tile.type << tile.x << tile.y << tile.originalChar;
+}
+
+sf::Packet& operator>>(sf::Packet& packet, Tile& tile) {
+	Tile tempTile(TileType::FLOOR, 0, 0, ' ');
+	packet >> tempTile.type >> tempTile.x >> tempTile.y;
+
+	int tempValue;
+	packet >> tempValue;
+	char charValue = static_cast<char>(tempValue);
+	tile.originalChar = charValue;
+	return packet;
+}
+
 void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, sf::TcpSocket& client)
 {
 	PacketTypes packetType;
 
 	packet >> packetType;
+
+	std::cout << "Recibiendo paquete del cliente, tipo: " << static_cast<int>(packetType) << std::endl;
 
 	switch (packetType)
 	{
@@ -54,6 +83,9 @@ void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, sf::TcpSocket& c
 		break;
 	case PacketTypes::END_GAME:
 		ReceiveEndGamePacket(packet);
+		break;
+	case PacketTypes::MAP_CHECK:
+		ManageMapPacket(packet, client);
 		break;
 	default:
 		std::cout << "No se ha identificado el tipo de packete" << std::endl;
@@ -234,7 +266,7 @@ void ServerPacketTypesManager::ReceiveLoginPacket(sf::Packet data, sf::TcpSocket
 	// Si es correcto, guardar tambi�n los datos del usuario (nombre y puntos del ranking)
 
 	if (correctLogin) {
-		MM->AddConnectedPlayer(&client, loginUsername, 15);
+		//MM->AddConnectedPlayer(&client, loginUsername, 15);
 	}
 }
 
@@ -253,7 +285,7 @@ void ServerPacketTypesManager::ReceiveRegisterPacket(sf::Packet data, sf::TcpSoc
 	SendRegisterResponse(client, correctRegister, registerUsername);
 
 	if (correctRegister) {
-		MM->AddConnectedPlayer(&client, registerUsername, 15);
+		//MM->AddConnectedPlayer(&client, registerUsername, 15);
 	}
 }
 
@@ -290,7 +322,7 @@ void ServerPacketTypesManager::ReceiveLobbyJoinPacket(sf::Packet data, sf::TcpSo
 	data >> lobbyID;
 
 	std::cout << "Servidor recibe join packet" << std::endl;
-	bool successfulLobbyJoin = MM->JoinWaitingRoom(lobbyID, &client);
+	bool successfulLobbyJoin = true; // = MM->JoinWaitingRoom(lobbyID, &client);
 
 	if (successfulLobbyJoin) {
 		std::cout << "Jugador se ha unido a lobby con ID: " << lobbyID << std::endl;
@@ -330,4 +362,56 @@ void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
 
 void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)
 {
+}
+
+void ServerPacketTypesManager::ManageMapPacket(sf::Packet data, sf::TcpSocket& client)
+{
+	std::cout << "Recibida solicitud de paquete de Mapa" << std::endl;
+
+	mapReader = new MapReader();
+	mapReader->Init();
+
+	int width, height;
+	data >> width >> height;
+
+	int tileCount = 0;
+	data >> tileCount;
+
+	std::vector<Tile> tempTileVector;
+
+	for (int i = 0; i < tileCount; i++) {
+		Tile tile;
+		data >> tile;
+		tempTileVector.push_back(tile);
+	}
+
+	bool isInformationValid = mapReader->CheckIfInformationIsCorrect(width, height, tempTileVector);
+
+	sf::Packet packet;
+	packet << PacketTypes::MAP_CHECK;
+	if (isInformationValid) {
+		std::cout << "El mapa enviado por el cliente es correcto" << std::endl;
+		packet << true;
+	}
+	else {
+		std::cout << "El mapa enviado por el cliente es incorrecto" << std::endl;
+		packet << false;
+
+		packet << mapReader->GetWidth() << mapReader->GetHeight();
+
+		int validTileCount = 0;
+		for (Tile* tile : mapReader->GetTiles()) {
+			if (tile != nullptr) validTileCount++;
+		}
+
+		packet << validTileCount;
+
+		for (Tile* tile : mapReader->GetTiles()) {
+			if (tile != nullptr) {
+				packet << *tile;
+			}
+		}
+	}
+
+	SendData(client, packet);
 }

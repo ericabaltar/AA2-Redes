@@ -5,6 +5,7 @@
 #include "ThreadManager.h"
 #include "Utils.h"
 #include <thread>
+#include <optional>
 
 sf::Packet& operator>>(sf::Packet& packet, TcpPacketTypes& type) {
 	int temp;
@@ -207,3 +208,37 @@ void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
 void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)
 {
 }
+
+void ServerPacketTypesManager::ReceiveLobbyPacket(
+	sf::Packet data,
+	std::optional<sf::IpAddress> senderIp,
+	unsigned short senderPort
+)
+{
+	int modeInt;
+	data >> modeInt;
+
+	GameMode mode = static_cast<GameMode>(modeInt);
+
+	Player player;
+	player.name = "Player";
+	player.points = 0;
+	player.udpIp = senderIp;
+	player.udpPort = senderPort;
+
+	GameRoom* room = GRM->JoinOrCreateRoom(player, mode);
+
+	std::cout << "Jugador unido a sala "
+		<< room->GetId()
+		<< " | Players: "
+		<< room->GetPlayerAmount()
+		<< std::endl;
+
+	if (room->HasStarted())
+	{
+		std::cout << "La partida empieza en sala "
+			<< room->GetId()
+			<< std::endl;
+	}
+}
+

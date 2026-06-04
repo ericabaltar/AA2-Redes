@@ -49,6 +49,8 @@ private:
 	void SendLobbyCreateResponse(sf::TcpSocket& client, bool success);
 	void SendLobbyJoinResponse(sf::TcpSocket& client, bool success);
 
+	void ReceiveLobbyPacket(sf::Packet data, std::optional<sf::IpAddress> senderIp, unsigned short senderPort);
+
 	void ProcessPacket(sf::Packet packet);
 
 	void ReceiveHandshakePacket(sf::Packet data);

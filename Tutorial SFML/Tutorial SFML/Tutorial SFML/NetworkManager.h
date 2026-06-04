@@ -48,6 +48,7 @@ public:
 	void SendLobbyCreateAttemptPacket(std::string lobbyId);
 	void SendLobbyJoinAttemptPacket(GameMode mode);
 	void SendRankingPetitionServerPacket(int userId);
+	void SendMapPetitionServerPacket();
 
 	void SendMovementPacket(MovementPacket movementPacket);
 	void SendTaunt();

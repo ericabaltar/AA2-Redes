@@ -3,6 +3,8 @@
 //#include "LobbyManager.h"
 #include "User.h"
 #include "LobbyManager.h"
+#include "MapManager.h"
+#include "RankingManager.h"
 
 sf::Packet& operator>>(sf::Packet& packet, TcpPacketTypes& tipo) {
 	int temp;
@@ -19,6 +21,34 @@ sf::Packet& operator<<(sf::Packet& packet, TcpPacketTypes& tipo) {
 
 	return packet;
 }
+
+inline sf::Packet& operator<<(sf::Packet& packet, TileType type) {
+	return packet << static_cast<char>(type);
+}
+
+sf::Packet& operator>>(sf::Packet& packet, TileType& type) {
+	int value;
+	packet >> value;
+	char charValue = static_cast<char>(value);
+	type = static_cast<TileType>(charValue);
+	return packet;
+}
+
+inline sf::Packet& operator<<(sf::Packet& packet, const Tile& tile) {
+	return packet << tile.type << tile.x << tile.y << tile.originalChar;
+}
+
+sf::Packet& operator>>(sf::Packet& packet, Tile& tile) {
+	Tile tempTile(TileType::FLOOR, 0, 0, ' ');
+	packet >> tempTile.type >> tempTile.x >> tempTile.y;
+
+	int tempValue;
+	packet >> tempValue;
+	char charValue = static_cast<char>(tempValue);
+	tile.originalChar = charValue;
+	return packet;
+}
+
 
 void ServerPacketTypesManager::ReceivePacket(sf::Packet packet)
 {
@@ -54,6 +84,9 @@ void ServerPacketTypesManager::ReceivePacket(sf::Packet packet)
 		break;
 	case TcpPacketTypes::END_GAME:
 		ReceiveEndGamePacket(packet);
+		break;
+	case TcpPacketTypes::MAP_CHECK:
+		ReceiveMapPacket(packet);
 		break;
 	default:
 		std::cout << "No se ha identificado el tipo de paquete" << std::endl;
@@ -138,7 +171,9 @@ void ServerPacketTypesManager::SendLobbyJoinAttempt(GameMode mode, sf::TcpSocket
 	packet << TcpPacketTypes::LOBBY_JOIN;
 	packet << (int)mode;
 
-	//LM->SetRoomId(lobbyId);
+	packet << priority;
+	packet << UdpPacketTypes::LOBBY;
+	packet << static_cast<int>(mode);
 
 	SendData(server, packet);
 }
@@ -149,6 +184,33 @@ void ServerPacketTypesManager::SendRankingPetition(int userId, sf::TcpSocket& se
 
 	packet << TcpPacketTypes::RANKING;
 	packet << userId;
+
+	SendData(server, packet);
+}
+
+void ServerPacketTypesManager::SendMapPetition(sf::TcpSocket& server)
+{
+	MAP->Init();
+
+	sf::Packet packet;
+
+	packet << TcpPacketTypes::MAP_CHECK;
+	packet << MAP->GetWidth() << MAP->GetHeight();
+
+	int validTileCount = 0;
+	for (Tile* tile : MAP->GetTiles()) {
+		if (tile != nullptr) validTileCount++;
+	}
+
+	packet << validTileCount;
+
+	for (Tile* tile : MAP->GetTiles()) {
+		if (tile != nullptr) {
+			packet << *tile;
+		}
+	}
+
+	std::cout << "Enviando mapa para comprobacion" << std::endl;
 
 	SendData(server, packet);
 }
@@ -270,6 +332,8 @@ void ServerPacketTypesManager::ReceiveRankingPacket(sf::Packet data)
 	int rankingSize;
 	data >> rankingSize;
 
+	std::vector<User> users;
+
 	for (int i = 0; i < rankingSize; i++)
 	{
 		User user;
@@ -278,16 +342,18 @@ void ServerPacketTypesManager::ReceiveRankingPacket(sf::Packet data)
 		data >> user.nickname;
 		data >> user.score;
 
-		ranking.push_back(user);
+		users.push_back(user);
 	}
 
-	std::cout << "\n=== TOP 10 RANKINGS ===" << std::endl;
+	RM->SetRanking(users);
+
+	/*std::cout << "\n=== TOP 10 RANKINGS ===" << std::endl;
 	for (const auto& user : ranking)
 	{
 		std::cout << user.position << ". "
 			<< user.nickname << " - "
 			<< user.score << " puntos" << std::endl;
-	}
+	}*/
 }
 
 void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
@@ -303,4 +369,38 @@ void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
 
 void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)
 {
+}
+
+void ServerPacketTypesManager::ReceiveMapPacket(sf::Packet data)
+{
+	bool informationIsCorrect;
+
+	data >> informationIsCorrect;
+
+	if (informationIsCorrect) {
+		std::cout << "El mapa es correcto" << std::endl;
+	}
+	else {
+		std::cout << "El mapa no es correcto, cogiendo mapa del servidor" << std::endl;
+
+		int width, height;
+		data >> width >> height;
+
+		int tileCount = 0;
+		data >> tileCount;
+
+		std::vector<Tile> tempTileVector;
+
+		for (int i = 0; i < tileCount; i++) {
+			Tile tile;
+			data >> tile;
+			tempTileVector.push_back(tile);
+		}
+
+		MAP->SetHeight(height);
+		MAP->SetWidth(width);
+		MAP->SetTiles(std::vector<Tile*>(tempTileVector.size(), nullptr));
+	}
+
+	MAP->SetInformationHasBeenChecked(true);
 }

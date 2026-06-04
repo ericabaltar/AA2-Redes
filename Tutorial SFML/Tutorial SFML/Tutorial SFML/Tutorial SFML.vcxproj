@@ -102,7 +102,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\include</AdditionalIncludeDirectories>
@@ -120,7 +120,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>STATIC_CONCPP;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\include</AdditionalIncludeDirectories>
@@ -143,11 +143,14 @@
     <ClCompile Include="GameStyle.cpp" />
     <ClCompile Include="Ground.cpp" />
     <ClCompile Include="InputField.cpp" />
+    <ClCompile Include="LauncherScene.cpp" />
     <ClCompile Include="LobbyManager.cpp" />
     <ClCompile Include="LobbyWaitingScene.cpp" />
     <ClCompile Include="LoginScene.cpp" />
     <ClCompile Include="LoginStyle.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MapManager.cpp" />
+    <ClCompile Include="MapReader.cpp" />
     <ClCompile Include="MatchmakingScene.cpp" />
     <ClCompile Include="MovementInterpolation.cpp" />
     <ClCompile Include="MovementPacket.cpp" />
@@ -156,28 +159,38 @@
     <ClCompile Include="NetworkManager.cpp" />
     <ClCompile Include="PlayerCharacter.cpp" />
     <ClCompile Include="Ranking.cpp" />
+    <ClCompile Include="RankingManager.cpp" />
     <ClCompile Include="RankingScene.cpp" />
     <ClCompile Include="RankingStyle.cpp" />
     <ClCompile Include="ServerPacketTypesManager.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="Vector2.cpp" />
+    <ClCompile Include="XMLReader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AABB.h" />
     <ClInclude Include="AnimatedSprite.h" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="Character.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="dep\inc\xml\rapidxml.hpp" />
+    <ClInclude Include="dep\inc\xml\rapidxml_iterators.hpp" />
+    <ClInclude Include="dep\inc\xml\rapidxml_print.hpp" />
+    <ClInclude Include="dep\inc\xml\rapidxml_utils.hpp" />
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="GameStyle.h" />
     <ClInclude Include="Ground.h" />
     <ClInclude Include="InputField.h" />
+    <ClInclude Include="LauncherScene.h" />
     <ClInclude Include="LobbyManager.h" />
     <ClInclude Include="LobbyWaitingScene.h" />
     <ClInclude Include="LoginScene.h" />
     <ClInclude Include="LoginStyle.h" />
+    <ClInclude Include="MapManager.h" />
+    <ClInclude Include="MapReader.h" />
     <ClInclude Include="MatchmakingScene.h" />
     <ClInclude Include="MovementInterpolation.h" />
     <ClInclude Include="MovementPacket.h" />
@@ -187,16 +200,20 @@
     <ClInclude Include="Object.h" />
     <ClInclude Include="PlayerCharacter.h" />
     <ClInclude Include="Ranking.h" />
+    <ClInclude Include="RankingManager.h" />
     <ClInclude Include="RankingScene.h" />
     <ClInclude Include="RankingStyle.h" />
+    <ClInclude Include="RigidBody.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="ServerPacketTypesManager.h" />
     <ClInclude Include="SharedMemory.h" />
+    <ClInclude Include="Spawner.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="User.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Vector2.h" />
+    <ClInclude Include="XMLReader.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\bullet.png" />
@@ -208,6 +225,9 @@
   </ItemGroup>
   <ItemGroup>
     <Font Include="arial.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="gameConfig.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
