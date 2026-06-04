@@ -6,6 +6,9 @@
 #include "Utils.h"
 #include <thread>
 #include <optional>
+#include "Player.h"
+#include "Game.h"
+#include "GameRoomManager.h"
 
 sf::Packet& operator>>(sf::Packet& packet, TcpPacketTypes& type) {
 	int temp;

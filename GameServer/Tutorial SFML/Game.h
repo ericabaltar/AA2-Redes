@@ -2,12 +2,6 @@
 #include <string>
 #include "Player.h"
 
-enum class GameMode
-{
-	Friendly,
-	Competitive
-};
-
 class GameRoom
 {
 public:

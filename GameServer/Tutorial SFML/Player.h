@@ -5,12 +5,13 @@ class Player
 {
 public:
 	Player()
-		: client(nullptr), name(""), points(0) {}
+		: udpIp(NULL), name(""), points(0) {}
 
-	Player(sf::TcpSocket* playerClient, std::string playerName, int playerPoints)
-		: client(playerClient), name(playerName), points(playerPoints) { }
+	Player(sf::IpAddress udpIp, short udpPort, std::string playerName, int playerPoints)
+		: udpIp(udpIp), udpPort(udpPort), name(playerName), points(playerPoints) { }
 
-	sf::TcpSocket* client;
+	std::optional<sf::IpAddress> udpIp;
+	short udpPort;
 	std::string name;
 	int points;
 };
