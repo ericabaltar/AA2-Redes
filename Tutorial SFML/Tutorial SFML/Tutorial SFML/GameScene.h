@@ -11,6 +11,7 @@
 #include "PlayerCharacter.h"
 #include "Bullet.h"
 #include "Scene.h"
+#include "Ground.h"
 
 
 class GameScene : public Scene
@@ -20,15 +21,12 @@ private:
     MovementReconciliation movementReconciliation;
 	MovementInterpolation movementInterpolation;
 
-    sf::RectangleShape ground;
-
     PlayerCharacter* player;
     Character* oponent;
 
     User opponentUser;
 public:
-    GameScene()
-        : ground({ 800.f, 50.f }) {}
+    GameScene() {}
 
     void Enter(SharedMemory* _sharedMemory) override
     {
@@ -36,9 +34,6 @@ public:
 
         if (NT->GetDisconnectFromServer())
             std::cout << "Disconnect from server";
-
-        ground.setFillColor(sf::Color(100, 100, 100));
-        ground.setPosition({ 0.f, 550.f });
 
         // Usuario de prueba
         opponentUser.nickname = "testOpponent";
@@ -52,6 +47,9 @@ public:
 
         oponent = new Character();
         objects.push_back(oponent);
+
+        objects.push_back(new Ground({ 0.f, 450.f }, {800.f, 50.f}));
+        objects.push_back(new Ground({ 400.f, 400.f }, { 50, 200.f }));
     }
 
     void HandleEvents(sf::RenderWindow& window)
@@ -80,14 +78,14 @@ public:
             std::cout << "VICTORIA" << std::endl;
         }
 
-        Scene::Update(window, dt);
-
 		movementInterpolation.Update(dt);
 
         Vector2 interpolatedPos = movementInterpolation.GetInterpolatedPosition(opponentUser);
         oponent->SetInterpolatedPosition(Vector2(interpolatedPos.x, interpolatedPos.y));
         oponent->Update(dt);  // Se hace dos veces este update, no parece que cause problemas por ahora pero en el futuro podria dar
         
+        Scene::Update(window, dt);
+
         //if (NT->GetDisconnectFromServer()) return false;
 
         NT->Update();
@@ -127,9 +125,6 @@ public:
     void Render(sf::RenderWindow& window) override
     {
         Scene::Render(window);
-
-        window.draw(ground);
-
-        window.display();
+        //window.display();
     }
 };

@@ -141,6 +141,7 @@
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="Character.cpp" />
     <ClCompile Include="GameStyle.cpp" />
+    <ClCompile Include="Ground.cpp" />
     <ClCompile Include="InputField.cpp" />
     <ClCompile Include="LobbyManager.cpp" />
     <ClCompile Include="LobbyWaitingScene.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="config.h" />
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="GameStyle.h" />
+    <ClInclude Include="Ground.h" />
     <ClInclude Include="InputField.h" />
     <ClInclude Include="LobbyManager.h" />
     <ClInclude Include="LobbyWaitingScene.h" />

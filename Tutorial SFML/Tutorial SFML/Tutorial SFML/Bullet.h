@@ -67,12 +67,14 @@ public:
 		window.draw(sprite);
 	}
 
-	void OnCollisionEnter(Object* other) override
+	void OnCollisionEnter(Object* other, const CollisionInfo& collisionInfo) override
 	{
 		if (other == owner)
 			return;
 
 		Destroy();
 	}
+
+	inline Object* GetOwner() { return owner; }
 };
 

@@ -18,7 +18,7 @@ private:
 
     void HandleInput(float dt);
 
-    void ApplyPhysics(float dt, float groundY);
+    void ApplyPhysics(float dt);
 
 
 public:
@@ -33,5 +33,6 @@ public:
 
     inline void ResetJumpBuffer() { jumpBufferTimer = jumpBufferTime; }
 
+    void OnCollisionEnter(Object* other, const CollisionInfo& collisionInfo) override;
 };
 
