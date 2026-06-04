@@ -292,10 +292,13 @@ void ServerPacketTypesManager::ReceiveRankingPacket(sf::Packet data)
 
 void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
 {
-	std::cout << "[START_GAME] recibido" << std::endl;
-	LM->StartGame();
-	std::cout << "[START_GAME] terminado" << std::endl;
+	int roomId = -1;
+	int playerIndex = -1;
 
+	data >> roomId;
+	data >> playerIndex;
+
+	LM->StartGame(roomId, playerIndex);
 }
 
 void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)
