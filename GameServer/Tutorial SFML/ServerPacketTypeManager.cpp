@@ -3,6 +3,7 @@
 #include <iostream>
 #include "MovementPacket.h"
 #include "ThreadManager.h"
+#include "Utils.h"
 #include <thread>
 
 sf::Packet& operator>>(sf::Packet& packet, TcpPacketTypes& type) {
@@ -192,6 +193,15 @@ void ServerPacketTypesManager::ReceiveTauntPacket(sf::Packet data)
 
 void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
 {
+	int roomId;
+	int mode;
+
+	data >> roomId;
+	data >> mode;
+
+	GameMode gameMode = static_cast<GameMode>(mode);
+
+
 }
 
 void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)
