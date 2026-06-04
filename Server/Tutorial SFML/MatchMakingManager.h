@@ -17,10 +17,14 @@ public:
 	}
 
 private:
+	std::vector<Player> connectedPlayers;
 	std::map<GameMode, std::queue<Player>> waitingPlayers;
 
-public:
-	void AddConnectedPlayer(Player player, GameMode mode);
+	Player* GetPlayer(sf::TcpSocket* playerClient);
 
+public:
+	void AddPlayerToWaitingRoom(sf::TcpSocket* playerClient, GameMode mode);
+
+	void AddConnectedPlayer(sf::TcpSocket* playerClient, std::string username, int playerPoints);
 };
 

@@ -61,6 +61,7 @@ private:
 	~NetworkManager() = default;
 
 	void EstablishConnectionWithServer();
-	void HandleReceivedPackets();
+	void HandleReceivedTcpPackets();
+	void HandleReceivedUdpPackets();
 	void SendServerPacket();
 };

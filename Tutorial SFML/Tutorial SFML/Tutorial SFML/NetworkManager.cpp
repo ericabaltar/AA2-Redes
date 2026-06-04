@@ -24,16 +24,32 @@ void NetworkManager::EstablishConnectionWithServer()
     else {
         socket.setBlocking(false);
         SPTM->SendHandshake(socket);
-        HandleReceivedPackets();
+        HandleReceivedTcpPackets();
         std::cout << "Conectado al servidor" << std::endl;
+    }
+}
+
+void NetworkManager::HandleReceivedTcpPackets()
+{
+    sf::Packet receivePacket;
+    if (socket.receive(receivePacket) == sf::Socket::Status::Done) {
+        SPTM->ReceivePacket(receivePacket);
+    }
+    else if (socket.receive(receivePacket) == sf::Socket::Status::Disconnected) {
+        std::cout << "Servidor desconectado" << std::endl;
+        disconnectFromServer = true;
     }
 }
 
 void NetworkManager::Update()
 {
+    // TCP
     if (!disconnectFromServer) {
-        HandleReceivedPackets();
+        HandleReceivedTcpPackets();
     }
+
+    // UDP
+    HandleReceivedUdpPackets();
 }
 
 sf::TcpSocket* NetworkManager::GetServerSocket()
@@ -76,24 +92,12 @@ void NetworkManager::SendLobbyCreateAttemptPacket(std::string lobbyId)
 
 void NetworkManager::SendLobbyJoinAttemptPacket(GameMode mode)
 {
-    SPTM->SendLobbyJoinAttempt(mode, udpServerSocket);
+    SPTM->SendLobbyJoinAttempt(mode, socket);
 }
 
-void NetworkManager::HandleReceivedPackets()
+void NetworkManager::HandleReceivedUdpPackets()
 {
     sf::Packet receivePacket;
-
-    sf::Socket::Status tcpStatus = socket.receive(receivePacket);
-
-    if (tcpStatus == sf::Socket::Status::Done)
-    {
-        SPTM->ReceivePacket(receivePacket);
-    }
-    else if (tcpStatus == sf::Socket::Status::Disconnected)
-    {
-        std::cout << "Servidor desconectado" << std::endl;
-        disconnectFromServer = true;
-    }
 
     MovementPacket movementPacket;
     std::size_t received;

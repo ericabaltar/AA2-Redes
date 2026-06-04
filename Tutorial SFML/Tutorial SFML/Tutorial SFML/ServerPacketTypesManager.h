@@ -45,7 +45,7 @@ public:
 	void SendLobbyCreateAttempt(std::string lobbyId, sf::TcpSocket& server);
 	void SendRankingPetition(int userId, sf::TcpSocket& server);
 
-	void SendLobbyJoinAttempt(GameMode mode, sf::UdpSocket& server);
+	void SendLobbyJoinAttempt(GameMode mode, sf::TcpSocket& server);
 	void SendMovement(sf::UdpSocket& server, MovementPacket movement);
 	void SendShot(sf::UdpSocket& server);
 	void SendTaunt(sf::UdpSocket& server);

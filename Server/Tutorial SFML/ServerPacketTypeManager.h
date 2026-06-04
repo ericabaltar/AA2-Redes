@@ -2,6 +2,7 @@
 #include <SFML/Network.hpp>
 #include "Bcrypt/bcrypt.h"
 #include "Database.h"
+#include "GameRoom.h"
 
 #include <string>
 
@@ -9,7 +10,7 @@
 
 enum PacketTypes
 {
-	HANDSHAKE, LOGIN, REGISTER, LOBBY_CREATE, LOBBY_JOIN, WAITING_ROOM_PLAYERS, MOVEMENT, RANKING, START_GAME, END_GAME
+	HANDSHAKE, LOGIN, REGISTER, LOBBY_CREATE, LOBBY_JOIN, WAITING_ROOM_PLAYERS, RANKING, START_GAME, END_GAME
 };
 
 class ServerPacketTypesManager
@@ -28,6 +29,7 @@ public:
 	void ReceivePacket(sf::Packet packet, sf::TcpSocket& client);
 	void SendHandshake(sf::TcpSocket& client);
 	void SendUpdatedPlayerCount(sf::TcpSocket& client, int playerCount);
+	void SendInfoToStartGame(GameRoom game);
 
 private:
 	ServerPacketTypesManager() = default;

@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
+#include <iostream>
 #include "GameRoom.h"
+#include "ServerPacketTypeManager.h"
 
 #define GM GameManager::Instance()
 
@@ -14,6 +16,10 @@ public:
 	}
 
 	void AddRoom(GameRoom room) { 
+		std::cout << "Sala creada" << std::endl;
+
+		SPTM->SendInfoToStartGame(room);
+		
 		//TODO: Send Room to GameServer
 	}
 };
