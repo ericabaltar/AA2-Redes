@@ -141,7 +141,9 @@
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Server\Tutorial SFML\Player.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GameRoomManager.h" />
     <ClInclude Include="MovementPacket.h" />
     <ClInclude Include="NetworkManager.h" />
     <ClInclude Include="ServerPacketTypeManager.h" />
