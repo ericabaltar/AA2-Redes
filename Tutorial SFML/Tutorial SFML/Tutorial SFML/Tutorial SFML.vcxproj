@@ -159,6 +159,7 @@
     <ClCompile Include="NetworkManager.cpp" />
     <ClCompile Include="PlayerCharacter.cpp" />
     <ClCompile Include="Ranking.cpp" />
+    <ClCompile Include="RankingManager.cpp" />
     <ClCompile Include="RankingScene.cpp" />
     <ClCompile Include="RankingStyle.cpp" />
     <ClCompile Include="ServerPacketTypesManager.cpp" />
@@ -199,6 +200,7 @@
     <ClInclude Include="Object.h" />
     <ClInclude Include="PlayerCharacter.h" />
     <ClInclude Include="Ranking.h" />
+    <ClInclude Include="RankingManager.h" />
     <ClInclude Include="RankingScene.h" />
     <ClInclude Include="RankingStyle.h" />
     <ClInclude Include="RigidBody.h" />

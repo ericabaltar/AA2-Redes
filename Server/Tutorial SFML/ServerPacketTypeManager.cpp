@@ -216,7 +216,7 @@ void ServerPacketTypesManager::ReceiveLoginPacket(sf::Packet data, sf::TcpSocket
 	// Si es correcto, guardar tambi�n los datos del usuario (nombre y puntos del ranking)
 	
 	if (correctLogin) {
-		MM->AddConnectedPlayer(&client, loginUsername, 15);
+		//MM->AddConnectedPlayer(&client, loginUsername, 15);
 	}
 }
 
@@ -235,7 +235,7 @@ void ServerPacketTypesManager::ReceiveRegisterPacket(sf::Packet data, sf::TcpSoc
 	SendRegisterResponse(client, correctRegister, registerUsername);
 
 	if (correctRegister) {
-		MM->AddConnectedPlayer(&client, registerUsername, 15);
+		//MM->AddConnectedPlayer(&client, registerUsername, 15);
 	}
 }
 
@@ -245,7 +245,7 @@ void ServerPacketTypesManager::ReceiveLobbyCreatePacket(sf::Packet data, sf::Tcp
 
 	data >> lobbyID;
 
-	bool successfulLobbyCreation = MM->CreateWaitingRoom(lobbyID, &client);
+	bool successfulLobbyCreation = true; // = MM->CreateWaitingRoom(lobbyID, &client);
 	 
 	if (successfulLobbyCreation) {
 		std::cout << "Lobby " << lobbyID << "creado exitosamente, pasando jugador a la sala de espera" << std::endl;
@@ -264,7 +264,7 @@ void ServerPacketTypesManager::ReceiveLobbyJoinPacket(sf::Packet data, sf::TcpSo
 	data >> lobbyID;
 
 	std::cout << "Servidor recibe join packet" << std::endl;
-	bool successfulLobbyJoin = MM->JoinWaitingRoom(lobbyID, &client);
+	bool successfulLobbyJoin = true; // = MM->JoinWaitingRoom(lobbyID, &client);
 
 	if (successfulLobbyJoin) {
 		std::cout << "Jugador se ha unido a lobby con ID: " << lobbyID << std::endl;
