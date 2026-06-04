@@ -3,6 +3,7 @@
 #include "Bcrypt/bcrypt.h"
 #include "Database.h"
 #include "GameRoom.h"
+#include "MapReader.h"	
 
 #include <string>
 
@@ -10,7 +11,7 @@
 
 enum PacketTypes
 {
-	HANDSHAKE, LOGIN, REGISTER, LOBBY_CREATE, LOBBY_JOIN, WAITING_ROOM_PLAYERS, RANKING, START_GAME, END_GAME
+	HANDSHAKE, LOGIN, REGISTER, LOBBY_CREATE, LOBBY_JOIN, WAITING_ROOM_PLAYERS, MOVEMENT_TCP, RANKING, START_GAME, END_GAME, MAP_CHECK
 };
 
 class ServerPacketTypesManager
@@ -25,6 +26,7 @@ public:
 private:
 	std::string handshakeMessage = "Handshake realizado";
 	std::string serversHandshakeMessage = "Handshake realizado entre servers";
+	MapReader* mapReader;
 
 public:
 	void ReceivePacket(sf::Packet packet, sf::TcpSocket& client);

@@ -171,6 +171,8 @@ void ServerPacketTypesManager::SendLobbyJoinAttempt(GameMode mode, sf::TcpSocket
 	packet << TcpPacketTypes::LOBBY_JOIN;
 	packet << (int)mode;
 
+	uint8_t priority = NORMAL_PACKET;
+
 	packet << priority;
 	packet << UdpPacketTypes::LOBBY;
 	packet << static_cast<int>(mode);
