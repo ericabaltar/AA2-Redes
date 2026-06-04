@@ -23,6 +23,8 @@ private:
 
 	std::vector <sf::TcpSocket*> clients;
 	sf::TcpSocket* newClient;
+
+	sf::TcpSocket* gameServer;
 	
 public:
 	void Init();
@@ -34,6 +36,8 @@ public:
 	inline void CloseServer() { closeServer = true; }
 	inline bool GetCloseServer() { return closeServer; }
 	inline bool CheckIfSocketsAreReadyToReceive() { return selector.wait(); }
+
+	inline void SetGameServerSocket(sf::TcpSocket* socket) { gameServer = socket; }
 
 private:
 	NetworkManager() = default;

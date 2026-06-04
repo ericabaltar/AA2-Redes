@@ -9,7 +9,7 @@
 #define CRITICAL_PACKET 0b00000001
 #define URGENT_PACKET 0b00000010
 
-enum PacketTypes
+enum TcpPacketTypes
 {
 	HANDSHAKE, LOGIN, REGISTER, LOBBY_CREATE, LOBBY_JOIN, WAITING_ROOM_PLAYERS, RANKING, START_GAME, END_GAME
 };
@@ -29,12 +29,14 @@ public:
 	}
 
 private:
-	std::string handshakeMessage = "Handshake realizado";
+	std::string handshakeMessage = "Handshake realizado entre servers";
 
 public:
 	void ReceivePacket(sf::Packet packet, std::optional<sf::IpAddress>& senderIp, unsigned short senderPort);
 	void SendHandshake(sf::TcpSocket& client);
 	void SendUpdatedPlayerCount(sf::TcpSocket& client, int playerCount);
+
+	void ReceiveTcpPacket(sf::Packet packet);
 
 private:
 	ServerPacketTypesManager() = default;

@@ -4,6 +4,7 @@
 #include "MovementPacket.h"
 #include "User.h"
 #include "MovementManager.h"
+#include "NetworkManager.h"
 #include "Utils.h"
 
 sf::Packet& operator>>(sf::Packet& packet, PacketTypes& tipo) {
@@ -31,7 +32,7 @@ void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, sf::TcpSocket& c
 	switch (packetType)
 	{
 	case PacketTypes::HANDSHAKE:
-		ReceiveHandshakePacket(packet);
+		ReceiveHandshakePacket(packet, client);
 		break;
 	case PacketTypes::LOGIN:
 		ReceiveLoginPacket(packet, client);
@@ -190,10 +191,15 @@ void ServerPacketTypesManager::SendRankingPacket(sf::TcpSocket& client, std::vec
 	std::cout << "Ranking packet enviado con " << rankings.size() << " entradas." << std::endl;
 }
 
-void ServerPacketTypesManager::ReceiveHandshakePacket(sf::Packet data)
+void ServerPacketTypesManager::ReceiveHandshakePacket(sf::Packet data, sf::TcpSocket& client)
 {
 	std::string receiveMesage;
 	data >> receiveMesage;
+
+	if (receiveMesage == serversHandshakeMessage)
+	{
+		NT->SetGameServerSocket(&client);
+	}
 
 	std::cout << "Mensaje enviado del cliente: " << receiveMesage << std::endl;
 }

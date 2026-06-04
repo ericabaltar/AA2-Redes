@@ -24,6 +24,7 @@ public:
 
 private:
 	std::string handshakeMessage = "Handshake realizado";
+	std::string serversHandshakeMessage = "Handshake realizado entre servers";
 
 public:
 	void ReceivePacket(sf::Packet packet, sf::TcpSocket& client);
@@ -45,7 +46,7 @@ private:
 	void SendLobbyJoinResponse(sf::TcpSocket& client, bool success);
 	void SendRankingPacket(sf::TcpSocket& client, std::vector<Database::RankingEntry>& rankings);
 
-	void ReceiveHandshakePacket(sf::Packet data);
+	void ReceiveHandshakePacket(sf::Packet data, sf::TcpSocket& client);
 	void ReceiveLoginPacket(sf::Packet data, sf::TcpSocket& client);
 	void ReceiveRegisterPacket(sf::Packet data, sf::TcpSocket& client);
 	void ReceiveLobbyCreatePacket(sf::Packet data, sf::TcpSocket& client);
