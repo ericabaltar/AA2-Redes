@@ -168,10 +168,11 @@ void ServerPacketTypesManager::SendLobbyJoinAttempt(GameMode mode, sf::UdpSocket
 {
 	sf::Packet packet;
 
-	packet << UdpPacketTypes::LOBBY;
-	packet << (int)mode;
+	uint8_t priority = NORMAL_PACKET;
 
-	//LM->SetRoomId(lobbyId);
+	packet << priority;
+	packet << UdpPacketTypes::LOBBY;
+	packet << static_cast<int>(mode);
 
 	SendUdpData(server, packet);
 }
