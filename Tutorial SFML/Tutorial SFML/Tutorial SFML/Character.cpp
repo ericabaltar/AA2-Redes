@@ -1,5 +1,6 @@
 #include "Character.h"
 #include "Bullet.h"
+#include "Ground.h"
 #include "Spawner.h"
 
 void Character::HandleAnimation(float dt)
@@ -107,9 +108,27 @@ void Character::Shoot()
     SPAWN.SpawnObject(bullet);
 }
 
-void Character::OnCollisionEnter(Object* other)
+void Character::OnCollisionEnter(Object* other, const CollisionInfo& collisionInfo)
 {
-    ReceiveHit();
+    if (dynamic_cast<Ground*>(other))
+    {
+        if (collisionInfo.penetration < 0.01f)
+            return;
+
+        transform->position.x = transform->position.x + collisionInfo.normal.x * collisionInfo.penetration;
+        transform->position.y = transform->position.y + collisionInfo.normal.y * collisionInfo.penetration;
+
+        if (collisionInfo.normal.y != 0)
+            velocity.y = 0;
+
+        if (collisionInfo.normal.x != 0)
+            velocity.x = 0;
+    }
+    else if (Bullet* bullet = dynamic_cast<Bullet*>(other))
+    {
+        if (bullet->GetOwner() != this)
+            ReceiveHit();
+    }
 }
 
 void Character::SetInterpolatedPosition(const Vector2 newPosition)

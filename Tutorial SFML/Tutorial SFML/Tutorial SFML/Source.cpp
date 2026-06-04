@@ -19,6 +19,8 @@ int main()
     while (window.isOpen())
     {
         float dt = clock.restart().asSeconds();
+        if (dt > 0.05f)
+            dt = 0.05f;
 
         gameScene.HandleEvents(window);
         gameScene.Update(window, dt);
