@@ -3,20 +3,19 @@
 #include <iostream>
 #include "MovementPacket.h"
 #include "ThreadManager.h"
-#include "Player.h"
-#include "GameRoomManager.h"
+#include "Utils.h"
 #include <thread>
 #include <optional>
 
-sf::Packet& operator>>(sf::Packet& packet, PacketTypes& type) {
+sf::Packet& operator>>(sf::Packet& packet, TcpPacketTypes& type) {
 	int temp;
 	packet >> temp;
-	type = static_cast<PacketTypes>(temp);
+	type = static_cast<TcpPacketTypes>(temp);
 
 	return packet;
 }
 
-sf::Packet& operator<<(sf::Packet& packet, PacketTypes& type) {
+sf::Packet& operator<<(sf::Packet& packet, TcpPacketTypes& type) {
 	int temp;
 	temp = static_cast<int>(type);
 	packet << temp;
@@ -86,23 +85,48 @@ void ServerPacketTypesManager::SendData(sf::TcpSocket& client, sf::Packet& packe
 void ServerPacketTypesManager::SendHandshake(sf::TcpSocket& client)
 {
 	sf::Packet packet;
-	packet << PacketTypes::HANDSHAKE << handshakeMessage;
+	packet << TcpPacketTypes::HANDSHAKE << handshakeMessage;
 	SendData(client, packet);
 }
 
 void ServerPacketTypesManager::SendUpdatedPlayerCount(sf::TcpSocket& client, int playerCount)
 {
 	sf::Packet packet;
-	packet << PacketTypes::WAITING_ROOM_PLAYERS;
+	packet << TcpPacketTypes::WAITING_ROOM_PLAYERS;
 	packet << playerCount;
 
 	SendData(client, packet);
 }
 
+void ServerPacketTypesManager::ReceiveTcpPacket(sf::Packet packet)
+{
+	TcpPacketTypes packetType;
+
+	packet >> packetType;
+
+	switch (packetType)
+	{
+	case TcpPacketTypes::HANDSHAKE:
+		ReceiveHandshakePacket(packet);
+		break;
+	case TcpPacketTypes::START_GAME:
+		ReceiveStartGamePacket(packet);
+		break;
+	case TcpPacketTypes::END_GAME:
+		ReceiveEndGamePacket(packet);
+		break;
+	default:
+		std::cout << "No se ha identificado el tipo de paquete" << std::endl;
+		break;
+	}
+
+	packet.clear();
+}
+
 void ServerPacketTypesManager::SendLobbyCreateResponse(sf::TcpSocket& client, bool success)
 {
 	sf::Packet packet;
-	packet << PacketTypes::LOBBY_CREATE;
+	packet << TcpPacketTypes::LOBBY_CREATE;
 	packet << success;
 
 	SendData(client, packet);
@@ -113,7 +137,7 @@ void ServerPacketTypesManager::SendLobbyCreateResponse(sf::TcpSocket& client, bo
 void ServerPacketTypesManager::SendLobbyJoinResponse(sf::TcpSocket& client, bool success)
 {
 	sf::Packet packet;
-	packet << PacketTypes::LOBBY_JOIN;
+	packet << TcpPacketTypes::LOBBY_JOIN;
 	packet << success;
 
 	SendData(client, packet);
@@ -170,6 +194,15 @@ void ServerPacketTypesManager::ReceiveTauntPacket(sf::Packet data)
 
 void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
 {
+	int roomId;
+	int mode;
+
+	data >> roomId;
+	data >> mode;
+
+	GameMode gameMode = static_cast<GameMode>(mode);
+
+
 }
 
 void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)

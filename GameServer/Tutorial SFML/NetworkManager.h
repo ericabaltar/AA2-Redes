@@ -7,6 +7,9 @@
 
 #define NT NetworkManager::Instance()
 #define BIND_PORT 55000
+#define LAUNCHER_SERVER_PORT 55000
+
+const sf::IpAddress LAUNCHER_SERVER_IP = sf::IpAddress(127, 0, 0, 1);
 
 class NetworkManager
 {
@@ -22,8 +25,8 @@ private:
 	sf::UdpSocket socket;
 	sf::SocketSelector selector;
 
-	std::vector <sf::TcpSocket*> clients;
-	sf::TcpSocket* newClient;
+	sf::TcpSocket launcherSocket;
+	bool disconnectFromLauncherServer = false;
 
 	std::queue<Task> pendingTasks;
 	
@@ -46,5 +49,8 @@ private:
 	NetworkManager(const NetworkManager& nt) = delete;
 	NetworkManager& operator=(const NetworkManager& nt) = delete;
 	~NetworkManager() = default;
+
+	void EstablishConnectionWithLauncherServer();
+	void HandleReceivedTcpPackets();
 };
 

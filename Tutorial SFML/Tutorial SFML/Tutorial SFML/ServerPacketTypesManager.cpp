@@ -164,17 +164,18 @@ void ServerPacketTypesManager::SendLobbyCreateAttempt(std::string lobbyId, sf::T
 	SendData(server, packet);
 }
 
-void ServerPacketTypesManager::SendLobbyJoinAttempt(GameMode mode, sf::UdpSocket& server)
+void ServerPacketTypesManager::SendLobbyJoinAttempt(GameMode mode, sf::TcpSocket& server)
 {
 	sf::Packet packet;
 
-	uint8_t priority = NORMAL_PACKET;
+	packet << TcpPacketTypes::LOBBY_JOIN;
+	packet << (int)mode;
 
 	packet << priority;
 	packet << UdpPacketTypes::LOBBY;
 	packet << static_cast<int>(mode);
 
-	SendUdpData(server, packet);
+	SendData(server, packet);
 }
 
 void ServerPacketTypesManager::SendRankingPetition(int userId, sf::TcpSocket& server)
@@ -357,7 +358,13 @@ void ServerPacketTypesManager::ReceiveRankingPacket(sf::Packet data)
 
 void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
 {
-	LM->StartGame();
+	int roomId = -1;
+	int playerIndex = -1;
+
+	data >> roomId;
+	data >> playerIndex;
+
+	LM->StartGame(roomId, playerIndex);
 }
 
 void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)

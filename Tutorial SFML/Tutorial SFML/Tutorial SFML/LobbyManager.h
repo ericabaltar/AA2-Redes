@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <iostream>
 
 #define LM LobbyManager::Instance()
 
@@ -12,20 +13,21 @@ public:
 		return &lm;
 	}
 private:
-	bool roomJoined = false;
 	bool gameStarted = false;
-	int playerCount = 1;
-	std::string roomId = "";
+	int roomId = -1;
+	int playerIndex = -1;
 
 public:
 
-	void StartGame()
+	void StartGame(int room, int index)
 	{
 		gameStarted = true;
+		std::cout << "Iniciando partida. ID: " << room << " | " << "Indice de player: " << index << std::endl;
 	}
 
 	bool GetGameStarted() { return gameStarted; }
-
+	int GetRoomId() { return roomId; }
+	int GetPlayerIndex() { return playerIndex; }
 
 private:
 	LobbyManager() = default;

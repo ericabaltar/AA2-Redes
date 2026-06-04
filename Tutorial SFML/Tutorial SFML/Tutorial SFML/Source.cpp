@@ -20,6 +20,11 @@ int main()
 
     sf::Clock clock;
 
+    NT->Init();
+
+    if (NT->GetDisconnectFromServer())
+        std::cout << "No ha habido conexión con el servidor." << std::endl;
+
     while (window.isOpen())
     {
         if (!NT->GetDisconnectFromServer()) {
@@ -31,6 +36,8 @@ int main()
             dt = 0.05f;
 
         sceneManager.update(window, dt);
+        
+        NT->Update();
     }
 
     return 0;

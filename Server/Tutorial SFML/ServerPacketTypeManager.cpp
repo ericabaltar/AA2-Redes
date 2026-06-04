@@ -4,6 +4,8 @@
 #include "MovementPacket.h"
 #include "User.h"
 #include "MovementManager.h"
+#include "NetworkManager.h"
+#include "Utils.h"
 
 sf::Packet& operator>>(sf::Packet& packet, PacketTypes& tipo) {
 	int temp;
@@ -59,7 +61,7 @@ void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, sf::TcpSocket& c
 	switch (packetType)
 	{
 	case PacketTypes::HANDSHAKE:
-		ReceiveHandshakePacket(packet);
+		ReceiveHandshakePacket(packet, client);
 		break;
 	case PacketTypes::LOGIN:
 		ReceiveLoginPacket(packet, client);
@@ -72,9 +74,6 @@ void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, sf::TcpSocket& c
 		break;
 	case PacketTypes::LOBBY_JOIN:
 		ReceiveLobbyJoinPacket(packet, client);
-		break;
-	case PacketTypes::MOVEMENT:
-		ReceiveMovementPacket(packet, client);
 		break;
 	case PacketTypes::RANKING:
 		ReceiveRankingPacket(packet, client);
@@ -120,6 +119,52 @@ void ServerPacketTypesManager::SendUpdatedPlayerCount(sf::TcpSocket& client, int
 	packet << playerCount;
 
 	SendData(client, packet);
+}
+
+void ServerPacketTypesManager::SendInfoToStartGame(GameRoom game, int roomId)
+{
+	const float playerAmount = 2;
+
+	// Info for game server
+	sf::Packet packet;
+
+	packet << PacketTypes::START_GAME;
+	
+	packet << roomId;
+	packet << (int)game.GetMode();
+	
+	for (int i = 0; i < playerAmount; i++)
+	{
+		int playerIndex = i;
+		std::optional<sf::IpAddress> ip = game.GetPlayer(i)->client->getRemoteAddress();
+		unsigned short port = game.GetPlayer(i)->client->getRemotePort();
+		std::string username = game.GetPlayer(i)->name;
+		int points = game.GetPlayer(i)->points;
+
+		packet << playerIndex;
+		packet << ip->toString();
+		packet << port;
+		packet << username;
+		packet << points;
+	}
+
+	SendData(*NT->GetGameServerSocket(), packet);
+	std::cout << "Enviada información al game server " << std::endl;
+
+	// Info for player clients
+
+	for (int i = 0; i < playerAmount; i++)
+	{
+		sf::Packet packet;
+
+		packet << PacketTypes::START_GAME;
+		
+		packet << roomId;
+		packet << i;
+
+		SendData(*game.GetPlayer(i)->client, packet);
+		std::cout << "Enviada información a jugador " << i << " de la sala.";
+	}
 }
 
 void ServerPacketTypesManager::SendLoginResponse(sf::TcpSocket& client, bool success, const std::string& username)
@@ -191,10 +236,15 @@ void ServerPacketTypesManager::SendRankingPacket(sf::TcpSocket& client, std::vec
 	std::cout << "Ranking packet enviado con " << rankings.size() << " entradas." << std::endl;
 }
 
-void ServerPacketTypesManager::ReceiveHandshakePacket(sf::Packet data)
+void ServerPacketTypesManager::ReceiveHandshakePacket(sf::Packet data, sf::TcpSocket& client)
 {
 	std::string receiveMesage;
 	data >> receiveMesage;
+
+	if (receiveMesage == serversHandshakeMessage)
+	{
+		NT->SetGameServerSocket(&client);
+	}
 
 	std::cout << "Mensaje enviado del cliente: " << receiveMesage << std::endl;
 }
@@ -214,7 +264,7 @@ void ServerPacketTypesManager::ReceiveLoginPacket(sf::Packet data, sf::TcpSocket
 	SendLoginResponse(client, correctLogin, loginUsername);
 
 	// Si es correcto, guardar tambi�n los datos del usuario (nombre y puntos del ranking)
-	
+
 	if (correctLogin) {
 		//MM->AddConnectedPlayer(&client, loginUsername, 15);
 	}
@@ -245,7 +295,7 @@ void ServerPacketTypesManager::ReceiveLobbyCreatePacket(sf::Packet data, sf::Tcp
 
 	data >> lobbyID;
 
-	bool successfulLobbyCreation = true; // = MM->CreateWaitingRoom(lobbyID, &client);
+	bool successfulLobbyCreation = false;//MM->CreateWaitingRoom(lobbyID, &client);
 	 
 	if (successfulLobbyCreation) {
 		std::cout << "Lobby " << lobbyID << "creado exitosamente, pasando jugador a la sala de espera" << std::endl;
@@ -259,6 +309,14 @@ void ServerPacketTypesManager::ReceiveLobbyCreatePacket(sf::Packet data, sf::Tcp
 
 void ServerPacketTypesManager::ReceiveLobbyJoinPacket(sf::Packet data, sf::TcpSocket& client)
 {
+	int mode;
+	data >> mode;
+
+	GameMode gameMode = static_cast<GameMode>(mode);
+
+	MM->AddPlayerToWaitingRoom(&client, gameMode);
+
+	/*
 	std::string lobbyID;
 
 	data >> lobbyID;
@@ -273,7 +331,7 @@ void ServerPacketTypesManager::ReceiveLobbyJoinPacket(sf::Packet data, sf::TcpSo
 		std::cout << "El lobby " << lobbyID << " esta lleno o no existe" << std::endl;
 	}
 
-	SendLobbyJoinResponse(client, successfulLobbyJoin);
+	SendLobbyJoinResponse(client, successfulLobbyJoin);*/
 }
 
 void ServerPacketTypesManager::ReceiveMovementPacket(sf::Packet data, sf::TcpSocket& client) {
