@@ -36,7 +36,7 @@ public:
 
 		return false;
 	};
-	virtual void OnCollisionEnter(Object* other) {}
+	virtual void OnCollisionEnter(Object* other, const CollisionInfo& collisionInfo) {}
 
 	inline bool IsPendingDestroy() const { return isPendingDestroy; }
 	inline void Destroy() { isPendingDestroy = true; }

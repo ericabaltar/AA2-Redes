@@ -54,7 +54,7 @@ public:
 
     void Render(sf::RenderWindow& window) override { window.draw(sprite.GetSprite()); }
     
-    void OnCollisionEnter(Object* other) override;
+    virtual void OnCollisionEnter(Object* other, const CollisionInfo& collisionInfo) override;
 
     inline bool IsDead() { return lives <= 0; }
 

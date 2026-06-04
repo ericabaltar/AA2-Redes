@@ -1,5 +1,6 @@
 #include "PlayerCharacter.h"
 #include "NetworkManager.h"
+#include "Ground.h"
 
 void PlayerCharacter::HandleInput(float dt)
 {
@@ -24,7 +25,7 @@ void PlayerCharacter::HandleInput(float dt)
         inputX += 1.f;
 }
 
-void PlayerCharacter::ApplyPhysics(float dt, float groundY)
+void PlayerCharacter::ApplyPhysics(float dt)
 {
     if (isQuacking || isShooting)
     {
@@ -62,17 +63,6 @@ void PlayerCharacter::ApplyPhysics(float dt, float groundY)
     velocity.y += gravity * dt;
     transform->position = transform->position + velocity * dt;
 
-    if (transform->position.y + width / 2.f >= groundY)
-    {
-        transform->position = { transform->position.x, groundY - height / 2.f };
-        velocity.y = 0.f;
-        isOnGround = true;
-    }
-    else
-    {
-        isOnGround = false;
-    }
-
     if (transform->position.x - width / 2.f < 0.f)
     {
         transform->position = { width / 2.f, transform->position.y };
@@ -83,15 +73,15 @@ void PlayerCharacter::ApplyPhysics(float dt, float groundY)
     {
         transform->position = { 800.f - width / 2.f, transform->position.y };
         velocity.x = 0.f;
-    }
+    } 
+
+    isOnGround = false;
 }
 
 void PlayerCharacter::Update(float dt)
 {
-    float groundY = 550; // PENDIENTE QUITAR ESTO CUANDO HAYA COLISIONES REALES CON SUELO POR TILES
-
     HandleInput(dt);
-    ApplyPhysics(dt, groundY);
+    ApplyPhysics(dt);
     Character::Update(dt);
 }
 
@@ -104,4 +94,18 @@ void PlayerCharacter::Quack()
 void PlayerCharacter::Shoot()
 {
     Character::Shoot();
+}
+
+void PlayerCharacter::OnCollisionEnter(Object* other, const CollisionInfo& collisionInfo)
+{
+    Character::OnCollisionEnter(other, collisionInfo);
+
+    if (dynamic_cast<Ground*>(other))
+    {
+        if (collisionInfo.normal.y < 0.f)
+        {
+            isOnGround = true;
+            coyoteTimer = coyoteTime;
+        }
+    }
 }

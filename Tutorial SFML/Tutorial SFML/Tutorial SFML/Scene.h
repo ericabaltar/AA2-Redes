@@ -4,6 +4,7 @@
 #include "SharedMemory.h"
 #include "config.h"
 #include "Spawner.h"
+#include <iostream>
 
 class Scene
 {
@@ -34,10 +35,11 @@ private:
 		{
 			for (int j = i + 1; j < objects.size(); j++)
 			{
-				if (objects[i]->CheckCollision(objects[j]->GetCollider()))
+				CollisionInfo collisionInfo = objects[i]->GetCollider()->GetCollisionInfo(objects[j]->GetCollider());
+				if (collisionInfo.collided)
 				{
-					objects[i]->OnCollisionEnter(objects[j]);
-					objects[j]->OnCollisionEnter(objects[i]);
+					objects[i]->OnCollisionEnter(objects[j], collisionInfo);
+					objects[j]->OnCollisionEnter(objects[i], collisionInfo);
 				}
 			}
 		}
@@ -86,7 +88,7 @@ protected:
 
 		for (Object* obj : objects) obj->Render(window);
 
-		//window.display();
+		window.display();
 	}
 
 	virtual void HandleEvent(const sf::Event& event, sf::RenderWindow& window) {
