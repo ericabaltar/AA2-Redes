@@ -74,9 +74,9 @@ void NetworkManager::SendLobbyCreateAttemptPacket(std::string lobbyId)
     SPTM->SendLobbyCreateAttempt(lobbyId, socket);
 }
 
-void NetworkManager::SendLobbyJoinAttemptPacket(std::string lobbyId)
+void NetworkManager::SendLobbyJoinAttemptPacket(GameMode mode)
 {
-    SPTM->SendLobbyJoinAttempt(lobbyId, socket);
+    SPTM->SendLobbyJoinAttempt(mode, udpServerSocket);
 }
 
 void NetworkManager::HandleReceivedPackets()

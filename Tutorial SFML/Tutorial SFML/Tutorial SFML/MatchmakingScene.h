@@ -1,4 +1,5 @@
 #pragma once
+#include "NetworkManager.h"
 #include "Scene.h"
 #include "Button.h"
 #include "Utils.h"
@@ -22,6 +23,7 @@ public:
 		competitiveMatchRect.setFillColor(sf::Color::Red);
 		std::string competitiveMatchText = "Competitive Match";
 		competitiveMatchButton = new Button(competitiveMatchRect, sf::Text(*font, competitiveMatchText), [&]() {
+			NT->SendLobbyJoinAttemptPacket(GameMode::COMPETITIVE);
 			sharedMemory->saveInt("MatchType", (int)GameMode::COMPETITIVE);
 			nextScene = SceneOption::WAITING_ROOM;
 			});
@@ -35,6 +37,7 @@ public:
 		friendlyMatchRect.setFillColor(sf::Color::Blue);
 		std::string friendlyMatchText = "Friendly Match";
 		friendlyMatchButton = new Button(friendlyMatchRect, sf::Text(*font, friendlyMatchText), [&]() {
+			NT->SendLobbyJoinAttemptPacket(GameMode::FRIENDLY);
 			sharedMemory->saveInt("MatchType", (int)GameMode::FRIENDLY);
 			nextScene = SceneOption::WAITING_ROOM;
 			});

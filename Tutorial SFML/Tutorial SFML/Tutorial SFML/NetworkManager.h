@@ -4,6 +4,7 @@
 #include <string>
 #include "ServerPacketTypesManager.h"
 #include "MovementPacket.h"
+#include "Utils.h"
 
 #define NT NetworkManager::Instance()
 #define SERVER_PORT 55000
@@ -45,7 +46,7 @@ public:
 	void SendLoginAttemptServerPacket(std::string username, std::string password);
 	void SendRegisterAttemptServerPacket(std::string username, std::string password);
 	void SendLobbyCreateAttemptPacket(std::string lobbyId);
-	void SendLobbyJoinAttemptPacket(std::string lobbyId);
+	void SendLobbyJoinAttemptPacket(GameMode mode);
 	void SendRankingPetitionServerPacket(int userId);
 
 	void SendMovementPacket(MovementPacket movementPacket);
