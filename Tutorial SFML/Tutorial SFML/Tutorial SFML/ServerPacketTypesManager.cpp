@@ -4,6 +4,7 @@
 #include "User.h"
 #include "LobbyManager.h"
 #include "MapManager.h"
+#include "RankingManager.h"
 
 sf::Packet& operator>>(sf::Packet& packet, TcpPacketTypes& tipo) {
 	int temp;
@@ -302,6 +303,8 @@ void ServerPacketTypesManager::ReceiveRankingPacket(sf::Packet data)
 	int rankingSize;
 	data >> rankingSize;
 
+	std::vector<User> users;
+
 	for (int i = 0; i < rankingSize; i++)
 	{
 		User user;
@@ -310,16 +313,18 @@ void ServerPacketTypesManager::ReceiveRankingPacket(sf::Packet data)
 		data >> user.nickname;
 		data >> user.score;
 
-		ranking.push_back(user);
+		users.push_back(user);
 	}
 
-	std::cout << "\n=== TOP 10 RANKINGS ===" << std::endl;
+	RM->SetRanking(users);
+
+	/*std::cout << "\n=== TOP 10 RANKINGS ===" << std::endl;
 	for (const auto& user : ranking)
 	{
 		std::cout << user.position << ". "
 			<< user.nickname << " - "
 			<< user.score << " puntos" << std::endl;
-	}
+	}*/
 }
 
 void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
