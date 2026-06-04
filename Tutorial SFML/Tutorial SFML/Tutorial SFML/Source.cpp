@@ -16,6 +16,7 @@ int main()
     sf::RenderWindow window(sf::VideoMode({ WINDOW_WIDTH, WINDOW_HEIGHT }), "AA3 Shooter");
 
     SceneManager sceneManager = SceneManager();
+    std::cout << "Entering initial scene" << std::endl;
 
     sf::Clock clock;
 

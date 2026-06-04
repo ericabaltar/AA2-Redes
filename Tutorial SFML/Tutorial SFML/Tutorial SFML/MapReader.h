@@ -48,6 +48,7 @@ public:
     int GetWidth() const { return m_width; }
     int GetHeight() const { return m_height; }
     bool GetInformationHasBeenChecked() const { return informationHasBeenChecked; }
+    float GetDefaultTileSize() const { return defaultTileSize; }
 
     void SetInformationHasBeenChecked(bool checked) { informationHasBeenChecked = checked; }
     void SetWidth(int correctWidth) { m_width = correctWidth;}
@@ -71,6 +72,7 @@ private:
     Tileset m_tiles;
     int m_width = 0;
     int m_height = 0;
+    float defaultTileSize = 75.f;
 	bool informationHasBeenChecked = false;
 
     const std::string& filename = "gameConfig.txt";
