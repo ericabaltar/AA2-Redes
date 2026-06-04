@@ -1,4 +1,6 @@
 #include "PlayerCharacter.h"
+#include "NetworkManager.h"
+#include "Ground.h"
 
 void PlayerCharacter::HandleInput(float dt)
 {
@@ -23,7 +25,7 @@ void PlayerCharacter::HandleInput(float dt)
         inputX += 1.f;
 }
 
-void PlayerCharacter::ApplyPhysics(float dt, float groundY)
+void PlayerCharacter::ApplyPhysics(float dt)
 {
     if (isQuacking || isShooting)
     {
@@ -59,37 +61,51 @@ void PlayerCharacter::ApplyPhysics(float dt, float groundY)
     }
 
     velocity.y += gravity * dt;
-    position += velocity * dt;
+    transform->position = transform->position + velocity * dt;
 
-    if (position.y + width / 2.f >= groundY)
+    if (transform->position.x - width / 2.f < 0.f)
     {
-        position = { position.x, groundY - height / 2.f };
-        velocity.y = 0.f;
-        isOnGround = true;
-    }
-    else
-    {
-        isOnGround = false;
-    }
-
-    if (position.x - width / 2.f < 0.f)
-    {
-        position = { width / 2.f, position.y };
+        transform->position = { width / 2.f, transform->position.y };
         velocity.x = 0.f;
     }
 
-    if (position.x + width / 2.f > 800.f)
+    if (transform->position.x + width / 2.f > 800.f)
     {
-        position = { 800.f - width / 2.f, position.y };
+        transform->position = { 800.f - width / 2.f, transform->position.y };
         velocity.x = 0.f;
-    }
+    } 
+
+    isOnGround = false;
 }
 
 void PlayerCharacter::Update(float dt)
 {
-    float groundY = 550; // PENDIENTE QUITAR ESTO CUANDO HAYA COLISIONES REALES CON SUELO POR TILES
-
     HandleInput(dt);
-    ApplyPhysics(dt, groundY);
+    ApplyPhysics(dt);
     Character::Update(dt);
+}
+
+void PlayerCharacter::Quack()
+{
+    Character::Quack();
+    NT->SendTaunt();
+}
+
+void PlayerCharacter::Shoot()
+{
+    Character::Shoot();
+}
+
+void PlayerCharacter::OnCollisionEnter(Object* other, const CollisionInfo& collisionInfo)
+{
+    Character::OnCollisionEnter(other, collisionInfo);
+
+    if (dynamic_cast<Ground*>(other))
+    {
+        if (collisionInfo.normal.y < 0.f)
+        {
+            isOnGround = true;
+            coyoteTimer = coyoteTime;
+        }
+    }
 }

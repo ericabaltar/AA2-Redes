@@ -18,17 +18,21 @@ private:
 
     void HandleInput(float dt);
 
-    void ApplyPhysics(float dt, float groundY);
+    void ApplyPhysics(float dt);
 
 
 public:
     PlayerCharacter(): Character("assets/white_duck.png") {
-        position = { 100.f, 300.f };
+        transform->position = { 100.f, 300.f };
     }
 
     void Update(float dt) override; 
 
+    void Quack() override;
+    void Shoot() override;
+
     inline void ResetJumpBuffer() { jumpBufferTimer = jumpBufferTime; }
 
+    void OnCollisionEnter(Object* other, const CollisionInfo& collisionInfo) override;
 };
 

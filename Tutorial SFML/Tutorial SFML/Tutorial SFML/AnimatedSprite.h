@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <unordered_map>
 #include "Animation.h"
+#include "Vector2.h"
 
 class AnimatedSprite
 {
@@ -26,7 +27,7 @@ public:
 	float GetHeight();
 	bool IsCurrentAnimationFinished() const;
 
-	void SetPosition(sf::Vector2f pos);
+	void SetPosition(Vector2 pos);
 	void SetScale(sf::Vector2f newScale);
 	void FlipHorizontally(bool flip);
 };

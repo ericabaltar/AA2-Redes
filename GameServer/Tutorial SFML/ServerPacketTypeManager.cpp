@@ -1,6 +1,9 @@
 #include "ServerPacketTypeManager.h"
+#include "NetworkManager.h"
 #include <iostream>
 #include "MovementPacket.h"
+#include "ThreadManager.h"
+#include <thread>
 
 sf::Packet& operator>>(sf::Packet& packet, PacketTypes& type) {
 	int temp;
@@ -36,21 +39,35 @@ sf::Packet& operator<<(sf::Packet& packet, UdpPacketTypes& type) {
 
 void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, std::optional<sf::IpAddress>& senderIp, unsigned short senderPort)
 {
-	UdpPacketTypes packetType;
+	uint8_t receivedDataPriority;
 
-	packet >> packetType;
+	packet >> receivedDataPriority;
 
-	switch (packetType)
+	if (receivedDataPriority == 0)
 	{
-	case MOVEMENT:
-		ReceiveMovementPacket(packet);
-		break;
-	default:
-		std::cout << "No se ha identificado el tipo de packete" << std::endl;
-		break;
+		std::cout << "Normal" << std::endl;
+	}
+	else
+	{
+		if (receivedDataPriority & URGENT_PACKET)
+			std::cout << "Urgente" << std::endl;
+
+		if (receivedDataPriority & CRITICAL_PACKET)
+			std::cout << "Crítico" << std::endl;
 	}
 
-	packet.clear();
+	if (receivedDataPriority & URGENT_PACKET)
+	{
+		ThrdM->AddUrgentTask(new Task([this, packet]() mutable {
+			this->ProcessPacket(packet);
+			}));
+	}
+	else
+	{
+		ThrdM->AddTask(new Task([this, packet]() mutable {
+			this->ProcessPacket(packet);
+			}));
+	}
 }
 
 void ServerPacketTypesManager::SendData(sf::TcpSocket& client, sf::Packet& packet)
@@ -79,30 +96,6 @@ void ServerPacketTypesManager::SendUpdatedPlayerCount(sf::TcpSocket& client, int
 	SendData(client, packet);
 }
 
-void ServerPacketTypesManager::SendLoginResponse(sf::TcpSocket& client, bool success, const std::string& username)
-{
-	sf::Packet packet;
-	packet << PacketTypes::LOGIN;
-	packet << success;
-	packet << username;
-
-	SendData(client, packet);
-
-	std::cout << "Respuesta de login enviada" << std::endl;
-}
-
-void ServerPacketTypesManager::SendRegisterResponse(sf::TcpSocket& client, bool success, const std::string& username)
-{
-	sf::Packet packet;
-	packet << PacketTypes::REGISTER;
-	packet << success;
-	packet << username;
-
-	SendData(client, packet);
-
-	std::cout << "Respuesta de registro enviada" << std::endl;
-}
-
 void ServerPacketTypesManager::SendLobbyCreateResponse(sf::TcpSocket& client, bool success)
 {
 	sf::Packet packet;
@@ -125,6 +118,30 @@ void ServerPacketTypesManager::SendLobbyJoinResponse(sf::TcpSocket& client, bool
 	std::cout << "Respuesta de join a lobby enviada" << std::endl;
 }
 
+void ServerPacketTypesManager::ProcessPacket(sf::Packet packet)
+{
+	UdpPacketTypes packetType;
+
+	packet >> packetType;
+
+	switch (packetType)
+	{
+	case MOVEMENT:
+		ReceiveMovementPacket(packet);
+		break;
+	case SHOT:
+		break;
+	case TAUNT:
+		ReceiveTauntPacket(packet);
+		break;
+	default:
+		std::cout << "No se ha identificado el tipo de packete" << std::endl;
+		break;
+	}
+
+	packet.clear();
+}
+
 void ServerPacketTypesManager::ReceiveHandshakePacket(sf::Packet data)
 {
 	std::string receiveMesage;
@@ -141,6 +158,11 @@ void ServerPacketTypesManager::ReceiveMovementPacket(sf::Packet data)
 	std::cout << "Recibido movimiento: ";
 	std::cout << "ID " << movement.ID << " | ";
 	std::cout << "(" << movement.pos.x << ", " << movement.pos.y << ")" << std::endl;
+}
+
+void ServerPacketTypesManager::ReceiveTauntPacket(sf::Packet data)
+{
+	std::cout << "Burla recibida" << std::endl;
 }
 
 void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)

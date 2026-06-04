@@ -3,7 +3,14 @@
 void NetworkManager::Init()
 {
     EstablishConnectionWithServer();
-    //SPTM->SendMovement(udpServerSocket);
+
+    udpServerSocket.setBlocking(false);
+
+    if (udpServerSocket.bind(sf::Socket::AnyPort) != sf::Socket::Status::Done)
+    {
+        std::cout << "Error al abrir socket UDP del cliente" << std::endl;
+        disconnectFromServer = true;
+    }
 }
 
 void NetworkManager::EstablishConnectionWithServer()
@@ -62,24 +69,70 @@ void NetworkManager::SendMovementPacket(MovementPacket movementPacket)
     SPTM->SendMovement(udpServerSocket, movementPacket);
 }
 
+void NetworkManager::SendTaunt()
+{
+    SPTM->SendTaunt(udpServerSocket);
+}
+
 void NetworkManager::SendLobbyCreateAttemptPacket(std::string lobbyId)
 {
     SPTM->SendLobbyCreateAttempt(lobbyId, socket);
 }
 
-void NetworkManager::SendLobbyJoinAttemptPacket(std::string lobbyId)
+void NetworkManager::SendLobbyJoinAttemptPacket(GameMode mode)
 {
-    SPTM->SendLobbyJoinAttempt(lobbyId, socket);
+    SPTM->SendLobbyJoinAttempt(mode, udpServerSocket);
 }
 
 void NetworkManager::HandleReceivedPackets()
 {
     sf::Packet receivePacket;
-    if (socket.receive(receivePacket) == sf::Socket::Status::Done) {
+
+    sf::Socket::Status tcpStatus = socket.receive(receivePacket);
+
+    if (tcpStatus == sf::Socket::Status::Done)
+    {
         SPTM->ReceivePacket(receivePacket);
     }
-    else if (socket.receive(receivePacket) == sf::Socket::Status::Disconnected) {
+    else if (tcpStatus == sf::Socket::Status::Disconnected)
+    {
         std::cout << "Servidor desconectado" << std::endl;
         disconnectFromServer = true;
     }
+
+    MovementPacket movementPacket;
+    std::size_t received;
+    std::optional<sf::IpAddress> senderIp;
+    unsigned short senderPort;
+
+    sf::Socket::Status udpStatus = udpServerSocket.receive(
+        &movementPacket,
+        sizeof(MovementPacket),
+        received,
+        senderIp,
+        senderPort
+    );
+
+    if (udpStatus == sf::Socket::Status::Done)
+    {
+        if (received == sizeof(MovementPacket))
+        {
+            lastValidatedMovementPacket = movementPacket;
+            hasValidatedMovementPacket = true;
+
+            std::cout << "Paquete validado recibido. ID: "
+                << movementPacket.ID << std::endl;
+        }
+    }
+}
+
+bool NetworkManager::GetLastValidatedMovementPacket(MovementPacket& packet)
+{
+    if (!hasValidatedMovementPacket)
+        return false;
+
+    packet = lastValidatedMovementPacket;
+    hasValidatedMovementPacket = false;
+
+    return true;
 }

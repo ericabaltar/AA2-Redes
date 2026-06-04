@@ -19,16 +19,18 @@ public:
 	{
 		sendTimer += dt;
 
-		if (sendTimer > sendInterval)
+		bool shouldSend = false;
+
+		while (sendTimer >= sendInterval)
 		{
-			sendTimer = 0.f;
-			return true;
+			sendTimer -= sendInterval;
+			shouldSend = true;
 		}
 
-		return false;
+		return shouldSend;
 	}
 
-	MovementPacket CreateMovementPacket(sf::Vector2f position)
+	MovementPacket CreateMovementPacket(Vector2 position)
 	{
 		MovementPacket movementPacket;
 		

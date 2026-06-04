@@ -139,44 +139,29 @@
     <ClCompile Include="Bcrypt\bcrypt.cpp" />
     <ClCompile Include="Bcrypt\blowfish.cpp" />
     <ClCompile Include="Database.cpp" />
-    <ClCompile Include="MapReader.cpp" />
+    <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="MatchMakingManager.cpp" />
     <ClCompile Include="MovementManager.cpp" />
     <ClCompile Include="MovementPacket.cpp" />
     <ClCompile Include="NetworkManager.cpp" />
     <ClCompile Include="ServerPacketTypeManager.cpp" />
     <ClCompile Include="Source.cpp" />
-    <ClCompile Include="Task.cpp" />
-    <ClCompile Include="ThreadManager.cpp" />
-    <ClCompile Include="User.cpp" />
-    <ClCompile Include="Vector2.cpp" />
-    <ClCompile Include="XMLReader.cpp" />
+    <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bcrypt\bcrypt.h" />
     <ClInclude Include="Bcrypt\node_blf.h" />
     <ClInclude Include="Bcrypt\openbsd.h" />
     <ClInclude Include="Database.h" />
-    <ClInclude Include="dep\inc\xml\rapidxml.hpp" />
-    <ClInclude Include="dep\inc\xml\rapidxml_iterators.hpp" />
-    <ClInclude Include="dep\inc\xml\rapidxml_print.hpp" />
-    <ClInclude Include="dep\inc\xml\rapidxml_utils.hpp" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="MapReader.h" />
+    <ClInclude Include="GameManager.h" />
+    <ClInclude Include="GameRoom.h" />
     <ClInclude Include="MatchMakingManager.h" />
     <ClInclude Include="MovementManager.h" />
     <ClInclude Include="MovementPacket.h" />
     <ClInclude Include="NetworkManager.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="ServerPacketTypeManager.h" />
-    <ClInclude Include="Task.h" />
-    <ClInclude Include="ThreadManager.h" />
-    <ClInclude Include="User.h" />
-    <ClInclude Include="Vector2.h" />
-    <ClInclude Include="XMLReader.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="gameConfig.txt" />
+    <ClInclude Include="Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

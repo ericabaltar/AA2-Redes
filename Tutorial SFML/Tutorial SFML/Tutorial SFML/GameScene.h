@@ -5,27 +5,28 @@
 
 #include "NetworkManager.h"
 #include "MovementPrediction.h"
+#include "MovementReconciliation.h"
+#include "Character.h"
 #include "MovementInterpolation.h"
 #include "PlayerCharacter.h"
 #include "Bullet.h"
 #include "Scene.h"
+#include "Ground.h"
 
 
-class GameScene : Scene
+class GameScene : public Scene
 {
 private:
     MovementPrediction movementPrediction;
+    MovementReconciliation movementReconciliation;
 	MovementInterpolation movementInterpolation;
-
-    sf::RectangleShape ground;
 
     PlayerCharacter* player;
     Character* oponent;
 
     User opponentUser;
 public:
-    GameScene()
-        : ground({ 800.f, 50.f }) {}
+    GameScene() {}
 
     void Enter(SharedMemory* _sharedMemory) override
     {
@@ -33,9 +34,6 @@ public:
 
         if (NT->GetDisconnectFromServer())
             std::cout << "Disconnect from server";
-
-        ground.setFillColor(sf::Color(100, 100, 100));
-        ground.setPosition({ 0.f, 550.f });
 
         // Usuario de prueba
         opponentUser.nickname = "testOpponent";
@@ -50,8 +48,8 @@ public:
         oponent = new Character();
         objects.push_back(oponent);
 
-        Bullet* bullet = new Bullet();
-        objects.push_back(bullet);
+        objects.push_back(new Ground({ 0.f, 450.f }, {800.f, 50.f}));
+        objects.push_back(new Ground({ 400.f, 400.f }, { 50, 200.f }));
     }
 
     void HandleEvents(sf::RenderWindow& window)
@@ -71,22 +69,54 @@ public:
 
     virtual bool Update(sf::RenderWindow& window, float dt) override
     {
-        Scene::Update(window, dt);
+        if (player->IsDead())
+        {
+            std::cout << "DERROTA" << std::endl;
+        }
+        else if (oponent->IsDead())
+        {
+            std::cout << "VICTORIA" << std::endl;
+        }
 
 		movementInterpolation.Update(dt);
 
         Vector2 interpolatedPos = movementInterpolation.GetInterpolatedPosition(opponentUser);
-        oponent->SetInterpolatedPosition(sf::Vector2f(interpolatedPos.x, interpolatedPos.y));
+        oponent->SetInterpolatedPosition(Vector2(interpolatedPos.x, interpolatedPos.y));
         oponent->Update(dt);  // Se hace dos veces este update, no parece que cause problemas por ahora pero en el futuro podria dar
+        
+        Scene::Update(window, dt);
 
-        if (NT->GetDisconnectFromServer()) return false;
+        //if (NT->GetDisconnectFromServer()) return false;
 
         NT->Update();
 
         if (movementPrediction.ShouldSendPacket(dt))
         {
-            MovementPacket playerMovementPacket = movementPrediction.CreateMovementPacket(player->GetPosition());
-            NT->SendMovementPacket(playerMovementPacket);
+            MovementPacket movementPacket = movementPrediction.CreateMovementPacket(player->GetPosition());
+
+            movementReconciliation.AddPendingPacket(movementPacket);
+
+            NT->SendMovementPacket(movementPacket);
+        }
+
+        MovementPacket validatedPacket;
+
+        if (NT->GetLastValidatedMovementPacket(validatedPacket))
+        {
+            Vector2 correctedPosition = player->GetPosition();
+
+            Vector2 validatedPosition(
+                validatedPacket.pos.x,
+                validatedPacket.pos.y
+            );
+
+            movementReconciliation.Reconcile(
+                correctedPosition,
+                validatedPosition,
+                validatedPacket.ID
+            );
+
+            player->SetInterpolatedPosition(correctedPosition);
         }
 
         return true;
@@ -95,9 +125,6 @@ public:
     void Render(sf::RenderWindow& window) override
     {
         Scene::Render(window);
-
-        window.draw(ground);
-
-        window.display();
+        //window.display();
     }
 };

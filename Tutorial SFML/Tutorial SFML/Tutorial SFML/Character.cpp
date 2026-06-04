@@ -1,4 +1,7 @@
 #include "Character.h"
+#include "Bullet.h"
+#include "Ground.h"
+#include "Spawner.h"
 
 void Character::HandleAnimation(float dt)
 {
@@ -31,9 +34,20 @@ void Character::HandleAnimation(float dt)
     sprite.Update(dt);
 }
 
+void Character::ReceiveHit()
+{
+    currentHealthPoints--;
+
+    if (currentHealthPoints <= 0)
+    {
+        currentLives--;
+        currentHealthPoints = 5;
+    }
+}
+
 Character::Character(const std::string& texturePath) : sprite(texturePath), quackSound(quackBuffer)
 {
-    position = { 400.f, 300.f };
+    transform->position = { 400.f, 300.f };
     sprite.SetScale({ scale, scale });
 
     sprite.AddAnimation("idle", Animation(32, 32, 0, 1, 0));
@@ -43,10 +57,20 @@ Character::Character(const std::string& texturePath) : sprite(texturePath), quac
 
     sprite.StartAnimation("idle");
 
-    velocity = sf::Vector2f(0, 0);
+    velocity = Vector2(0,0);
 
     width = sprite.GetWidth() * scale;
     height = sprite.GetHeight() * scale;
+
+    float colliderWidth = width * 0.5f;
+    float colliderHeight = height * (2.f / 3.f);
+
+    collider->SetSize(Vector2(colliderWidth, colliderHeight));
+
+    float offsetY = (height / 2.f) - (colliderHeight / 2.f);
+    colliderOffset = -Vector2(colliderWidth / 2.f, colliderHeight / 2.f) + Vector2(0.f, offsetY);       
+    
+    collider->SetTopLeft(transform->position + colliderOffset);
 
     if (!quackBuffer.loadFromFile("assets/quack.wav"))
         std::cout << "Error cargando quack.wav" << std::endl;
@@ -57,7 +81,8 @@ Character::Character(const std::string& texturePath) : sprite(texturePath), quac
 void Character::Update(float dt)
 {
     HandleAnimation(dt);
-    sprite.SetPosition(position);
+    collider->SetTopLeft(transform->position + colliderOffset);
+    sprite.SetPosition(transform->position);
 }
 
 void Character::Quack()
@@ -73,12 +98,42 @@ void Character::Shoot()
     isShooting = true;
     sprite.StartAnimation("shoot");
 
-    // Shoot
+    Bullet* bullet = new Bullet();
+
+    float offset = facingRight ? 40.f : -40.f;
+    Vector2 position = Vector2(transform->position.x + offset, transform->position.y);
+    
+    bullet->Init(this, position, facingRight);
+
+    SPAWN.SpawnObject(bullet);
 }
 
-void Character::SetInterpolatedPosition(const sf::Vector2f newPosition)
+void Character::OnCollisionEnter(Object* other, const CollisionInfo& collisionInfo)
 {
-    if (newPosition.x > position.x || newPosition.x < position.x) {
+    if (dynamic_cast<Ground*>(other))
+    {
+        if (collisionInfo.penetration < 0.01f)
+            return;
+
+        transform->position.x = transform->position.x + collisionInfo.normal.x * collisionInfo.penetration;
+        transform->position.y = transform->position.y + collisionInfo.normal.y * collisionInfo.penetration;
+
+        if (collisionInfo.normal.y != 0)
+            velocity.y = 0;
+
+        if (collisionInfo.normal.x != 0)
+            velocity.x = 0;
+    }
+    else if (Bullet* bullet = dynamic_cast<Bullet*>(other))
+    {
+        if (bullet->GetOwner() != this)
+            ReceiveHit();
+    }
+}
+
+void Character::SetInterpolatedPosition(const Vector2 newPosition)
+{
+    if (newPosition.x > transform->position.x || newPosition.x < transform->position.x) {
 		velocity.x = walkAnimVelocityThreshold;
     }
     else
@@ -86,5 +141,5 @@ void Character::SetInterpolatedPosition(const sf::Vector2f newPosition)
         velocity.x = 0.f;
     }
         
-    position = newPosition;
+    transform->position = newPosition;
 }

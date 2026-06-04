@@ -3,8 +3,8 @@
 #include "Scene.h"
 #include "GameScene.h"
 #include "LoginScene.h"
-#include "LobbyScene.h"
 #include "LobbyWaitingScene.h"
+#include "MatchmakingScene.h"
 #include "RankingScene.h"
 #include <string>
 #include "User.h"
@@ -40,21 +40,21 @@ public:
 
 		scenes[SceneOption::GAME] = new GameScene();
 		scenes[SceneOption::LOGIN] = new LoginScene();
-		scenes[SceneOption::LOBBY] = new LobbyScene();
+		scenes[SceneOption::LOBBY] = new MatchmakingScene();
 		scenes[SceneOption::WAITING_ROOM] = new LobbyWaitingScene();
 		scenes[SceneOption::RANKING] = new RankingScene();
-		curScene = scenes[SceneOption::LOGIN];
-		curScene->enter(sharedMemory);
+		curScene = scenes[SceneOption::LOBBY];
+		curScene->Enter(sharedMemory);
 	}
 
-	bool update(sf::RenderWindow& window) {
+	bool update(sf::RenderWindow& window, float dt) {
 		if (curScene->nextScene != SceneOption::NONE) {
-			curScene->exit();
+			curScene->Exit();
 			curScene = scenes[curScene->nextScene];
-			curScene->enter(sharedMemory);
+			curScene->Enter(sharedMemory);
 		}
 
-		return curScene->update(window);
+		return curScene->Update(window, dt);
 	}
 };
 
