@@ -48,9 +48,9 @@ protected:
 public:
     void Update(float dt) override;
 
-    void Quack();
+    virtual void Quack();
 
-    void Shoot();
+    virtual void Shoot();
 
     void Render(sf::RenderWindow& window) override { window.draw(sprite.GetSprite()); }
     

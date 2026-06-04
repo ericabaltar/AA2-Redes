@@ -1,4 +1,5 @@
 #include "PlayerCharacter.h"
+#include "NetworkManager.h"
 
 void PlayerCharacter::HandleInput(float dt)
 {
@@ -25,8 +26,6 @@ void PlayerCharacter::HandleInput(float dt)
 
 void PlayerCharacter::ApplyPhysics(float dt, float groundY)
 {
-    std::cout << "Posicion inicial: " << transform->position.x << "   " << transform->position.y << std::endl;
-
     if (isQuacking || isShooting)
     {
         velocity.x = 0.f;
@@ -85,9 +84,6 @@ void PlayerCharacter::ApplyPhysics(float dt, float groundY)
         transform->position = { 800.f - width / 2.f, transform->position.y };
         velocity.x = 0.f;
     }
-
-    std::cout << "Posicion final: " << transform->position.x << "   " << transform->position.y << std::endl;
-
 }
 
 void PlayerCharacter::Update(float dt)
@@ -97,4 +93,15 @@ void PlayerCharacter::Update(float dt)
     HandleInput(dt);
     ApplyPhysics(dt, groundY);
     Character::Update(dt);
+}
+
+void PlayerCharacter::Quack()
+{
+    Character::Quack();
+    NT->SendTaunt();
+}
+
+void PlayerCharacter::Shoot()
+{
+    Character::Shoot();
 }

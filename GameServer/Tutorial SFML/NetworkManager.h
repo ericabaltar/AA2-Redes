@@ -1,8 +1,9 @@
 #pragma once
 #include <SFML/Network.hpp>
 #include <iostream>
+#include <queue>
 #include "ServerPacketTypeManager.h"
-
+#include "Task.h"
 
 #define NT NetworkManager::Instance()
 #define BIND_PORT 55000
@@ -23,6 +24,8 @@ private:
 
 	std::vector <sf::TcpSocket*> clients;
 	sf::TcpSocket* newClient;
+
+	std::queue<Task> pendingTasks;
 	
 public:
 	void Init();
@@ -32,6 +35,8 @@ public:
 	void ReceiveClientPacket();
 	//void CheckForDisconnection();
 	
+	inline void AddTask(Task task) { pendingTasks.push(task); }
+
 	inline void CloseServer() { closeServer = true; }
 	inline bool GetCloseServer() { return closeServer; }
 	inline bool CheckIfSocketsAreReadyToReceive() { return selector.wait(); }

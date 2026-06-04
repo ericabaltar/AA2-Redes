@@ -88,20 +88,17 @@ public:
         oponent->SetInterpolatedPosition(Vector2(interpolatedPos.x, interpolatedPos.y));
         oponent->Update(dt);  // Se hace dos veces este update, no parece que cause problemas por ahora pero en el futuro podria dar
         
-        if (NT->GetDisconnectFromServer()) return false;
+        //if (NT->GetDisconnectFromServer()) return false;
 
         NT->Update();
 
         if (movementPrediction.ShouldSendPacket(dt))
         {
-            MovementPacket movementPacket =
-                movementPrediction.CreateMovementPacket(player->GetPosition());
+            MovementPacket movementPacket = movementPrediction.CreateMovementPacket(player->GetPosition());
 
             movementReconciliation.AddPendingPacket(movementPacket);
 
             NT->SendMovementPacket(movementPacket);
-            MovementPacket playerMovementPacket = movementPrediction.CreateMovementPacket(player->GetPosition());
-            NT->SendMovementPacket(playerMovementPacket);
         }
 
         MovementPacket validatedPacket;
