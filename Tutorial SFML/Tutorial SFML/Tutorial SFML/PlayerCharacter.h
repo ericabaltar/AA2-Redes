@@ -26,6 +26,7 @@ public:
         transform->position = { 100.f, 300.f };
     }
 
+    void HandleEvent(const sf::Event& event) override;
     void Update(float dt) override; 
 
     void Quack() override;
