@@ -78,21 +78,6 @@ public:
 
     }
 
-    void HandleEvents(sf::RenderWindow& window)
-    {
-        while (const std::optional event = window.pollEvent())
-        {
-            if (event->is<sf::Event::Closed>())
-                window.close();
-
-            if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
-            {
-                if (keyPressed->scancode == sf::Keyboard::Scancode::Space)
-                    player->ResetJumpBuffer();
-            }
-        }
-    }
-
     virtual bool Update(sf::RenderWindow& window, float dt) override
     {
         if (player->IsDead())

@@ -11,7 +11,7 @@ int main()
 {
     NT->Init();
 
-	if (NT->GetDisconnectFromServer()) return 0;
+	//if (NT->GetDisconnectFromServer()) return 0;
 
     sf::RenderWindow window(sf::VideoMode({ WINDOW_WIDTH, WINDOW_HEIGHT }), "AA3 Shooter");
 

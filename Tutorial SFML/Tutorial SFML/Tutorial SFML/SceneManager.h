@@ -45,7 +45,7 @@ public:
 		scenes[SceneOption::LOBBY] = new MatchmakingScene();
 		scenes[SceneOption::WAITING_ROOM] = new LobbyWaitingScene();
 		scenes[SceneOption::RANKING] = new RankingScene();
-		curScene = scenes[SceneOption::LAUNCHER];
+		curScene = scenes[SceneOption::GAME];
 		curScene->Enter(sharedMemory);
 	}
 

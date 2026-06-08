@@ -78,6 +78,15 @@ void PlayerCharacter::ApplyPhysics(float dt)
     isOnGround = false;
 }
 
+void PlayerCharacter::HandleEvent(const sf::Event& event)
+{
+    if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>())
+    {
+        if (keyPressed->scancode == sf::Keyboard::Scancode::Space)
+            ResetJumpBuffer();
+    }
+}
+
 void PlayerCharacter::Update(float dt)
 {
     HandleInput(dt);

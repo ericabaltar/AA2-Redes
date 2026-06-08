@@ -36,10 +36,13 @@ private:
 			for (int j = i + 1; j < objects.size(); j++)
 			{
 				CollisionInfo collisionInfo = objects[i]->GetCollider()->GetCollisionInfo(objects[j]->GetCollider());
+
 				if (collisionInfo.collided)
 				{
+					CollisionInfo collisionInfoReversed = objects[j]->GetCollider()->GetCollisionInfo(objects[i]->GetCollider());
+
 					objects[i]->OnCollisionEnter(objects[j], collisionInfo);
-					objects[j]->OnCollisionEnter(objects[i], collisionInfo);
+					objects[j]->OnCollisionEnter(objects[i], collisionInfoReversed);
 				}
 			}
 		}
