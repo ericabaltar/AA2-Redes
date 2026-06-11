@@ -164,6 +164,7 @@
     <ClCompile Include="RankingStyle.cpp" />
     <ClCompile Include="ServerPacketTypesManager.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="UdpManager.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="Vector2.cpp" />
     <ClCompile Include="XMLReader.cpp" />
@@ -210,6 +211,7 @@
     <ClInclude Include="SharedMemory.h" />
     <ClInclude Include="Spawner.h" />
     <ClInclude Include="Transform.h" />
+    <ClInclude Include="UdpManager.h" />
     <ClInclude Include="User.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Vector2.h" />

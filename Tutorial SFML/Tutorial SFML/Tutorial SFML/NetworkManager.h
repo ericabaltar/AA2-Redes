@@ -5,6 +5,8 @@
 #include "ServerPacketTypesManager.h"
 #include "MovementPacket.h"
 #include "Utils.h"
+#include "UdpManager.h"
+#include <list>
 
 #define NT NetworkManager::Instance()
 #define SERVER_PORT 55000
@@ -26,8 +28,7 @@ private:
 	sf::TcpSocket socket;
 	bool successfulLogin = false;
 
-	sf::UdpSocket udpServerSocket;
-	char buffer[1024];
+	UdpManager udp;
 
 	MovementPacket lastValidatedMovementPacket;
 	bool hasValidatedMovementPacket = false;
@@ -52,6 +53,7 @@ public:
 
 	void SendMovementPacket(MovementPacket movementPacket);
 	void SendTaunt();
+	void SendShot(bool towardsRight);
 
 	bool GetLastValidatedMovementPacket(MovementPacket& packet);
 

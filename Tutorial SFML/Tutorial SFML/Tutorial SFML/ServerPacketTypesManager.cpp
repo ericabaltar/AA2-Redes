@@ -229,6 +229,20 @@ void ServerPacketTypesManager::SendMovement(sf::UdpSocket& server, MovementPacke
 	SendUdpData(server, packet);
 }
 
+sf::Packet ServerPacketTypesManager::SendShot(sf::UdpSocket& server, bool towardsRight)
+{
+	sf::Packet packet;
+	uint8_t priority = CRITICAL_PACKET;
+
+	packet << priority;
+	packet << UdpPacketTypes::SHOT;
+	packet << towardsRight;
+
+	SendUdpData(server, packet);
+
+	return packet;
+}
+
 void ServerPacketTypesManager::SendTaunt(sf::UdpSocket& server)
 {
 	sf::Packet packet;
@@ -237,6 +251,11 @@ void ServerPacketTypesManager::SendTaunt(sf::UdpSocket& server)
 	packet << priority;
 	packet << UdpPacketTypes::TAUNT;
 
+	SendUdpData(server, packet);
+}
+
+void ServerPacketTypesManager::SendCriticalPacket(sf::UdpSocket& server, sf::Packet packet)
+{
 	SendUdpData(server, packet);
 }
 

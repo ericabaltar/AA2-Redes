@@ -4,13 +4,8 @@ void NetworkManager::Init()
 {
     EstablishConnectionWithServer();
 
-    udpServerSocket.setBlocking(false);
-
-    if (udpServerSocket.bind(sf::Socket::AnyPort) != sf::Socket::Status::Done)
-    {
-        std::cout << "Error al abrir socket UDP del cliente" << std::endl;
+    if (!udp.Init())
         disconnectFromServer = true;
-    }
 }
 
 void NetworkManager::EstablishConnectionWithServer()
@@ -85,12 +80,18 @@ void NetworkManager::SendMapPetitionServerPacket()
 
 void NetworkManager::SendMovementPacket(MovementPacket movementPacket)
 {
-    SPTM->SendMovement(udpServerSocket, movementPacket);
+    SPTM->SendMovement(udp.GetSocket(), movementPacket);
 }
 
 void NetworkManager::SendTaunt()
 {
-    SPTM->SendTaunt(udpServerSocket);
+    SPTM->SendTaunt(udp.GetSocket());
+}
+
+void NetworkManager::SendShot(bool towardsRight)
+{
+    sf::Packet packet = SPTM->SendShot(udp.GetSocket(), towardsRight);
+
 }
 
 void NetworkManager::SendLobbyCreateAttemptPacket(std::string lobbyId)
@@ -112,7 +113,7 @@ void NetworkManager::HandleReceivedUdpPackets()
     std::optional<sf::IpAddress> senderIp;
     unsigned short senderPort;
 
-    sf::Socket::Status udpStatus = udpServerSocket.receive(
+    sf::Socket::Status udpStatus = udp.GetSocket().receive(
         &movementPacket,
         sizeof(MovementPacket),
         received,

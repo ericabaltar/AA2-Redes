@@ -48,8 +48,9 @@ public:
 
 	void SendLobbyJoinAttempt(GameMode mode, sf::TcpSocket& server);
 	void SendMovement(sf::UdpSocket& server, MovementPacket movement);
-	void SendShot(sf::UdpSocket& server);
+	sf::Packet SendShot(sf::UdpSocket& server, bool towardsRight);
 	void SendTaunt(sf::UdpSocket& server);
+	void SendCriticalPacket(sf::UdpSocket& server, sf::Packet packet);
 
 private:
 	ServerPacketTypesManager() = default;
