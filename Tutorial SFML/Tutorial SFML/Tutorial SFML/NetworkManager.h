@@ -55,6 +55,7 @@ public:
 	void SendTaunt();
 	void SendShot(bool towardsRight);
 
+	void SetLastValidatedMovementPacket(const MovementPacket& packet);
 	bool GetLastValidatedMovementPacket(MovementPacket& packet);
 
 private:
@@ -65,6 +66,5 @@ private:
 
 	void EstablishConnectionWithServer();
 	void HandleReceivedTcpPackets();
-	void HandleReceivedUdpPackets();
 	void SendServerPacket();
 };

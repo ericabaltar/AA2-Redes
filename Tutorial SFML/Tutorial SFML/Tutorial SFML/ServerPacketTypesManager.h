@@ -15,11 +15,6 @@ enum TcpPacketTypes
 	HANDSHAKE, LOGIN, REGISTER, LOBBY_CREATE, LOBBY_JOIN, WAITING_ROOM_PLAYERS, MOVEMENT_TCP, RANKING, START_GAME, END_GAME, MAP_CHECK
 };
 
-enum UdpPacketTypes
-{
-	MOVEMENT, SHOT, TAUNT, LOBBY
-};
-
 class ServerPacketTypesManager
 {
 public:
@@ -43,7 +38,6 @@ public:
 	void SendMapPetition(sf::TcpSocket& server);
 
 	void SendLobbyJoinAttempt(GameMode mode, sf::TcpSocket& server);
-	void SendCriticalPacket(sf::UdpSocket& server, sf::Packet packet);
 
 private:
 	ServerPacketTypesManager() = default;
@@ -52,7 +46,6 @@ private:
 	~ServerPacketTypesManager() = default;
 
 	void SendData(sf::TcpSocket& socket, sf::Packet& packet);
-	void SendUdpData(sf::UdpSocket& socket, sf::Packet& packet);
 
 	void ReceiveLoginPacket(sf::Packet data);
 	void ReceiveRegisterPacket(sf::Packet data);

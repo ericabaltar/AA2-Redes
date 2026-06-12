@@ -1,7 +1,24 @@
 #include "UdpManager.h"
-#include "ServerPacketTypesManager.h"
 #include "NetworkManager.h"
 #include <iostream>
+
+sf::Packet& operator>>(sf::Packet& packet, UdpManager::PacketType& type)
+{
+    uint8_t temp;
+    packet >> temp;
+    type = static_cast<UdpManager::PacketType>(temp);
+
+    return packet;
+}
+
+sf::Packet& operator<<(sf::Packet& packet, UdpManager::PacketType type)
+{
+    uint8_t temp;
+    temp = static_cast<uint8_t>(type);
+    packet << temp;
+
+    return packet;
+}
 
 int UdpManager::GetNextCriticalPacketId()
 {
@@ -23,6 +40,73 @@ void UdpManager::AttemptToSendPendingCriticalPackets()
     }
 }
 
+void UdpManager::ReceivePacket()
+{
+    char buffer[1024];
+    std::size_t receivedSize;
+    std::optional<sf::IpAddress> senderIp;
+    unsigned short senderPort;
+
+    if (socket.receive(buffer, sizeof(buffer), receivedSize, senderIp, senderPort) == sf::Socket::Status::Done)
+    {
+        std::cout << "Paquete recibido de " << senderIp.value() << ":" << senderPort << std::endl;
+
+        sf::Packet packet;
+        packet.append(buffer, receivedSize);
+
+        uint8_t priority;
+        packet >> priority;
+
+        PacketType packetType;
+
+        bool isCritical = (priority & CRITICAL_PACKET) != 0;
+        uint8_t criticalId = 0;
+
+        if (isCritical)
+            packet >> criticalId;
+
+        packet >> packetType;
+
+        if (isCritical)
+        {
+            if (packetType == PacketType::ACKNOWLEDGEMENT)
+            {
+                RemoveCriticalPacketFromPending(criticalId);
+            }
+            else
+            {
+                if (PacketIsAlreadyProcessed(criticalId))
+                {
+                    packet.clear();
+                    return;
+                }
+                else
+                {
+                    ProcessedCriticalPacket(criticalId);
+                }
+            }         
+        }
+
+        switch (packetType)
+        {
+        case PacketType::MOVEMENT:
+            ReceiveMovement(packet);
+            break;
+        case PacketType::SHOT:
+            ReceiveShot(packet);
+            break;
+        case PacketType::TAUNT:
+            ReceiveTaunt(packet);
+            break;
+        default:
+            std::cout << "No se ha identificado el tipo de paquete" << std::endl;
+            break;
+        }
+
+        packet.clear();
+    }
+}
+
 void UdpManager::RemoveCriticalPacketFromPending(int id)
 {
     for (std::vector<std::pair<int, sf::Packet>>::iterator it = pendingCriticalPacketsToSend.begin();
@@ -36,12 +120,17 @@ void UdpManager::RemoveCriticalPacketFromPending(int id)
     }
 }
 
-bool UdpManager::CheckIfPacketIsAlreadyProcessed(int id)
+bool UdpManager::PacketIsAlreadyProcessed(int id)
 {
     if (processedCriticalPackets.find(id) != processedCriticalPackets.end())
         return true;
 
     return false;
+}
+
+void UdpManager::ProcessedCriticalPacket(int id)
+{
+    processedCriticalPackets.insert(id);
 }
 
 void UdpManager::SendData(const sf::Packet& packet)
@@ -57,6 +146,24 @@ void UdpManager::SendData(const sf::Packet& packet)
     {
         std::cerr << "Error al enviar paquete UDP" << std::endl;
     }
+}
+
+void UdpManager::ReceiveMovement(sf::Packet data)
+{
+    MovementPacket movementPacket;
+    data >> movementPacket;
+
+    NT->SetLastValidatedMovementPacket(movementPacket);
+
+    std::cout << "Paquete de movimiento validado recibido. ID: " << movementPacket.ID << std::endl;
+}
+
+void UdpManager::ReceiveShot(sf::Packet data)
+{
+}
+
+void UdpManager::ReceiveTaunt(sf::Packet data)
+{
 }
 
 bool UdpManager::Init()
@@ -80,7 +187,7 @@ void UdpManager::SendMovement(MovementPacket movement)
     uint8_t priority = NORMAL_PACKET;
 
     packet << priority;
-    packet << UdpPacketTypes::MOVEMENT;
+    packet << PacketType::MOVEMENT;
     packet << movement;
 
     SendData(packet);
@@ -94,7 +201,7 @@ void UdpManager::SendShot(bool towardsRight)
 
     packet << priority;
     packet << id;
-    packet << UdpPacketTypes::SHOT;
+    packet << PacketType::SHOT;
     packet << towardsRight;
 
     SendCriticalPacket(id, packet);
@@ -106,12 +213,7 @@ void UdpManager::SendTaunt()
     uint8_t priority = URGENT_PACKET;
 
     packet << priority;
-    packet << UdpPacketTypes::TAUNT;
+    packet << PacketType::TAUNT;
 
     SendData(packet);
-}
-
-sf::UdpSocket& UdpManager::GetSocket()
-{
-    return socket;
 }

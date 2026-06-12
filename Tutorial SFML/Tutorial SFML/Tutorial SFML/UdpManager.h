@@ -9,6 +9,9 @@
 
 class UdpManager
 {
+public:
+	enum class PacketType : uint8_t { MOVEMENT, SHOT, TAUNT, ACKNOWLEDGEMENT };
+
 private:
 	sf::UdpSocket socket;
 
@@ -19,18 +22,22 @@ private:
 	int GetNextCriticalPacketId();
 	void SendCriticalPacket(int id, sf::Packet packet);
 	void RemoveCriticalPacketFromPending(int id);
-	bool CheckIfPacketIsAlreadyProcessed(int id);
+	bool PacketIsAlreadyProcessed(int id);
+	void ProcessedCriticalPacket(int id);
 
 	void SendData(const sf::Packet& packet);
+
+	void ReceiveMovement(sf::Packet data);
+	void ReceiveShot(sf::Packet data);
+	void ReceiveTaunt(sf::Packet data);
 
 public:
 	bool Init();
 	void AttemptToSendPendingCriticalPackets();
+	void ReceivePacket();
 
 	void SendMovement(MovementPacket movement);
 	void SendShot(bool towardsRight);
 	void SendTaunt();
-
-	sf::UdpSocket& GetSocket();
 };
 

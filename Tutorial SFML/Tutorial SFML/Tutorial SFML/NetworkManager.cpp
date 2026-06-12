@@ -47,7 +47,7 @@ void NetworkManager::Update()
     }
 
     // UDP
-    HandleReceivedUdpPackets();
+    udp.ReceivePacket();
     udp.AttemptToSendPendingCriticalPackets();
 }
 
@@ -104,34 +104,10 @@ void NetworkManager::SendLobbyJoinAttemptPacket(GameMode mode)
     SPTM->SendLobbyJoinAttempt(mode, socket);
 }
 
-void NetworkManager::HandleReceivedUdpPackets()
+void NetworkManager::SetLastValidatedMovementPacket(const MovementPacket& packet)
 {
-    sf::Packet receivePacket;
-
-    MovementPacket movementPacket;
-    std::size_t received;
-    std::optional<sf::IpAddress> senderIp;
-    unsigned short senderPort;
-
-    sf::Socket::Status udpStatus = udp.GetSocket().receive(
-        &movementPacket,
-        sizeof(MovementPacket),
-        received,
-        senderIp,
-        senderPort
-    );
-
-    if (udpStatus == sf::Socket::Status::Done)
-    {
-        if (received == sizeof(MovementPacket))
-        {
-            lastValidatedMovementPacket = movementPacket;
-            hasValidatedMovementPacket = true;
-
-            std::cout << "Paquete validado recibido. ID: "
-                << movementPacket.ID << std::endl;
-        }
-    }
+    lastValidatedMovementPacket = packet;
+    hasValidatedMovementPacket = true;
 }
 
 bool NetworkManager::GetLastValidatedMovementPacket(MovementPacket& packet)

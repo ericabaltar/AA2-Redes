@@ -106,21 +106,6 @@ void ServerPacketTypesManager::SendData(sf::TcpSocket& socket, sf::Packet& packe
 	}
 }
 
-void ServerPacketTypesManager::SendUdpData(sf::UdpSocket& socket, sf::Packet& packet)
-{
-	const void* data = packet.getData();
-	std::size_t dataSize = packet.getDataSize();
-
-	if (socket.send(data, dataSize, SERVER_IP, SERVER_PORT) == sf::Socket::Status::Done)
-	{
-		std::cout << "Paquete UDP enviado..." << std::endl;
-	}
-	else
-	{
-		std::cerr << "Error al enviar paquete UDP" << std::endl;
-	}
-}
-
 void ServerPacketTypesManager::SendHandshake(sf::TcpSocket& server)
 {
 	sf::Packet packet;
@@ -174,7 +159,7 @@ void ServerPacketTypesManager::SendLobbyJoinAttempt(GameMode mode, sf::TcpSocket
 	uint8_t priority = NORMAL_PACKET;
 
 	packet << priority;
-	packet << UdpPacketTypes::LOBBY;
+	packet << TcpPacketTypes::LOBBY_JOIN;
 	packet << static_cast<int>(mode);
 
 	SendData(server, packet);
@@ -216,12 +201,6 @@ void ServerPacketTypesManager::SendMapPetition(sf::TcpSocket& server)
 
 	SendData(server, packet);
 }
-
-void ServerPacketTypesManager::SendCriticalPacket(sf::UdpSocket& server, sf::Packet packet)
-{
-	SendUdpData(server, packet);
-}
-
 
 void ServerPacketTypesManager::ReceiveHandshakePacket(sf::Packet data)
 {
