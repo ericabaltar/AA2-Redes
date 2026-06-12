@@ -48,6 +48,7 @@ void NetworkManager::Update()
 
     // UDP
     HandleReceivedUdpPackets();
+    udp.AttemptToSendPendingCriticalPackets();
 }
 
 sf::TcpSocket* NetworkManager::GetServerSocket()
@@ -80,18 +81,17 @@ void NetworkManager::SendMapPetitionServerPacket()
 
 void NetworkManager::SendMovementPacket(MovementPacket movementPacket)
 {
-    SPTM->SendMovement(udp.GetSocket(), movementPacket);
+    udp.SendMovement(movementPacket);
 }
 
 void NetworkManager::SendTaunt()
 {
-    SPTM->SendTaunt(udp.GetSocket());
+    udp.SendTaunt();
 }
 
 void NetworkManager::SendShot(bool towardsRight)
 {
-    sf::Packet packet = SPTM->SendShot(udp.GetSocket(), towardsRight);
-
+    udp.SendShot(towardsRight);
 }
 
 void NetworkManager::SendLobbyCreateAttemptPacket(std::string lobbyId)
