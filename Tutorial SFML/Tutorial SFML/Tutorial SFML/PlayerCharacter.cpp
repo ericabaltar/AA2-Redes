@@ -63,18 +63,6 @@ void PlayerCharacter::ApplyPhysics(float dt)
     velocity.y += gravity * dt;
     transform->position = transform->position + velocity * dt;
 
-    if (transform->position.x - width / 2.f < 0.f)
-    {
-        transform->position = { width / 2.f, transform->position.y };
-        velocity.x = 0.f;
-    }
-
-    if (transform->position.x + width / 2.f > 800.f)
-    {
-        transform->position = { 800.f - width / 2.f, transform->position.y };
-        velocity.x = 0.f;
-    } 
-
     isOnGround = false;
 }
 

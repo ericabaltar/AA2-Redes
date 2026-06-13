@@ -72,7 +72,7 @@ private:
     Tileset m_tiles;
     int m_width = 0;
     int m_height = 0;
-    float defaultTileSize = 75.f;
+    float defaultTileSize = 80.f;
 	bool informationHasBeenChecked = false;
 
     const std::string& filename = "gameConfig.txt";

@@ -72,10 +72,6 @@ public:
                 }
             }
         }
-
-
-
-
     }
 
     virtual bool Update(sf::RenderWindow& window, float dt) override
