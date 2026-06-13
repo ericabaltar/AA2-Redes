@@ -139,6 +139,7 @@
     <ClCompile Include="NetworkManager.cpp" />
     <ClCompile Include="ServerPacketTypeManager.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="UdpManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Server\Tutorial SFML\Player.h" />
@@ -149,6 +150,7 @@
     <ClInclude Include="ServerPacketTypeManager.h" />
     <ClInclude Include="Task.h" />
     <ClInclude Include="ThreadManager.h" />
+    <ClInclude Include="UdpManager.h" />
     <ClInclude Include="Vector2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

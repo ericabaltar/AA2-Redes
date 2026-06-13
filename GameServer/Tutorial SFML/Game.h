@@ -5,12 +5,12 @@
 class GameRoom
 {
 public:
-	GameRoom(std::string roomId, GameMode mode)
+	GameRoom(int roomId, GameMode mode)
 		: id(roomId), gameMode(mode) {
 	}
 
 private:
-	std::string id;
+	int id;
 	GameMode gameMode;
 
 	static const int maxPlayers = 2;
@@ -21,7 +21,7 @@ private:
 	bool gameStarted = false;
 
 public:
-	std::string GetId()
+	int GetId()
 	{
 		return id;
 	}

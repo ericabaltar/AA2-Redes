@@ -32,7 +32,7 @@ public:
 
 	GameRoom* CreateRoom(GameMode mode)
 	{
-		std::string roomId = "Room_" + std::to_string(nextRoomId);
+		int roomId = nextRoomId;
 		nextRoomId++;
 
 		rooms.emplace_back(roomId, mode);

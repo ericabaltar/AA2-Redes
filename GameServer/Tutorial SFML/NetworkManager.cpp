@@ -3,28 +3,17 @@
 void NetworkManager::Init()
 {
     EstablishConnectionWithLauncherServer();
-
-    closeServer = false;
-
-    if(socket.bind(BIND_PORT) == sf::Socket::Status::Done)
-    {
-        std::cout << "Puerto bindeado correctamente." << std::endl;
-    }
-    else
-    {
-        std::cout << "Error: No se pudo bindear el puerto." << std::endl;
+    
+    if (!udp.Init())
         closeServer = true;
-    }
-
-    //selector.add(listener);
-    std::cout << "Servidor Abierto" << std::endl;
 }
 
 void NetworkManager::Update()
 {
     HandleReceivedTcpPackets();
 
-    ReceiveClientPacket();
+    udp.ReceivePacket();
+    udp.AttemptToSendPendingCriticalPackets();
 }
 /*
 void NetworkManager::EstablishConnectionWithClient()
@@ -46,35 +35,17 @@ void NetworkManager::EstablishConnectionWithClient()
     }
 }*/
 
-void NetworkManager::ReceiveClientPacket()
-{
-    char buffer[1024];
-    std::size_t receivedSize;
-    std::optional<sf::IpAddress> senderIp;
-    unsigned short senderPort;        
-
-    if (socket.receive(buffer, sizeof(buffer), receivedSize, senderIp, senderPort) == sf::Socket::Status::Done)
-    {
-        std::cout << "Paquete recibido de " << senderIp.value() << ":" << senderPort << std::endl;
-
-        sf::Packet packet;
-        packet.append(buffer, receivedSize);
-
-        SPTM->ReceivePacket(packet, senderIp, senderPort);
-    }
-}
-
 void NetworkManager::EstablishConnectionWithLauncherServer()
 {
-    disconnectFromLauncherServer = false;
+    closeServer = false;
 
-    if (launcherSocket.connect(LAUNCHER_SERVER_IP, LAUNCHER_SERVER_PORT) != sf::Socket::Status::Done) {
+    if (mainServerSocket.connect(MAIN_SERVER_IP, MAIN_SERVER_PORT) != sf::Socket::Status::Done) {
         std::cerr << "Error al conectar con el servidor" << std::endl;
-        disconnectFromLauncherServer = true;
+        closeServer = true;
     }
     else {
-        launcherSocket.setBlocking(false);
-        SPTM->SendHandshake(launcherSocket);
+        mainServerSocket.setBlocking(false);
+        SPTM->SendHandshake(mainServerSocket);
         HandleReceivedTcpPackets();
         std::cout << "Conectado al servidor" << std::endl;
     }
@@ -83,12 +54,12 @@ void NetworkManager::EstablishConnectionWithLauncherServer()
 void NetworkManager::HandleReceivedTcpPackets()
 {
     sf::Packet receivePacket;
-    if (launcherSocket.receive(receivePacket) == sf::Socket::Status::Done) {
+    if (mainServerSocket.receive(receivePacket) == sf::Socket::Status::Done) {
         SPTM->ReceiveTcpPacket(receivePacket);
     }
-    else if (launcherSocket.receive(receivePacket) == sf::Socket::Status::Disconnected) {
+    else if (mainServerSocket.receive(receivePacket) == sf::Socket::Status::Disconnected) {
         std::cout << "Servidor desconectado" << std::endl;
-        disconnectFromLauncherServer = true;
+        closeServer = true;
     }
 }
 
