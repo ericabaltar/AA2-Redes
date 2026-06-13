@@ -11,7 +11,7 @@ private:
     const float friction = 8.f;
 
     const float gravity = 2000.f;
-    const float jumpForce = -900.f;
+    const float jumpForce = -1050.f;
 
     const float coyoteTime = 0.12f;
     float coyoteTimer = 0.f;

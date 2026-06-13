@@ -23,29 +23,30 @@ sf::Packet& operator<<(sf::Packet& packet, TcpPacketTypes& tipo) {
 }
 
 inline sf::Packet& operator<<(sf::Packet& packet, TileType type) {
-	return packet << static_cast<char>(type);
+	return packet << static_cast<uint8_t>(type);
 }
 
 sf::Packet& operator>>(sf::Packet& packet, TileType& type) {
-	int value;
+	uint8_t value;
 	packet >> value;
-	char charValue = static_cast<char>(value);
-	type = static_cast<TileType>(charValue);
+	type = static_cast<TileType>(value);
 	return packet;
 }
 
 inline sf::Packet& operator<<(sf::Packet& packet, const Tile& tile) {
-	return packet << tile.type << tile.x << tile.y << tile.originalChar;
+	return packet << tile.type << tile.x << tile.y << static_cast<uint8_t>(tile.originalChar);
 }
 
 sf::Packet& operator>>(sf::Packet& packet, Tile& tile) {
-	Tile tempTile(TileType::FLOOR, 0, 0, ' ');
-	packet >> tempTile.type >> tempTile.x >> tempTile.y;
+	uint8_t c;
 
-	int tempValue;
-	packet >> tempValue;
-	char charValue = static_cast<char>(tempValue);
-	tile.originalChar = charValue;
+	packet >> tile.type;
+	packet >> tile.x;
+	packet >> tile.y;
+	packet >> c;
+
+	tile.originalChar = static_cast<char>(c);
+
 	return packet;
 }
 
@@ -352,17 +353,17 @@ void ServerPacketTypesManager::ReceiveMapPacket(sf::Packet data)
 		int tileCount = 0;
 		data >> tileCount;
 
-		std::vector<Tile> tempTileVector;
+		std::vector<Tile*> tempTileVector;
 
 		for (int i = 0; i < tileCount; i++) {
 			Tile tile;
 			data >> tile;
-			tempTileVector.push_back(tile);
+			tempTileVector.push_back(new Tile(tile));
 		}
 
 		MAP->SetHeight(height);
 		MAP->SetWidth(width);
-		MAP->SetTiles(std::vector<Tile*>(tempTileVector.size(), nullptr));
+		MAP->SetTiles(tempTileVector);
 	}
 
 	MAP->SetInformationHasBeenChecked(true);
