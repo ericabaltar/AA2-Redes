@@ -4,12 +4,12 @@
 #include <queue>
 #include "ServerPacketTypeManager.h"
 #include "Task.h"
+#include "UdpManager.h"
 
 #define NT NetworkManager::Instance()
-#define BIND_PORT 55000
-#define LAUNCHER_SERVER_PORT 55000
+#define MAIN_SERVER_PORT 55000
 
-const sf::IpAddress LAUNCHER_SERVER_IP = sf::IpAddress(127, 0, 0, 1);
+const sf::IpAddress MAIN_SERVER_IP = sf::IpAddress(127, 0, 0, 1);
 
 class NetworkManager
 {
@@ -21,12 +21,11 @@ public:
 	}
 
 private:
-	bool closeServer;
-	sf::UdpSocket socket;
-	sf::SocketSelector selector;
+	bool closeServer = false;
+	
+	UdpManager udp;
 
-	sf::TcpSocket launcherSocket;
-	bool disconnectFromLauncherServer = false;
+	sf::TcpSocket mainServerSocket;
 
 	std::queue<Task> pendingTasks;
 	
@@ -35,14 +34,12 @@ public:
 	
 	void Update();
 	//void EstablishConnectionWithClient();
-	void ReceiveClientPacket();
 	//void CheckForDisconnection();
 	
 	inline void AddTask(Task task) { pendingTasks.push(task); }
 
 	inline void CloseServer() { closeServer = true; }
 	inline bool GetCloseServer() { return closeServer; }
-	inline bool CheckIfSocketsAreReadyToReceive() { return selector.wait(); }
 
 private:
 	NetworkManager() = default;

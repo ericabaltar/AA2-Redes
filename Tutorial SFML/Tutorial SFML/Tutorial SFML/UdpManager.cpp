@@ -60,7 +60,7 @@ void UdpManager::ReceivePacket()
         PacketType packetType;
 
         bool isCritical = (priority & CRITICAL_PACKET) != 0;
-        uint8_t criticalId = 0;
+        int criticalId = 0;
 
         if (isCritical)
             packet >> criticalId;
@@ -87,21 +87,7 @@ void UdpManager::ReceivePacket()
             }         
         }
 
-        switch (packetType)
-        {
-        case PacketType::MOVEMENT:
-            ReceiveMovement(packet);
-            break;
-        case PacketType::SHOT:
-            ReceiveShot(packet);
-            break;
-        case PacketType::TAUNT:
-            ReceiveTaunt(packet);
-            break;
-        default:
-            std::cout << "No se ha identificado el tipo de paquete" << std::endl;
-            break;
-        }
+        ProcessPacket(packetType, packet);
 
         packet.clear();
     }
@@ -145,6 +131,25 @@ void UdpManager::SendData(const sf::Packet& packet)
     else
     {
         std::cerr << "Error al enviar paquete UDP" << std::endl;
+    }
+}
+
+void UdpManager::ProcessPacket(PacketType type, sf::Packet data)
+{
+    switch (type)
+    {
+    case PacketType::MOVEMENT:
+        ReceiveMovement(data);
+        break;
+    case PacketType::SHOT:
+        ReceiveShot(data);
+        break;
+    case PacketType::TAUNT:
+        ReceiveTaunt(data);
+        break;
+    default:
+        std::cout << "No se ha identificado el tipo de paquete" << std::endl;
+        break;
     }
 }
 
