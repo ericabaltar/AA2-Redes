@@ -132,28 +132,12 @@ void ServerPacketTypesManager::SendInfoToStartGame(GameRoom game, int roomId)
 	packet << PacketTypes::START_GAME;
 	
 	packet << roomId;
-	packet << (int)game.GetMode();
-	
-	for (int i = 0; i < playerAmount; i++)
-	{
-		int playerIndex = i;
-		std::optional<sf::IpAddress> ip = game.GetPlayer(i)->client->getRemoteAddress();
-		unsigned short port = game.GetPlayer(i)->client->getRemotePort();
-		std::string username = game.GetPlayer(i)->name;
-		int points = game.GetPlayer(i)->points;
-
-		packet << playerIndex;
-		packet << ip->toString();
-		packet << port;
-		packet << username;
-		packet << points;
-	}
+	packet << (uint8_t)game.GetMode();
 
 	SendData(*NT->GetGameServerSocket(), packet);
-	std::cout << "Enviada información al game server " << std::endl;
+	std::cout << "Enviada información al game server de sala" << std::endl;
 
 	// Info for player clients
-
 	for (int i = 0; i < playerAmount; i++)
 	{
 		sf::Packet packet;

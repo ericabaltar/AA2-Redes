@@ -1,5 +1,6 @@
 #include "UdpManager.h"
 #include "ThreadManager.h"
+#include "GameRoomManager.h"
 #include <iostream>
 
 sf::Packet& operator>>(sf::Packet& packet, UdpManager::PacketType& type)
@@ -86,6 +87,8 @@ void UdpManager::ProcessPacket(PacketType type, sf::Packet data, std::optional<s
     case PacketType::TAUNT:
         ReceiveTaunt(data);
         break;
+    case PacketType::MATCH_CONNECT:
+        ReceiveMatchConnect(data, senderIp.value(), senderPort);
     default:
         std::cout << "No se ha identificado el tipo de paquete" << std::endl;
         break;
@@ -102,6 +105,17 @@ void UdpManager::ReceiveShot(sf::Packet data)
 
 void UdpManager::ReceiveTaunt(sf::Packet data)
 {
+}
+
+void UdpManager::ReceiveMatchConnect(sf::Packet data, const sf::IpAddress& ip, unsigned short port)
+{
+    int roomId;
+    uint8_t playerIndex;
+
+    data >> roomId;
+    data >> playerIndex;
+
+    GRM->ConnectPlayerToRoom(roomId, playerIndex, ip, port);
 }
 
 bool UdpManager::Init()

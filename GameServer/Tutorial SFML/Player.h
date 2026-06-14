@@ -5,13 +5,12 @@ class Player
 {
 public:
 	Player()
-		: udpIp(NULL), name(""), points(0) {}
+		: udpIp(NULL) {}
 
-	Player(sf::IpAddress udpIp, short udpPort, std::string playerName, int playerPoints)
-		: udpIp(udpIp), udpPort(udpPort), name(playerName), points(playerPoints) { }
+	Player(sf::IpAddress udpIp, short udpPort, short index)
+		: udpIp(udpIp), udpPort(udpPort), index(index) { }
 
 	std::optional<sf::IpAddress> udpIp;
 	short udpPort;
-	std::string name;
-	int points;
+	short index;
 };

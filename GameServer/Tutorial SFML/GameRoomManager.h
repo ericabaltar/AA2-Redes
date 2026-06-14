@@ -1,7 +1,9 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <iostream>
 #include "Game.h"
+#include "Utils.h"
 
 #define GRM GameRoomManager::Instance()
 
@@ -16,43 +18,42 @@ public:
 
 private:
 	std::vector<GameRoom> rooms;
-	int nextRoomId = 0;
 
-public:
-	GameRoom* FindAvailableRoom(GameMode mode)
+	GameRoom* FindRoom(int roomId)
 	{
 		for (GameRoom& room : rooms)
 		{
-			if (room.GetGameMode() == mode && !room.IsFull() && !room.HasStarted())
+			if (room.GetId() == roomId)
 				return &room;
 		}
 
 		return nullptr;
 	}
 
-	GameRoom* CreateRoom(GameMode mode)
+public:
+	GameRoom* CreateRoom(GameMode mode, int roomId)
 	{
-		int roomId = nextRoomId;
-		nextRoomId++;
-
 		rooms.emplace_back(roomId, mode);
 
 		return &rooms.back();
 	}
 
-	GameRoom* JoinOrCreateRoom(Player& player, GameMode mode)
+	void ConnectPlayerToRoom(int roomId, uint8_t playerIndex, const sf::IpAddress& ip, unsigned short port)
 	{
-		GameRoom* room = FindAvailableRoom(mode);
+		Player player;
+		player.index = playerIndex;
+		player.udpIp = ip;
+		player.udpPort = port;
+
+		GameRoom* room = FindRoom(roomId);
 
 		if (room == nullptr)
-			room = CreateRoom(mode);
+			std::cout << "Error al conectar jugador. No existe la sala con id " << roomId << std::endl;
 
 		room->AddPlayer(player);
 
 		if (room->CanStartGame())
 			room->StartGame();
-
-		return room;
 	}
 
 private:

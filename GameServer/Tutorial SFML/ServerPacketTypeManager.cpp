@@ -42,39 +42,6 @@ sf::Packet& operator<<(sf::Packet& packet, UdpPacketTypes& type) {
 	return packet;
 }
 
-void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, std::optional<sf::IpAddress>& senderIp, unsigned short senderPort)
-{
-	uint8_t receivedDataPriority;
-
-	packet >> receivedDataPriority;
-
-	if (receivedDataPriority == 0)
-	{
-		std::cout << "Normal" << std::endl;
-	}
-	else
-	{
-		if (receivedDataPriority & URGENT_PACKET)
-			std::cout << "Urgente" << std::endl;
-
-		if (receivedDataPriority & CRITICAL_PACKET)
-			std::cout << "Crítico" << std::endl;
-	}
-
-	if (receivedDataPriority & URGENT_PACKET)
-	{
-		ThrdM->AddUrgentTask(new Task([this, packet]() mutable {
-			this->ProcessPacket(packet);
-			}));
-	}
-	else
-	{
-		ThrdM->AddTask(new Task([this, packet]() mutable {
-			this->ProcessPacket(packet);
-			}));
-	}
-}
-
 void ServerPacketTypesManager::SendData(sf::TcpSocket& client, sf::Packet& packet)
 {
 	if (client.send(packet) == sf::Socket::Status::Done) {
@@ -148,30 +115,6 @@ void ServerPacketTypesManager::SendLobbyJoinResponse(sf::TcpSocket& client, bool
 	std::cout << "Respuesta de join a lobby enviada" << std::endl;
 }
 
-void ServerPacketTypesManager::ProcessPacket(sf::Packet packet)
-{
-	UdpPacketTypes packetType;
-
-	packet >> packetType;
-
-	switch (packetType)
-	{
-	case MOVEMENT:
-		ReceiveMovementPacket(packet);
-		break;
-	case SHOT:
-		break;
-	case TAUNT:
-		ReceiveTauntPacket(packet);
-		break;
-	default:
-		std::cout << "No se ha identificado el tipo de packete" << std::endl;
-		break;
-	}
-
-	packet.clear();
-}
-
 void ServerPacketTypesManager::ReceiveHandshakePacket(sf::Packet data)
 {
 	std::string receiveMesage;
@@ -198,50 +141,17 @@ void ServerPacketTypesManager::ReceiveTauntPacket(sf::Packet data)
 void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
 {
 	int roomId;
-	int mode;
+	uint8_t mode;
 
 	data >> roomId;
 	data >> mode;
 
 	GameMode gameMode = static_cast<GameMode>(mode);
 
-
+	GRM->CreateRoom(gameMode, roomId);
 }
 
 void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)
 {
-}
-
-void ServerPacketTypesManager::ReceiveLobbyPacket(
-	sf::Packet data,
-	std::optional<sf::IpAddress> senderIp,
-	unsigned short senderPort
-)
-{
-	int modeInt;
-	data >> modeInt;
-
-	GameMode mode = static_cast<GameMode>(modeInt);
-
-	Player player;
-	player.name = "Player";
-	player.points = 0;
-	player.udpIp = senderIp;
-	player.udpPort = senderPort;
-
-	GameRoom* room = GRM->JoinOrCreateRoom(player, mode);
-
-	std::cout << "Jugador unido a sala "
-		<< room->GetId()
-		<< " | Players: "
-		<< room->GetPlayerAmount()
-		<< std::endl;
-
-	if (room->HasStarted())
-	{
-		std::cout << "La partida empieza en sala "
-			<< room->GetId()
-			<< std::endl;
-	}
 }
 

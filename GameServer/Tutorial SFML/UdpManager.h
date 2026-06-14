@@ -12,7 +12,7 @@
 class UdpManager
 {
 public:
-	enum class PacketType : uint8_t { MOVEMENT, SHOT, TAUNT, ACKNOWLEDGEMENT };
+	enum class PacketType : uint8_t { MATCH_CONNECT, MOVEMENT, SHOT, TAUNT, ACKNOWLEDGEMENT };
 
 private:
 	struct PendingCriticalPacket
@@ -42,6 +42,7 @@ private:
 	void ReceiveMovement(sf::Packet data);
 	void ReceiveShot(sf::Packet data);
 	void ReceiveTaunt(sf::Packet data);
+	void ReceiveMatchConnect(sf::Packet data, const sf::IpAddress& ip, unsigned short port);
 	
 public:
 	bool Init();
