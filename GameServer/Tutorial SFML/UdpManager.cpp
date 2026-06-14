@@ -54,9 +54,22 @@ bool UdpManager::PacketIsAlreadyProcessed(int id)
     return false;
 }
 
-void UdpManager::ProcessedCriticalPacket(int id)
+void UdpManager::ProcessedCriticalPacket(const sf::IpAddress& ip, unsigned short port, int id)
 {
     processedCriticalPackets.insert(id);
+    SendAcknowledgement(ip, port, id);
+}
+
+void UdpManager::SendAcknowledgement(const sf::IpAddress& ip, unsigned short port, int id)
+{
+    sf::Packet packet;
+    uint8_t priority = NORMAL_PACKET;
+
+    packet << priority;
+    packet << PacketType::ACKNOWLEDGEMENT;
+    packet << id;
+
+    SendData(ip, port, packet);
 }
 
 void UdpManager::SendData(const sf::IpAddress& ip, unsigned short port, const sf::Packet& packet)
@@ -115,6 +128,8 @@ void UdpManager::ReceiveMatchConnect(sf::Packet data, const sf::IpAddress& ip, u
     data >> roomId;
     data >> playerIndex;
 
+    std::cout << "Recibida conexíon de player " << playerIndex << " para la sala " << roomId << std::endl;
+
     GRM->ConnectPlayerToRoom(roomId, playerIndex, ip, port);
 }
 
@@ -170,36 +185,38 @@ void UdpManager::ReceivePacket()
 
         if (isCritical)
         {
-            if (packetType == PacketType::ACKNOWLEDGEMENT)
+            if (PacketIsAlreadyProcessed(criticalId))
             {
-                RemoveCriticalPacketFromPending(criticalId);
+                packet.clear();
+                return;
             }
             else
             {
-                if (PacketIsAlreadyProcessed(criticalId))
-                {
-                    packet.clear();
-                    return;
-                }
-                else
-                {
-                    ProcessedCriticalPacket(criticalId);
-                }
+                ProcessedCriticalPacket(senderIp.value(), senderPort, criticalId);
             }
         }
 
-        if (priority & URGENT_PACKET)
+        if (packetType == PacketType::ACKNOWLEDGEMENT)
         {
-            ThrdM->AddUrgentTask(new Task([this, packetType, packet, senderIp, senderPort]() mutable {
-                this->ProcessPacket(packetType, packet, senderIp, senderPort);
-                }));
+            int id;
+            packet >> id;
+            RemoveCriticalPacketFromPending(id);
         }
         else
         {
-            ThrdM->AddTask(new Task([this, packetType, packet, senderIp, senderPort]() mutable {
-                this->ProcessPacket(packetType, packet, senderIp, senderPort);
-                }));
-        }
+            if (priority & URGENT_PACKET)
+            {
+                ThrdM->AddUrgentTask(new Task([this, packetType, packet, senderIp, senderPort]() mutable {
+                    this->ProcessPacket(packetType, packet, senderIp, senderPort);
+                    }));
+            }
+            else
+            {
+                ThrdM->AddTask(new Task([this, packetType, packet, senderIp, senderPort]() mutable {
+                    this->ProcessPacket(packetType, packet, senderIp, senderPort);
+                    }));
+            }
+        }     
 
         packet.clear();
     }

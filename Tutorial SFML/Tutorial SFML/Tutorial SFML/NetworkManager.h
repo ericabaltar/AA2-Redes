@@ -51,6 +51,7 @@ public:
 	void SendRankingPetitionServerPacket(int userId);
 	void SendMapPetitionServerPacket();
 
+	void SendMatchConnect(int roomId, uint8_t playerIndex);
 	void SendMovementPacket(MovementPacket movementPacket);
 	void SendTaunt();
 	void SendShot(bool towardsRight);

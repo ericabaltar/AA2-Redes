@@ -18,11 +18,16 @@ private:
 	int playerIndex = -1;
 
 public:
+	void StoreGameInfo(int room, int index)
+	{
+		roomId = room;
+		playerIndex = index;
+	}
 
-	void StartGame(int room, int index)
+	void StartGame()
 	{
 		gameStarted = true;
-		std::cout << "Iniciando partida. ID: " << room << " | " << "Indice de player: " << index << std::endl;
+		std::cout << "Iniciando partida. ID: " << roomId << " | " << "Indice de player: " << playerIndex << std::endl;
 	}
 
 	bool GetGameStarted() { return gameStarted; }

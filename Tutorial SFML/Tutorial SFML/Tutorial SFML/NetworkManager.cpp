@@ -79,6 +79,11 @@ void NetworkManager::SendMapPetitionServerPacket()
     SPTM->SendMapPetition(socket);
 }
 
+void NetworkManager::SendMatchConnect(int roomId, uint8_t playerIndex)
+{
+    udp.SendMatchConnect(roomId, playerIndex);
+}
+
 void NetworkManager::SendMovementPacket(MovementPacket movementPacket)
 {
     udp.SendMovement(movementPacket);

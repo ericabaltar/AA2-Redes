@@ -328,7 +328,8 @@ void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
 	data >> roomId;
 	data >> playerIndex;
 
-	LM->StartGame(roomId, playerIndex);
+	LM->StoreGameInfo(roomId, playerIndex);
+	NT->SendMatchConnect(roomId, playerIndex);
 }
 
 void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)

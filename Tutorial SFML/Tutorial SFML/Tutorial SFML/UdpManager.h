@@ -24,6 +24,7 @@ private:
 	void RemoveCriticalPacketFromPending(int id);
 	bool PacketIsAlreadyProcessed(int id);
 	void ProcessedCriticalPacket(int id);
+	void SendAcknowledgement(int id);
 
 	void SendData(const sf::Packet& packet);
 
@@ -38,6 +39,7 @@ public:
 	void AttemptToSendPendingCriticalPackets();
 	void ReceivePacket();
 
+	void SendMatchConnect(int roomId, uint8_t playerIndex);
 	void SendMovement(MovementPacket movement);
 	void SendShot(bool towardsRight);
 	void SendTaunt();

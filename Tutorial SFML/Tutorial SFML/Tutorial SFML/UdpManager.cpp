@@ -69,25 +69,27 @@ void UdpManager::ReceivePacket()
 
         if (isCritical)
         {
-            if (packetType == PacketType::ACKNOWLEDGEMENT)
+            if (PacketIsAlreadyProcessed(criticalId))
             {
-                RemoveCriticalPacketFromPending(criticalId);
+                packet.clear();
+                return;
             }
             else
             {
-                if (PacketIsAlreadyProcessed(criticalId))
-                {
-                    packet.clear();
-                    return;
-                }
-                else
-                {
-                    ProcessedCriticalPacket(criticalId);
-                }
-            }         
+                ProcessedCriticalPacket(criticalId);
+            }      
         }
 
-        ProcessPacket(packetType, packet);
+        if (packetType == PacketType::ACKNOWLEDGEMENT)
+        {
+            int id;
+            packet >> id;
+            RemoveCriticalPacketFromPending(id);
+        }
+        else
+        {
+            ProcessPacket(packetType, packet);
+        }
 
         packet.clear();
     }
@@ -117,6 +119,19 @@ bool UdpManager::PacketIsAlreadyProcessed(int id)
 void UdpManager::ProcessedCriticalPacket(int id)
 {
     processedCriticalPackets.insert(id);
+    SendAcknowledgement(id);
+}
+
+void UdpManager::SendAcknowledgement(int id)
+{
+    sf::Packet packet;
+    uint8_t priority = NORMAL_PACKET;
+
+    packet << priority;
+    packet << PacketType::ACKNOWLEDGEMENT;
+    packet << id;
+
+    SendData(packet);
 }
 
 void UdpManager::SendData(const sf::Packet& packet)
@@ -184,6 +199,23 @@ bool UdpManager::Init()
     }
 
     return successful;
+}
+
+void UdpManager::SendMatchConnect(int roomId, uint8_t playerIndex)
+{
+    sf::Packet packet;
+    uint8_t priority = CRITICAL_PACKET;
+    int id = GetNextCriticalPacketId();
+
+    packet << priority;
+    packet << id;
+    packet << PacketType::MATCH_CONNECT;
+    packet << roomId;
+    packet << playerIndex;
+
+    std::cout << "Enviada peticion de conexion a match " << roomId << std::endl;
+
+    SendCriticalPacket(id, packet);
 }
 
 void UdpManager::SendMovement(MovementPacket movement)

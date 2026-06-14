@@ -33,7 +33,8 @@ private:
 	void SendCriticalPacket(const sf::IpAddress& ip, unsigned short port, int id, sf::Packet packet);
 	void RemoveCriticalPacketFromPending(int id);
 	bool PacketIsAlreadyProcessed(int id);
-	void ProcessedCriticalPacket(int id);
+	void ProcessedCriticalPacket(const sf::IpAddress& ip, unsigned short port, int id);
+	void SendAcknowledgement(const sf::IpAddress& ip, unsigned short port, int id);
 
 	void SendData(const sf::IpAddress& ip, unsigned short port, const sf::Packet& packet);
 
