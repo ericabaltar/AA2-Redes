@@ -86,7 +86,7 @@ void ServerPacketTypesManager::ReceiveTcpPacket(sf::Packet packet)
 		ReceiveEndGamePacket(packet);
 		break;
 	default:
-		std::cout << "No se ha identificado el tipo de paquete" << std::endl;
+		std::cout << "No se ha identificado el tipo de paquete tcp" << std::endl;
 		break;
 	}
 
@@ -140,6 +140,8 @@ void ServerPacketTypesManager::ReceiveTauntPacket(sf::Packet data)
 
 void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
 {
+	std::cout << "Recibido paquete para crear sala" << std::endl;
+
 	int roomId;
 	uint8_t mode;
 

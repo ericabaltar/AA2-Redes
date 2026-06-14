@@ -33,13 +33,14 @@ private:
 public:
 	GameRoom* CreateRoom(GameMode mode, int roomId)
 	{
+		std::cout << "Sala creada con id " << roomId << std::endl;
 		rooms.emplace_back(roomId, mode);
 
 		return &rooms.back();
 	}
 
 	void ConnectPlayerToRoom(int roomId, uint8_t playerIndex, const sf::IpAddress& ip, unsigned short port)
-	{
+	{/*
 		Player player;
 		player.index = playerIndex;
 		player.udpIp = ip;
@@ -53,7 +54,7 @@ public:
 		room->AddPlayer(player);
 
 		if (room->CanStartGame())
-			room->StartGame();
+			room->StartGame();*/
 	}
 
 private:

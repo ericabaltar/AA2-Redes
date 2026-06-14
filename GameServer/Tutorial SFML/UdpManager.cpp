@@ -21,6 +21,11 @@ sf::Packet& operator<<(sf::Packet& packet, UdpManager::PacketType type)
     return packet;
 }
 
+std::string UdpManager::MakeClientKey(const sf::IpAddress& ip, unsigned short port)
+{
+    return ip.toString() + ":" + std::to_string(port);
+}
+
 int UdpManager::GetNextCriticalPacketId()
 {
     currentCriticalPacketId++;
@@ -46,17 +51,24 @@ void UdpManager::RemoveCriticalPacketFromPending(int id)
     }
 }
 
-bool UdpManager::PacketIsAlreadyProcessed(int id)
+bool UdpManager::PacketIsAlreadyProcessed(const std::string& key, int id)
 {
-    if (processedCriticalPackets.find(id) != processedCriticalPackets.end())
-        return true;
+    std::unordered_map<std::string, std::unordered_set<int>>::iterator mapIt;
+    mapIt = processedCriticalPackets.find(key);
 
-    return false;
+    if (mapIt == processedCriticalPackets.end())
+        return false;
+
+    std::unordered_set<int>::iterator setIt =
+        mapIt->second.find(id);
+
+    return setIt != mapIt->second.end();
 }
 
-void UdpManager::ProcessedCriticalPacket(const sf::IpAddress& ip, unsigned short port, int id)
+void UdpManager::ProcessedCriticalPacket(const std::string& key, const sf::IpAddress& ip, unsigned short port, int id)
 {
-    processedCriticalPackets.insert(id);
+    processedCriticalPackets[key].insert(id);
+
     SendAcknowledgement(ip, port, id);
 }
 
@@ -103,7 +115,7 @@ void UdpManager::ProcessPacket(PacketType type, sf::Packet data, std::optional<s
     case PacketType::MATCH_CONNECT:
         ReceiveMatchConnect(data, senderIp.value(), senderPort);
     default:
-        std::cout << "No se ha identificado el tipo de paquete" << std::endl;
+        std::cout << "No se ha identificado el tipo de paquete udp" << std::endl;
         break;
     }
 }
@@ -185,14 +197,17 @@ void UdpManager::ReceivePacket()
 
         if (isCritical)
         {
-            if (PacketIsAlreadyProcessed(criticalId))
+            std::string clientKey = MakeClientKey(senderIp.value(), senderPort);
+
+            if (PacketIsAlreadyProcessed(clientKey, criticalId))
             {
+                SendAcknowledgement(senderIp.value(), senderPort, criticalId);
                 packet.clear();
                 return;
             }
             else
             {
-                ProcessedCriticalPacket(senderIp.value(), senderPort, criticalId);
+                ProcessedCriticalPacket(clientKey, senderIp.value(), senderPort, criticalId);
             }
         }
 

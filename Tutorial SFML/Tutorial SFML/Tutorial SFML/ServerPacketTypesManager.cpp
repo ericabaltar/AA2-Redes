@@ -90,7 +90,7 @@ void ServerPacketTypesManager::ReceivePacket(sf::Packet packet)
 		ReceiveMapPacket(packet);
 		break;
 	default:
-		std::cout << "No se ha identificado el tipo de paquete" << std::endl;
+		std::cout << "No se ha identificado el tipo de paquete de tcp" << std::endl;
 		break;
 	}
 

@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Network.hpp>
 #include <unordered_set>
+#include <unordered_map>
 #include "MovementPacket.h"
 
 #define NORMAL_PACKET 0b00000000
@@ -16,14 +17,16 @@ private:
 	sf::UdpSocket socket;
 
 	std::vector<std::pair<int, sf::Packet>> pendingCriticalPacketsToSend;
-	std::unordered_set<int> processedCriticalPackets;
+	std::unordered_map<std::string, std::unordered_set<int>> processedCriticalPackets;
 	int currentCriticalPacketId = 0;
+
+	std::string MakeClientKey(const sf::IpAddress& ip, unsigned short port);
 
 	int GetNextCriticalPacketId();
 	void SendCriticalPacket(int id, sf::Packet packet);
 	void RemoveCriticalPacketFromPending(int id);
-	bool PacketIsAlreadyProcessed(int id);
-	void ProcessedCriticalPacket(int id);
+	bool PacketIsAlreadyProcessed(const std::string& key, int id);
+	void ProcessedCriticalPacket(const std::string& key, int id);
 	void SendAcknowledgement(int id);
 
 	void SendData(const sf::Packet& packet);
