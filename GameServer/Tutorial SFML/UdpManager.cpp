@@ -114,6 +114,7 @@ void UdpManager::ProcessPacket(PacketType type, sf::Packet data, std::optional<s
         break;
     case PacketType::MATCH_CONNECT:
         ReceiveMatchConnect(data, senderIp.value(), senderPort);
+        break;
     default:
         std::cout << "No se ha identificado el tipo de paquete udp" << std::endl;
         break;

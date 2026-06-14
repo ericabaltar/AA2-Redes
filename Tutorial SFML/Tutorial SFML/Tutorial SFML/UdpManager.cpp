@@ -228,7 +228,7 @@ void UdpManager::SendMatchConnect(int roomId, uint8_t playerIndex)
     packet << roomId;
     packet << playerIndex;
 
-    std::cout << "Enviada peticion de conexion a match " << roomId << std::endl;
+    std::cout << "Enviada peticion de conexion a match " << roomId << " como player " << static_cast<int>(playerIndex) << std::endl;
 
     SendCriticalPacket(id, packet);
 }

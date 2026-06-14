@@ -19,6 +19,14 @@ public:
 private:
 	std::vector<GameRoom> rooms;
 
+	struct PendingPlayer
+	{
+		int roomId;
+		Player player;
+	};
+
+	std::vector<PendingPlayer> pendingPlayers;
+
 	GameRoom* FindRoom(int roomId)
 	{
 		for (GameRoom& room : rooms)
@@ -30,17 +38,42 @@ private:
 		return nullptr;
 	}
 
+	void FlushPendingPlayers(int roomId)
+	{
+		GameRoom* room = FindRoom(roomId);
+		if (room == nullptr)
+			return;
+
+		for (std::vector<PendingPlayer>::iterator it = pendingPlayers.begin(); it != pendingPlayers.end(); )
+		{
+			if (it->roomId == roomId)
+			{
+				room->AddPlayer(it->player);
+				it = pendingPlayers.erase(it);
+			}
+			else
+			{
+				++it;
+			}
+		}
+
+		if (room->CanStartGame())
+			room->StartGame();
+	}
+
 public:
 	GameRoom* CreateRoom(GameMode mode, int roomId)
 	{
 		std::cout << "Sala creada con id " << roomId << std::endl;
 		rooms.emplace_back(roomId, mode);
 
+		FlushPendingPlayers(roomId);
+
 		return &rooms.back();
 	}
 
 	void ConnectPlayerToRoom(int roomId, uint8_t playerIndex, const sf::IpAddress& ip, unsigned short port)
-	{/*
+	{
 		Player player;
 		player.index = playerIndex;
 		player.udpIp = ip;
@@ -49,12 +82,17 @@ public:
 		GameRoom* room = FindRoom(roomId);
 
 		if (room == nullptr)
-			std::cout << "Error al conectar jugador. No existe la sala con id " << roomId << std::endl;
+		{
+			std::cout << "Sala no existe aún. Guardando jugador en pending. RoomId: " << roomId << std::endl;
+
+			pendingPlayers.push_back({ roomId, player });
+			return;
+		}
 
 		room->AddPlayer(player);
 
 		if (room->CanStartGame())
-			room->StartGame();*/
+			room->StartGame();
 	}
 
 private:

@@ -329,7 +329,7 @@ void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
 	data >> playerIndex;
 
 	LM->StoreGameInfo(roomId, playerIndex);
-	NT->SendMatchConnect(roomId, playerIndex);
+	NT->SendMatchConnect(roomId, (uint8_t)playerIndex);
 }
 
 void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)
