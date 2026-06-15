@@ -4,6 +4,8 @@
 #include <unordered_map> 
 #include "MovementPacket.h"
 
+#define PACKET_SIZE 1024
+
 #define NORMAL_PACKET 0b00000000 
 #define CRITICAL_PACKET 0b00000001 
 #define URGENT_PACKET 0b00000010
@@ -28,7 +30,7 @@ private:
 	void ProcessedCriticalPacket(const std::string& key, int id);
 	void SendAcknowledgement(int id);
 
-	void SendData(const sf::Packet& packet);
+	void SendData(char* buffer, size_t size);
 
 	void ProcessPacket(PacketType type, sf::Packet data);
 

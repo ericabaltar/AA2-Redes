@@ -67,22 +67,27 @@ void UdpManager::ProcessedCriticalPacket(const std::string& key, const sf::IpAdd
 
 void UdpManager::SendAcknowledgement(const sf::IpAddress& ip, unsigned short port, int id)
 {
-	sf::Packet packet;
+	char buffer[PACKET_SIZE];
+	size_t bufferSize = 0;
+
 	uint8_t priority = NORMAL_PACKET;
+	PacketType type = PacketType::ACKNOWLEDGEMENT;
 
-	packet << priority;
-	packet << PacketType::ACKNOWLEDGEMENT;
-	packet << id;
+	std::memcpy(buffer + bufferSize, &priority, sizeof(priority));
+	bufferSize += sizeof(priority);
 
-	SendData(ip, port, packet);
+	std::memcpy(buffer + bufferSize, &type, sizeof(type));
+	bufferSize += sizeof(type);
+
+	std::memcpy(buffer + bufferSize, &id, sizeof(id));
+	bufferSize += sizeof(id);
+
+	SendData(ip, port, buffer, bufferSize);
 }
 
-void UdpManager::SendData(const sf::IpAddress& ip, unsigned short port, const sf::Packet& packet)
+void UdpManager::SendData(const sf::IpAddress& ip, unsigned short port, char* buffer, size_t size)
 {
-	const void* data = packet.getData();
-	std::size_t dataSize = packet.getDataSize();
-
-	if (socket.send(data, dataSize, ip, port) == sf::Socket::Status::Done)
+	if (socket.send(buffer, size, ip, port) == sf::Socket::Status::Done)
 	{
 		// std::cout << "Paquete UDP enviado..." << std::endl;
 	}
@@ -92,11 +97,11 @@ void UdpManager::SendData(const sf::IpAddress& ip, unsigned short port, const sf
 	}
 }
 
-void UdpManager::ProcessPacket(PacketType type, sf::Packet data, std::optional<sf::IpAddress>& senderIp, unsigned short senderPort)
+void UdpManager::ProcessPacket(PacketType type, char* buffer, size_t dataRead, std::optional<sf::IpAddress>& senderIp, unsigned short senderPort)
 {
 	switch (type) {
 	case PacketType::MOVEMENT:
-		ReceiveMovement(data);
+		ReceiveMovement(buffer, dataRead);
 		break;
 	case PacketType::SHOT:
 		ReceiveShot(data);
@@ -105,7 +110,7 @@ void UdpManager::ProcessPacket(PacketType type, sf::Packet data, std::optional<s
 		ReceiveTaunt(data);
 		break;
 	case PacketType::MATCH_CONNECT:
-		ReceiveMatchConnect(data, senderIp.value(), senderPort);
+		ReceiveMatchConnect(buffer, dataRead, senderIp.value(), senderPort);
 		break;
 	default:
 		std::cout << "No se ha identificado el tipo de paquete udp" << std::endl;
@@ -113,19 +118,22 @@ void UdpManager::ProcessPacket(PacketType type, sf::Packet data, std::optional<s
 	}
 }
 
-void UdpManager::ReceiveMovement(sf::Packet data) {}
+void UdpManager::ReceiveMovement(char* buffer, size_t dataRead) {}
 
 void UdpManager::ReceiveShot(sf::Packet data) {}
 
 void UdpManager::ReceiveTaunt(sf::Packet data) {}
 
-void UdpManager::ReceiveMatchConnect(sf::Packet data, const sf::IpAddress& ip, unsigned short port)
+void UdpManager::ReceiveMatchConnect(char* buffer, size_t dataRead, const sf::IpAddress& ip, unsigned short port)
 {
 	int roomId;
 	uint8_t playerIndex;
 
-	data >> roomId;
-	data >> playerIndex;
+	std::memcpy(&roomId, buffer + dataRead, sizeof(roomId));
+	dataRead += sizeof(roomId);
+	
+	std::memcpy(&playerIndex, buffer + dataRead, sizeof(playerIndex));
+	dataRead += sizeof(playerIndex);
 
 	std::cout << "Recibida conexion de player " << (int)playerIndex << " para la sala " << roomId << std::endl;
 
@@ -156,28 +164,29 @@ void UdpManager::AttemptToSendPendingCriticalPackets()
 
 void UdpManager::ReceivePacket()
 {
-	char buffer[1024];
-	std::size_t receivedSize;
+	char buffer[PACKET_SIZE];
+	size_t dataRead = 0;
+	size_t receivedSize;
 	std::optional<sf::IpAddress> senderIp;
 	unsigned short senderPort;
 
 	if (socket.receive(buffer, sizeof(buffer), receivedSize, senderIp, senderPort) == sf::Socket::Status::Done)
 	{
-		sf::Packet packet;
-		packet.append(buffer, receivedSize);
-
 		uint8_t priority;
-		packet >> priority;
-
-		PacketType packetType;
+		std::memcpy(&priority, buffer + dataRead, sizeof(priority));
+		dataRead += sizeof(priority);
 
 		bool isCritical = (priority & CRITICAL_PACKET) != 0;
 		int criticalId = 0;
 
-		if (isCritical)
-			packet >> criticalId;
+		if (isCritical) {
+			std::memcpy(&criticalId, buffer + dataRead, sizeof(criticalId));
+			dataRead += sizeof(criticalId);
+		}
 
-		packet >> packetType;
+		PacketType packetType;
+		std::memcpy(&packetType, buffer + dataRead, sizeof(packetType));
+		dataRead += sizeof(packetType);
 
 		if (isCritical)
 		{
@@ -186,7 +195,6 @@ void UdpManager::ReceivePacket()
 			if (PacketIsAlreadyProcessed(clientKey, criticalId))
 			{
 				SendAcknowledgement(senderIp.value(), senderPort, criticalId);
-				packet.clear();
 				return;
 			}
 			else
@@ -198,26 +206,25 @@ void UdpManager::ReceivePacket()
 		if (packetType == PacketType::ACKNOWLEDGEMENT)
 		{
 			int id;
-			packet >> id;
+			std::memcpy(&id, buffer + dataRead, sizeof(id));
+			dataRead += sizeof(id);
 			RemoveCriticalPacketFromPending(id);
 		}
 		else
 		{
 			if (priority & URGENT_PACKET)
 			{
-				ThrdM->AddUrgentTask(new Task([this, packetType, packet, senderIp, senderPort]() mutable {
-					this->ProcessPacket(packetType, packet, senderIp, senderPort);
+				ThrdM->AddUrgentTask(new Task([this, packetType, buffer, dataRead, senderIp, senderPort]() mutable {
+					this->ProcessPacket(packetType, buffer, dataRead, senderIp, senderPort);
 					}));
 			}
 			else
 			{
-				ThrdM->AddTask(new Task([this, packetType, packet, senderIp, senderPort]() mutable {
-					this->ProcessPacket(packetType, packet, senderIp, senderPort);
+				ThrdM->AddTask(new Task([this, packetType, buffer, dataRead, senderIp, senderPort]() mutable {
+					this->ProcessPacket(packetType, buffer, dataRead, senderIp, senderPort);
 					}));
 			}
 		}
-
-		packet.clear();
 	}
 }
 

@@ -130,22 +130,27 @@ void UdpManager::ProcessedCriticalPacket(const std::string& key, int id)
 
 void UdpManager::SendAcknowledgement(int id)
 {
-	sf::Packet packet;
+	char buffer[PACKET_SIZE];
+	size_t bufferSize = 0;
+
 	uint8_t priority = NORMAL_PACKET;
+	PacketType type = PacketType::ACKNOWLEDGEMENT;
 
-	packet << priority;
-	packet << PacketType::ACKNOWLEDGEMENT;
-	packet << id;
+	std::memcpy(buffer + bufferSize, &priority, sizeof(priority));
+	bufferSize += sizeof(priority);
 
-	SendData(packet);
+	std::memcpy(buffer + bufferSize, &type, sizeof(type));
+	bufferSize += sizeof(type);
+
+	std::memcpy(buffer + bufferSize, &id, sizeof(id));
+	bufferSize += sizeof(id);
+
+	SendData(buffer, bufferSize);
 }
 
-void UdpManager::SendData(const sf::Packet& packet)
+void UdpManager::SendData(char* buffer, size_t size)
 {
-	const void* data = packet.getData();
-	std::size_t dataSize = packet.getDataSize();
-
-	if (socket.send(data, dataSize, SERVER_IP, SERVER_PORT) == sf::Socket::Status::Done)
+	if (socket.send(buffer, size, SERVER_IP, SERVER_PORT) == sf::Socket::Status::Done)
 	{
 		// std::cout << "Paquete UDP enviado..." << std::endl;
 	}
@@ -227,14 +232,24 @@ void UdpManager::SendMatchConnect(int roomId, uint8_t playerIndex)
 
 void UdpManager::SendMovement(MovementPacket movement)
 {
-	sf::Packet packet;
+	char buffer[PACKET_SIZE];
+	size_t bufferSize = 0;
+
 	uint8_t priority = NORMAL_PACKET;
+	PacketType type = PacketType::MOVEMENT;
 
-	packet << priority;
-	packet << PacketType::MOVEMENT;
-	packet << movement;
+	std::memcpy(buffer + bufferSize, &priority, sizeof(priority));
+	bufferSize += sizeof(priority);
 
-	SendData(packet);
+	std::memcpy(buffer + bufferSize, &type, sizeof(type));
+	bufferSize += sizeof(type);
+
+	std::memcpy(buffer + bufferSize, &movement, sizeof(movement));
+	bufferSize += sizeof(movement);
+
+	SendData(buffer, bufferSize);
+
+	delete buffer;
 }
 
 void UdpManager::SendShot(bool towardsRight)

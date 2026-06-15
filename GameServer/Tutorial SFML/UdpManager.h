@@ -4,6 +4,8 @@
 #include <unordered_map> 
 #include "MovementPacket.h"
 
+#define PACKET_SIZE 1024
+
 #define NORMAL_PACKET 0b00000000 
 #define CRITICAL_PACKET 0b00000001 
 #define URGENT_PACKET 0b00000010
@@ -37,14 +39,14 @@ private:
 	void ProcessedCriticalPacket(const std::string& key, const sf::IpAddress& ip, unsigned short port, int id);
 	void SendAcknowledgement(const sf::IpAddress& ip, unsigned short port, int id);
 
-	void SendData(const sf::IpAddress& ip, unsigned short port, const sf::Packet& packet);
+	void SendData(const sf::IpAddress& ip, unsigned short port, char* buffer, size_t size);
 
-	void ProcessPacket(PacketType type, sf::Packet data, std::optional<sf::IpAddress>& senderIp, unsigned short senderPort);
+	void ProcessPacket(PacketType type, char* buffer, size_t dataRead, std::optional<sf::IpAddress>& senderIp, unsigned short senderPort);
 
-	void ReceiveMovement(sf::Packet data);
+	void ReceiveMovement(char* buffer, size_t dataRead);
 	void ReceiveShot(sf::Packet data);
 	void ReceiveTaunt(sf::Packet data);
-	void ReceiveMatchConnect(sf::Packet data, const sf::IpAddress& ip, unsigned short port);
+	void ReceiveMatchConnect(char* buffer, size_t dataRead, const sf::IpAddress& ip, unsigned short port);
 
 public:
 	bool Init();
