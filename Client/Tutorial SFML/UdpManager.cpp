@@ -1,50 +1,44 @@
 #include "UdpManager.h" 
 #include "NetworkManager.h" 
-#include "LobbyManager.h"
+#include "MatchManager.h" 
 #include <iostream>
+#include <cstdint>
 
-sf::Packet& operator>>(sf::Packet& packet, UdpManager::PacketType& type)
-{
+sf::Packet& operator>>(sf::Packet& packet, UdpManager::PacketType& type) {
 	uint8_t temp;
 	packet >> temp;
 	type = static_cast<UdpManager::PacketType>(temp);
 	return packet;
 }
 
-sf::Packet& operator<<(sf::Packet& packet, UdpManager::PacketType type)
-{
+sf::Packet& operator<<(sf::Packet& packet, UdpManager::PacketType type) {
 	uint8_t temp;
 	temp = static_cast<uint8_t>(type);
 	packet << temp;
 	return packet;
 }
 
-std::string UdpManager::MakeClientKey(const sf::IpAddress& ip, unsigned short port)
-{
+std::string UdpManager::MakeClientKey(const sf::IpAddress& ip, unsigned short port) {
 	return ip.toString() + ":" + std::to_string(port);
 }
 
-int UdpManager::GetNextCriticalPacketId()
-{
+int UdpManager::GetNextCriticalPacketId() {
 	currentCriticalPacketId++;
 	return currentCriticalPacketId;
 }
 
-void UdpManager::SendCriticalPacket(int id, sf::Packet packet)
-{
+void UdpManager::SendCriticalPacket(int id, sf::Packet packet) {
 	pendingCriticalPacketsToSend.push_back(std::pair<int, sf::Packet>(id, packet));
 	SendData(packet);
 }
 
 void UdpManager::AttemptToSendPendingCriticalPackets() {
-	for (const std::pair<int, sf::Packet>& pair : pendingCriticalPacketsToSend)
-	{
+	for (const std::pair<int, sf::Packet>& pair : pendingCriticalPacketsToSend) {
 		SendData(pair.second);
 	}
 }
 
-void UdpManager::ReceivePacket()
-{
+void UdpManager::ReceivePacket() {
 	char buffer[1024];
 	std::size_t receivedSize;
 	std::optional<sf::IpAddress> senderIp;
@@ -99,8 +93,7 @@ void UdpManager::ReceivePacket()
 	}
 }
 
-void UdpManager::RemoveCriticalPacketFromPending(int id)
-{
+void UdpManager::RemoveCriticalPacketFromPending(int id) {
 	for (std::vector<std::pair<int, sf::Packet>>::iterator it = pendingCriticalPacketsToSend.begin(); it != pendingCriticalPacketsToSend.end(); it++) {
 		if (it->first == id) {
 			pendingCriticalPacketsToSend.erase(it);
@@ -109,8 +102,7 @@ void UdpManager::RemoveCriticalPacketFromPending(int id)
 	}
 }
 
-bool UdpManager::PacketIsAlreadyProcessed(const std::string& key, int id)
-{
+bool UdpManager::PacketIsAlreadyProcessed(const std::string& key, int id) {
 	std::unordered_map<std::string, std::unordered_set<int>>::iterator mapIt;
 	mapIt = processedCriticalPackets.find(key);
 
@@ -122,8 +114,7 @@ bool UdpManager::PacketIsAlreadyProcessed(const std::string& key, int id)
 	return setIt != mapIt->second.end();
 }
 
-void UdpManager::ProcessedCriticalPacket(const std::string& key, int id)
-{
+void UdpManager::ProcessedCriticalPacket(const std::string& key, int id) {
 	processedCriticalPackets[key].insert(id);
 	SendAcknowledgement(id);
 }
@@ -160,8 +151,7 @@ void UdpManager::SendData(char* buffer, size_t size)
 	}
 }
 
-void UdpManager::ProcessPacket(PacketType type, sf::Packet data)
-{
+void UdpManager::ProcessPacket(PacketType type, sf::Packet data) {
 	switch (type) {
 	case PacketType::MOVEMENT:
 		ReceiveMovement(data);
@@ -172,6 +162,9 @@ void UdpManager::ProcessPacket(PacketType type, sf::Packet data)
 	case PacketType::TAUNT:
 		ReceiveTaunt(data);
 		break;
+	case PacketType::HEALTH_UPDATE:
+		ReceiveHealthUpdate(data);
+		break;
 	case PacketType::MATCH_START:
 		ReceiveMatchStart(data);
 		break;
@@ -181,31 +174,39 @@ void UdpManager::ProcessPacket(PacketType type, sf::Packet data)
 	}
 }
 
-void UdpManager::ReceiveMovement(sf::Packet data)
-{
+void UdpManager::ReceiveMovement(sf::Packet data) {
 	MovementPacket movementPacket;
 	data >> movementPacket;
 	NT->SetLastValidatedMovementPacket(movementPacket);
-	// std::cout << "Paquete de movimiento validado recibido. ID: " << movementPacket.ID << std::endl;
 }
 
 void UdpManager::ReceiveShot(sf::Packet data) {}
 
-void UdpManager::ReceiveTaunt(sf::Packet data) {}
-
-void UdpManager::ReceiveMatchStart(sf::Packet data)
+void UdpManager::ReceiveTaunt(sf::Packet data)
 {
-	std::cout << "Se han conectado ambos clientes. MATCH START recibido. Iniciando gameplay..." << std::endl;
-	LM->StartGame();
+	std::cout << "Recibida burla" << std::endl;
+	MM->HandleEnemyQuack();
 }
 
-bool UdpManager::Init()
-{
+void UdpManager::ReceiveHealthUpdate(sf::Packet data) {
+	uint8_t playerIndex;
+	std::int32_t health, lives;
+	data >> playerIndex >> health >> lives;
+
+	NT->QueueHealthUpdate(playerIndex, static_cast<int>(health), static_cast<int>(lives));
+}
+
+void UdpManager::ReceiveMatchStart(sf::Packet data) {
+	std::cout << "Se han conectado ambos clientes. MATCH START recibido. Iniciando gameplay..." << std::endl;
+	MM->StartGame();
+}
+
+bool UdpManager::Init() {
 	bool successful = true;
 	socket.setBlocking(false);
 
 	if (socket.bind(sf::Socket::AnyPort) != sf::Socket::Status::Done)
-	{
+	{ 
 		std::cout << "Error al abrir socket UDP del cliente" << std::endl;
 		successful = false;
 	}
@@ -213,8 +214,7 @@ bool UdpManager::Init()
 	return successful;
 }
 
-void UdpManager::SendMatchConnect(int roomId, uint8_t playerIndex)
-{
+void UdpManager::SendMatchConnect(int roomId, uint8_t playerIndex) {
 	sf::Packet packet;
 	uint8_t priority = CRITICAL_PACKET;
 	int id = GetNextCriticalPacketId();
@@ -252,8 +252,7 @@ void UdpManager::SendMovement(MovementPacket movement)
 	delete buffer;
 }
 
-void UdpManager::SendShot(bool towardsRight)
-{
+void UdpManager::SendShot(bool towardsRight) {
 	sf::Packet packet;
 	uint8_t priority = CRITICAL_PACKET;
 	int id = GetNextCriticalPacketId();

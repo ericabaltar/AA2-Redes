@@ -1,25 +1,27 @@
 #pragma once
 
-#include <SFML/Network.hpp>
-#include <iostream>
-#include <string>
-#include "ServerPacketTypesManager.h"
-#include "MovementPacket.h"
-#include "Utils.h"
+#include <SFML/Network.hpp> 
+#include <queue> 
+#include "ServerPacketTypesManager.h" 
+#include "MovementPacket.h" 
+#include "Utils.h" 
 #include "UdpManager.h"
-#include <list>
 
-#define NT NetworkManager::Instance()
+#define NT NetworkManager::Instance() 
 #define SERVER_PORT 55000
 
 const sf::IpAddress SERVER_IP = sf::IpAddress(127, 0, 0, 1);
 
-class NetworkManager
-{
+struct HealthUpdatePacket {
+	uint8_t playerIndex;
+	int health;
+	int lives;
+};
+
+class NetworkManager {
 public:
 	static NetworkManager* Instance() {
 		static NetworkManager nt;
-
 		return &nt;
 	}
 
@@ -33,6 +35,8 @@ private:
 
 	MovementPacket lastValidatedMovementPacket;
 	bool hasValidatedMovementPacket = false;
+
+	std::queue<HealthUpdatePacket> healthUpdates;
 
 	sf::Packet receivePacket;
 
@@ -61,6 +65,17 @@ public:
 
 	void SetLastValidatedMovementPacket(const MovementPacket& packet);
 	bool GetLastValidatedMovementPacket(MovementPacket& packet);
+
+	void QueueHealthUpdate(uint8_t index, int hp, int lives) {
+		healthUpdates.push({ index, hp, lives });
+	}
+
+	bool PollHealthUpdate(HealthUpdatePacket& update) {
+		if (healthUpdates.empty()) return false;
+		update = healthUpdates.front();
+		healthUpdates.pop();
+		return true;
+	}
 
 private:
 	NetworkManager() = default;

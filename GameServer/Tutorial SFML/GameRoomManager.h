@@ -1,24 +1,22 @@
 #pragma once 
-#include <vector> 
+#include <vector>
 #include <iostream> 
-#include <optional> 
+#include <memory>
 #include "Game.h" 
 #include "Utils.h"
 #include "NetworkManager.h"
 
 #define GRM GameRoomManager::Instance()
 
-class GameRoomManager
-{
+class GameRoomManager {
 public:
-	static GameRoomManager* Instance()
-	{
+	static GameRoomManager* Instance() {
 		static GameRoomManager manager;
 		return &manager;
 	}
 
 private:
-	std::vector<GameRoom> rooms;
+	std::vector<std::unique_ptr<GameRoom>> rooms;
 
 	struct PendingPlayer
 	{
@@ -30,12 +28,11 @@ private:
 
 	GameRoom* FindRoom(int roomId)
 	{
-		for (GameRoom& room : rooms)
+		for (auto& room : rooms)
 		{
-			if (room.GetId() == roomId)
-				return &room;
+			if (room->GetId() == roomId)
+				return room.get();
 		}
-
 		return nullptr;
 	}
 
@@ -69,29 +66,21 @@ private:
 	}
 
 public:
-	GameRoom* CreateRoom(GameMode mode, int roomId)
-	{
+	GameRoom* CreateRoom(GameMode mode, int roomId) {
 		std::cout << "Sala creada con id " << roomId << std::endl;
-		rooms.emplace_back(roomId, mode);
-
+		rooms.push_back(std::make_unique<GameRoom>(roomId, mode));
 		FlushPendingPlayers(roomId);
-
-		return &rooms.back();
+		return rooms.back().get();
 	}
 
 	void ConnectPlayerToRoom(int roomId, uint8_t playerIndex, const sf::IpAddress& ip, unsigned short port)
 	{
-		Player player;
-		player.index = playerIndex;
-		player.udpIp = ip;
-		player.udpPort = port;
-
+		Player player(ip, port, playerIndex);
 		GameRoom* room = FindRoom(roomId);
 
 		if (room == nullptr)
 		{
-			std::cout << "Sala no existe an. Guardando jugador en pending. RoomId: " << roomId << std::endl;
-
+			std::cout << "Sala no existe aun. Guardando jugador en pending. RoomId: " << roomId << std::endl;
 			pendingPlayers.push_back({ roomId, player });
 			return;
 		}
@@ -105,6 +94,52 @@ public:
 				Player* p = room->GetPlayer(i);
 				NT->GetUdpManager()->SendMatchStart(p->udpIp.value(), p->udpPort);
 			}
+		}
+	}
+
+	GameRoom* FindRoomByUdp(const sf::IpAddress& ip, unsigned short port, int& outPlayerIndex)
+	{
+		for (auto& room : rooms)
+		{
+			for (int i = 0; i < room->GetPlayerAmount(); ++i) {
+				Player* p = room->GetPlayer(i);
+				if (p->udpIp.has_value() && p->udpIp.value() == ip && p->udpPort == port) {
+					outPlayerIndex = i;
+					return room.get();
+				}
+			}
+		}
+		return nullptr;
+	}
+
+	void HandleMovement(const sf::IpAddress& ip, unsigned short port, MovementPacket movement) {
+		int playerIndex;
+		GameRoom* room = FindRoomByUdp(ip, port, playerIndex);
+		if (room) {
+			room->HandleMovement(playerIndex, movement);
+		}
+	}
+
+	void HandleShot(const sf::IpAddress& ip, unsigned short port, bool facingRight) {
+		int playerIndex;
+		GameRoom* room = FindRoomByUdp(ip, port, playerIndex);
+		if (room) {
+			room->HandleShot(playerIndex, facingRight);
+		}
+	}
+
+	void HandleTaunt(const sf::IpAddress& ip, unsigned short port)
+	{
+		int playerIndex;
+		GameRoom* room = FindRoomByUdp(ip, port, playerIndex);
+		if (room) {
+			room->HandleTaunt(playerIndex);
+		}
+	}
+
+	void Update(float dt) {
+		for (auto& room : rooms) {
+			room->Update(dt);
 		}
 	}
 

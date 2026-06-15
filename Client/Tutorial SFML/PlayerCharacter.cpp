@@ -2,12 +2,8 @@
 #include "NetworkManager.h" 
 #include "Ground.h"
 
-void PlayerCharacter::HandleInput(float dt)
-{
-	if (!isFocused) {
-		inputX = 0.f;
-		return;
-	}
+void PlayerCharacter::HandleInput(float dt) {
+	if (!isFocused) { inputX = 0.f; return; }
 
 	bool isDoingAction = isQuacking || isShooting;
 	if (isOnGround) {
@@ -33,8 +29,7 @@ void PlayerCharacter::HandleInput(float dt)
 		inputX += 1.f;
 }
 
-void PlayerCharacter::ApplyPhysics(float dt)
-{
+void PlayerCharacter::ApplyPhysics(float dt) {
 	if (isQuacking || isShooting) {
 		velocity.x = 0.f;
 	}
@@ -72,8 +67,7 @@ void PlayerCharacter::ApplyPhysics(float dt)
 	isOnGround = false;
 }
 
-void PlayerCharacter::HandleEvent(const sf::Event& event) 
-{
+void PlayerCharacter::HandleEvent(const sf::Event& event) {
 	if (event.is<sf::Event::FocusGained>()) {
 		isFocused = true;
 	}
@@ -93,26 +87,23 @@ void PlayerCharacter::HandleEvent(const sf::Event& event)
 	}
 }
 
-void PlayerCharacter::Update(float dt)
-{
+void PlayerCharacter::Update(float dt) {
 	HandleInput(dt);
 	ApplyPhysics(dt);
 	Character::Update(dt);
 }
 
-void PlayerCharacter::Quack()
-{
+void PlayerCharacter::Quack() {
 	Character::Quack();
 	NT->SendTaunt();
 }
 
-void PlayerCharacter::Shoot()
-{
+void PlayerCharacter::Shoot() {
 	Character::Shoot();
+	NT->SendShot(facingRight);
 }
 
-void PlayerCharacter::OnCollisionEnter(Object* other, const CollisionInfo& collisionInfo)
-{
+void PlayerCharacter::OnCollisionEnter(Object* other, const CollisionInfo& collisionInfo) {
 	Character::OnCollisionEnter(other, collisionInfo);
 
 	if (dynamic_cast<Ground*>(other))

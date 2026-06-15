@@ -144,7 +144,6 @@
     <ClCompile Include="Ground.cpp" />
     <ClCompile Include="InputField.cpp" />
     <ClCompile Include="LauncherScene.cpp" />
-    <ClCompile Include="LobbyManager.cpp" />
     <ClCompile Include="LobbyWaitingScene.cpp" />
     <ClCompile Include="LoginScene.cpp" />
     <ClCompile Include="LoginStyle.cpp" />
@@ -186,7 +185,7 @@
     <ClInclude Include="Ground.h" />
     <ClInclude Include="InputField.h" />
     <ClInclude Include="LauncherScene.h" />
-    <ClInclude Include="LobbyManager.h" />
+    <ClInclude Include="MatchManager.h" />
     <ClInclude Include="LobbyWaitingScene.h" />
     <ClInclude Include="LoginScene.h" />
     <ClInclude Include="LoginStyle.h" />
