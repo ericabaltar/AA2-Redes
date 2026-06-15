@@ -1,9 +1,10 @@
-#pragma once
-#include <vector>
-#include <string>
-#include <iostream>
-#include "Game.h"
+#pragma once 
+#include <vector> 
+#include <iostream> 
+#include <optional> 
+#include "Game.h" 
 #include "Utils.h"
+#include "NetworkManager.h"
 
 #define GRM GameRoomManager::Instance()
 
@@ -58,7 +59,13 @@ private:
 		}
 
 		if (room->CanStartGame())
+		{
 			room->StartGame();
+			for (int i = 0; i < room->GetPlayerAmount(); ++i) {
+				Player* p = room->GetPlayer(i);
+				NT->GetUdpManager()->SendMatchStart(p->udpIp.value(), p->udpPort);
+			}
+		}
 	}
 
 public:
@@ -83,7 +90,7 @@ public:
 
 		if (room == nullptr)
 		{
-			std::cout << "Sala no existe aún. Guardando jugador en pending. RoomId: " << roomId << std::endl;
+			std::cout << "Sala no existe an. Guardando jugador en pending. RoomId: " << roomId << std::endl;
 
 			pendingPlayers.push_back({ roomId, player });
 			return;
@@ -92,7 +99,13 @@ public:
 		room->AddPlayer(player);
 
 		if (room->CanStartGame())
+		{
 			room->StartGame();
+			for (int i = 0; i < room->GetPlayerAmount(); ++i) {
+				Player* p = room->GetPlayer(i);
+				NT->GetUdpManager()->SendMatchStart(p->udpIp.value(), p->udpPort);
+			}
+		}
 	}
 
 private:

@@ -1,17 +1,16 @@
-#pragma once
-#include <SFML/Network.hpp>
-#include <unordered_set>
-#include <unordered_map>
+#pragma once 
+#include <SFML/Network.hpp> 
+#include <unordered_set> 
+#include <unordered_map> 
 #include "MovementPacket.h"
 
-#define NORMAL_PACKET 0b00000000
-#define CRITICAL_PACKET 0b00000001
+#define NORMAL_PACKET 0b00000000 
+#define CRITICAL_PACKET 0b00000001 
 #define URGENT_PACKET 0b00000010
 
-class UdpManager
-{
+class UdpManager {
 public:
-	enum class PacketType : uint8_t { MATCH_CONNECT, MOVEMENT, SHOT, TAUNT, ACKNOWLEDGEMENT };
+	enum class PacketType : uint8_t { MATCH_CONNECT, MATCH_START, MOVEMENT, SHOT, TAUNT, ACKNOWLEDGEMENT };
 
 private:
 	sf::UdpSocket socket;
@@ -36,6 +35,7 @@ private:
 	void ReceiveMovement(sf::Packet data);
 	void ReceiveShot(sf::Packet data);
 	void ReceiveTaunt(sf::Packet data);
+	void ReceiveMatchStart(sf::Packet data);
 
 public:
 	bool Init();
@@ -47,4 +47,3 @@ public:
 	void SendShot(bool towardsRight);
 	void SendTaunt();
 };
-

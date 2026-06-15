@@ -6,9 +6,6 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameServer", "Tutorial SFML\Tutorial SFML.vcxproj", "{8F93E8EF-A2C3-4C5A-87E9-56F2A1A69D3B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Elementos de la solución", "Elementos de la solución", "{D107F4C8-89CC-BEA8-D3D7-CA6B7733353D}"
-	ProjectSection(SolutionItems) = preProject
-		..\Server\Tutorial SFML\Player.h = ..\Server\Tutorial SFML\Player.h
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

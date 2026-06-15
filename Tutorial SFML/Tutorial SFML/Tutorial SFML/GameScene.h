@@ -1,137 +1,137 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
-#include <optional>
+#include <SFML/Graphics.hpp> 
+#include <iostream>
 
-#include "NetworkManager.h"
-#include "MovementPrediction.h"
-#include "MovementReconciliation.h"
-#include "Character.h"
-#include "MovementInterpolation.h"
-#include "PlayerCharacter.h"
-#include "Bullet.h"
-#include "Scene.h"
+#include "NetworkManager.h" 
+#include "MovementPrediction.h" 
+#include "MovementReconciliation.h" 
+#include "Character.h" 
+#include "MovementInterpolation.h" 
+#include "PlayerCharacter.h" 
+#include "Bullet.h" 
+#include "Scene.h" 
 #include "Ground.h"
+#include "MapReader.h"
+#include "LobbyManager.h"
 
-
-class GameScene : public Scene
-{
+class GameScene : public Scene {
 private:
-    MovementPrediction movementPrediction;
-    MovementReconciliation movementReconciliation;
+	MovementPrediction movementPrediction;
+	MovementReconciliation movementReconciliation;
 	MovementInterpolation movementInterpolation;
 
-    PlayerCharacter* player;
-    Character* oponent;
+	PlayerCharacter* player;
+	Character* oponent;
 
-    User opponentUser;
+	User opponentUser;
+
 public:
-    GameScene() {}
+	GameScene() {}
 
-    void Enter(SharedMemory* _sharedMemory) override
-    {
-        // Usuario de prueba
-        opponentUser.nickname = "testOpponent";
-        opponentUser.score = 0;
-        opponentUser.userIndex = 999;
-        opponentUser.position = 0;
-        opponentUser.speed = 1.f;
+	void Enter(SharedMemory* _sharedMemory) override
+	{
+		// Usuario de rival
+		opponentUser.nickname = "testOpponent";
+		opponentUser.score = 0;
+		opponentUser.userIndex = (LM->GetPlayerIndex() == 0) ? 1 : 0;
+		opponentUser.position = 0;
+		opponentUser.speed = 1.f;
 
-        if(MAP->GetTiles().empty()) {
+		if (MAP->GetTiles().empty()) {
 			MAP->Init();
 		}
 
-        Vector2 playerPos;
-        Vector2 opponentPos;
-        float tileSize = 0.f;
-        for (Tile* tile : MAP->GetTiles()) {
-            if (tile != nullptr) {
-                switch (tile->type)
-                {
-                case TileType::PLAYER:
-                    player = new PlayerCharacter();
+		int myIndex = LM->GetPlayerIndex();
+		TileType myTileType = (myIndex == 0) ? TileType::PLAYER : TileType::OPONENT;
+		TileType oppTileType = (myIndex == 0) ? TileType::OPONENT : TileType::PLAYER;
+
+		Vector2 playerPos;
+		Vector2 opponentPos;
+		float tileSize = 0.f;
+
+		for (Tile* tile : MAP->GetTiles()) {
+			if (tile != nullptr) {
+				if (tile->type == myTileType) {
+					player = new PlayerCharacter();
 					playerPos = Vector2(tile->x * MAP->GetDefaultTileSize(), tile->y * MAP->GetDefaultTileSize());
-                    player->SetPosition(playerPos);
-                    objects.push_back(player);
-					break;
+					player->SetPosition(playerPos);
+					objects.push_back(player);
+				}
+				else if (tile->type == oppTileType) {
+					oponent = new Character();
+					opponentPos = Vector2(tile->x * MAP->GetDefaultTileSize(), tile->y * MAP->GetDefaultTileSize());
+					oponent->SetPosition(opponentPos);
+					objects.push_back(oponent);
+				}
+				else if (tile->type == TileType::FLOOR) {
+					tileSize = MAP->GetDefaultTileSize();
+					objects.push_back(new Ground({ tile->x * MAP->GetDefaultTileSize(), tile->y * MAP->GetDefaultTileSize() },
+						{ tileSize, tileSize }));
+				}
+			}
+		}
 
-                case TileType::OPONENT:
-                    oponent = new Character();
-					opponentUser.position = tile->x * MAP->GetDefaultTileSize();
-                    opponentPos = Vector2(tile->x * MAP->GetDefaultTileSize(), tile->y * MAP->GetDefaultTileSize());
-                    oponent->SetPosition(opponentPos);
-                    objects.push_back(oponent);
-                    break;
-				case TileType::FLOOR:
-                    tileSize = MAP->GetDefaultTileSize();
-                    objects.push_back(new Ground({ tile->x * MAP->GetDefaultTileSize(), tile->y * MAP->GetDefaultTileSize() }, 
-                        { tileSize, tileSize}));
-                    break;
-                default:
-                    break;
-                }
-            }
-        }
-    }
+		// Configurar el paquete inicial para que el rival no aparezca en (0,0)
+		MovementPacket initialPacket;
+		initialPacket.ID = -1;
+		initialPacket.pos = opponentPos;
+		movementInterpolation.AddPacket(opponentUser, initialPacket);
+	}
 
-    virtual bool Update(sf::RenderWindow& window, float dt) override
-    {
-        if (player->IsDead())
-        {
-            std::cout << "DERROTA" << std::endl;
-        }
-        else if (oponent->IsDead())
-        {
-            std::cout << "VICTORIA" << std::endl;
-        }
+	virtual bool Update(sf::RenderWindow& window, float dt) override
+	{
+		if (player->IsDead())
+		{
+			std::cout << "DERROTA" << std::endl;
+		}
+		else if (oponent->IsDead())
+		{
+			std::cout << "VICTORIA" << std::endl;
+		}
 
 		movementInterpolation.Update(dt);
 
-        Vector2 interpolatedPos = movementInterpolation.GetInterpolatedPosition(opponentUser);
-        oponent->SetInterpolatedPosition(Vector2(interpolatedPos.x, interpolatedPos.y));
-        oponent->Update(dt);  // Se hace dos veces este update, no parece que cause problemas por ahora pero en el futuro podria dar
-        
-        Scene::Update(window, dt);
+		Vector2 interpolatedPos = movementInterpolation.GetInterpolatedPosition(opponentUser);
+		oponent->SetInterpolatedPosition(Vector2(interpolatedPos.x, interpolatedPos.y));
+		oponent->Update(dt);
 
-        //if (NT->GetDisconnectFromServer()) return false;
+		Scene::Update(window, dt);
 
-        NT->Update();
+		NT->Update();
 
-        if (movementPrediction.ShouldSendPacket(dt))
-        {
-            MovementPacket movementPacket = movementPrediction.CreateMovementPacket(player->GetPosition());
+		if (movementPrediction.ShouldSendPacket(dt))
+		{
+			MovementPacket movementPacket = movementPrediction.CreateMovementPacket(player->GetPosition());
+			movementReconciliation.AddPendingPacket(movementPacket);
+			NT->SendMovementPacket(movementPacket);
+		}
 
-            movementReconciliation.AddPendingPacket(movementPacket);
+		MovementPacket validatedPacket;
 
-            NT->SendMovementPacket(movementPacket);
-        }
+		if (NT->GetLastValidatedMovementPacket(validatedPacket))
+		{
+			Vector2 correctedPosition = player->GetPosition();
 
-        MovementPacket validatedPacket;
+			Vector2 validatedPosition(
+				validatedPacket.pos.x,
+				validatedPacket.pos.y
+			);
 
-        if (NT->GetLastValidatedMovementPacket(validatedPacket))
-        {
-            Vector2 correctedPosition = player->GetPosition();
+			movementReconciliation.Reconcile(
+				correctedPosition,
+				validatedPosition,
+				validatedPacket.ID
+			);
 
-            Vector2 validatedPosition(
-                validatedPacket.pos.x,
-                validatedPacket.pos.y
-            );
+			player->SetInterpolatedPosition(correctedPosition);
+		}
 
-            movementReconciliation.Reconcile(
-                correctedPosition,
-                validatedPosition,
-                validatedPacket.ID
-            );
+		return true;
+	}
 
-            player->SetInterpolatedPosition(correctedPosition);
-        }
-
-        return true;
-    }
-
-    void Render(sf::RenderWindow& window) override
-    {
-        Scene::Render(window);
-        //window.display();
-    }
+	void Render(sf::RenderWindow& window) override
+	{
+		Scene::Render(window);
+	}
 };
