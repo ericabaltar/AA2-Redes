@@ -10,7 +10,7 @@
 
 class UdpManager {
 public:
-	enum class PacketType : uint8_t { MATCH_CONNECT, MATCH_START, MOVEMENT, SHOT, TAUNT, ACKNOWLEDGEMENT };
+	enum class PacketType : uint8_t { MATCH_CONNECT, MATCH_START, MOVEMENT, SHOT, TAUNT, HEALTH_UPDATE, ACKNOWLEDGEMENT };
 
 private:
 	sf::UdpSocket socket;
@@ -35,6 +35,7 @@ private:
 	void ReceiveMovement(sf::Packet data);
 	void ReceiveShot(sf::Packet data);
 	void ReceiveTaunt(sf::Packet data);
+	void ReceiveHealthUpdate(sf::Packet data);
 	void ReceiveMatchStart(sf::Packet data);
 
 public:
