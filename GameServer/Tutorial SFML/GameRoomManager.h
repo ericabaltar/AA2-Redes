@@ -1,7 +1,10 @@
-#pragma once
-#include <vector>
-#include <string>
-#include "Game.h"
+#pragma once 
+#include <vector> 
+#include <iostream> 
+#include <optional> 
+#include "Game.h" 
+#include "Utils.h"
+#include "NetworkManager.h"
 
 #define GRM GameRoomManager::Instance()
 
@@ -16,43 +19,93 @@ public:
 
 private:
 	std::vector<GameRoom> rooms;
-	int nextRoomId = 0;
 
-public:
-	GameRoom* FindAvailableRoom(GameMode mode)
+	struct PendingPlayer
+	{
+		int roomId;
+		Player player;
+	};
+
+	std::vector<PendingPlayer> pendingPlayers;
+
+	GameRoom* FindRoom(int roomId)
 	{
 		for (GameRoom& room : rooms)
 		{
-			if (room.GetGameMode() == mode && !room.IsFull() && !room.HasStarted())
+			if (room.GetId() == roomId)
 				return &room;
 		}
 
 		return nullptr;
 	}
 
-	GameRoom* CreateRoom(GameMode mode)
+	void FlushPendingPlayers(int roomId)
 	{
-		int roomId = nextRoomId;
-		nextRoomId++;
+		GameRoom* room = FindRoom(roomId);
+		if (room == nullptr)
+			return;
 
+		for (std::vector<PendingPlayer>::iterator it = pendingPlayers.begin(); it != pendingPlayers.end(); )
+		{
+			if (it->roomId == roomId)
+			{
+				room->AddPlayer(it->player);
+				it = pendingPlayers.erase(it);
+			}
+			else
+			{
+				++it;
+			}
+		}
+
+		if (room->CanStartGame())
+		{
+			room->StartGame();
+			for (int i = 0; i < room->GetPlayerAmount(); ++i) {
+				Player* p = room->GetPlayer(i);
+				NT->GetUdpManager()->SendMatchStart(p->udpIp.value(), p->udpPort);
+			}
+		}
+	}
+
+public:
+	GameRoom* CreateRoom(GameMode mode, int roomId)
+	{
+		std::cout << "Sala creada con id " << roomId << std::endl;
 		rooms.emplace_back(roomId, mode);
+
+		FlushPendingPlayers(roomId);
 
 		return &rooms.back();
 	}
 
-	GameRoom* JoinOrCreateRoom(Player& player, GameMode mode)
+	void ConnectPlayerToRoom(int roomId, uint8_t playerIndex, const sf::IpAddress& ip, unsigned short port)
 	{
-		GameRoom* room = FindAvailableRoom(mode);
+		Player player;
+		player.index = playerIndex;
+		player.udpIp = ip;
+		player.udpPort = port;
+
+		GameRoom* room = FindRoom(roomId);
 
 		if (room == nullptr)
-			room = CreateRoom(mode);
+		{
+			std::cout << "Sala no existe an. Guardando jugador en pending. RoomId: " << roomId << std::endl;
+
+			pendingPlayers.push_back({ roomId, player });
+			return;
+		}
 
 		room->AddPlayer(player);
 
 		if (room->CanStartGame())
+		{
 			room->StartGame();
-
-		return room;
+			for (int i = 0; i < room->GetPlayerAmount(); ++i) {
+				Player* p = room->GetPlayer(i);
+				NT->GetUdpManager()->SendMatchStart(p->udpIp.value(), p->udpPort);
+			}
+		}
 	}
 
 private:

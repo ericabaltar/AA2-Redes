@@ -130,36 +130,23 @@ void ServerPacketTypesManager::SendInfoToStartGame(GameRoom game, int roomId)
 	sf::Packet packet;
 
 	packet << PacketTypes::START_GAME;
-	
-	packet << roomId;
-	packet << (int)game.GetMode();
-	
-	for (int i = 0; i < playerAmount; i++)
-	{
-		int playerIndex = i;
-		std::optional<sf::IpAddress> ip = game.GetPlayer(i)->client->getRemoteAddress();
-		unsigned short port = game.GetPlayer(i)->client->getRemotePort();
-		std::string username = game.GetPlayer(i)->name;
-		int points = game.GetPlayer(i)->points;
 
-		packet << playerIndex;
-		packet << ip->toString();
-		packet << port;
-		packet << username;
-		packet << points;
+	packet << roomId;
+	packet << (uint8_t)game.GetMode();
+
+	sf::TcpSocket* gameServer = NT->GetGameServerSocket();
+	if (gameServer != nullptr) {
+		SendData(*gameServer, packet);
+		std::cout << "Enviada información al game server de sala" << std::endl;
 	}
 
-	SendData(*NT->GetGameServerSocket(), packet);
-	std::cout << "Enviada información al game server " << std::endl;
-
 	// Info for player clients
-
 	for (int i = 0; i < playerAmount; i++)
 	{
 		sf::Packet packet;
 
 		packet << PacketTypes::START_GAME;
-		
+
 		packet << roomId;
 		packet << i;
 
@@ -227,7 +214,7 @@ void ServerPacketTypesManager::SendRankingPacket(sf::TcpSocket& client, std::vec
 		packet << entry.username;
 		packet << entry.points;
 
-		
+
 		std::cout << entry.position << ". " << entry.userId << " - "
 			<< entry.username << " - "
 			<< entry.points << " puntos" << std::endl;
@@ -264,7 +251,7 @@ void ServerPacketTypesManager::ReceiveLoginPacket(sf::Packet data, sf::TcpSocket
 
 	SendLoginResponse(client, correctLogin, loginUsername);
 
-	// Si es correcto, guardar tambi�n los datos del usuario (nombre y puntos del ranking)
+	// Si es correcto, guardar tambin los datos del usuario (nombre y puntos del ranking)
 
 	if (correctLogin) {
 		//MM->AddConnectedPlayer(&client, loginUsername, 15);
@@ -280,7 +267,7 @@ void ServerPacketTypesManager::ReceiveRegisterPacket(sf::Packet data, sf::TcpSoc
 	data >> registerPassword;
 
 	std::string passwordHash = bcrypt::generateHash(registerPassword);
-	
+
 	bool correctRegister = DB->RegisterUser(registerUsername, passwordHash);
 
 	SendRegisterResponse(client, correctRegister, registerUsername);
@@ -297,9 +284,10 @@ void ServerPacketTypesManager::ReceiveLobbyCreatePacket(sf::Packet data, sf::Tcp
 	data >> lobbyID;
 
 	bool successfulLobbyCreation = false;//MM->CreateWaitingRoom(lobbyID, &client);
-	 
+
 	if (successfulLobbyCreation) {
 		std::cout << "Lobby " << lobbyID << "creado exitosamente, pasando jugador a la sala de espera" << std::endl;
+		//LM->JoinRoom();
 	}
 	else {
 		std::cout << "El ID " << lobbyID << " ya esta en uso" << std::endl;
@@ -359,10 +347,12 @@ void ServerPacketTypesManager::ReceiveRankingPacket(sf::Packet data, sf::TcpSock
 
 void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
 {
+
 }
 
 void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)
 {
+
 }
 
 void ServerPacketTypesManager::ManageMapPacket(sf::Packet data, sf::TcpSocket& client)

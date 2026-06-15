@@ -90,7 +90,7 @@ void ServerPacketTypesManager::ReceivePacket(sf::Packet packet)
 		ReceiveMapPacket(packet);
 		break;
 	default:
-		std::cout << "No se ha identificado el tipo de paquete" << std::endl;
+		std::cout << "No se ha identificado el tipo de paquete de tcp" << std::endl;
 		break;
 	}
 
@@ -328,7 +328,8 @@ void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
 	data >> roomId;
 	data >> playerIndex;
 
-	LM->StartGame(roomId, playerIndex);
+	LM->StoreGameInfo(roomId, playerIndex);
+	NT->SendMatchConnect(roomId, (uint8_t)playerIndex);
 }
 
 void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)

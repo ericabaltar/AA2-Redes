@@ -1,4 +1,5 @@
 #pragma once
+
 #include <SFML/Network.hpp>
 #include <iostream>
 #include <string>
@@ -33,6 +34,8 @@ private:
 	MovementPacket lastValidatedMovementPacket;
 	bool hasValidatedMovementPacket = false;
 
+	sf::Packet receivePacket;
+
 public:
 	void Init();
 	void Update();
@@ -51,6 +54,7 @@ public:
 	void SendRankingPetitionServerPacket(int userId);
 	void SendMapPetitionServerPacket();
 
+	void SendMatchConnect(int roomId, uint8_t playerIndex);
 	void SendMovementPacket(MovementPacket movementPacket);
 	void SendTaunt();
 	void SendShot(bool towardsRight);

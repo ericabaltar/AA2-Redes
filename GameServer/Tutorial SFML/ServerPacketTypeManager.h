@@ -11,7 +11,7 @@
 
 enum TcpPacketTypes
 {
-	HANDSHAKE, LOGIN, REGISTER, LOBBY_CREATE, LOBBY_JOIN, WAITING_ROOM_PLAYERS, RANKING, START_GAME, END_GAME
+	HANDSHAKE, LOGIN, REGISTER, LOBBY_CREATE, LOBBY_JOIN, WAITING_ROOM_PLAYERS, MOVEMENT_TCP, RANKING, START_GAME, END_GAME, MAP_CHECK
 };
 
 enum UdpPacketTypes
@@ -32,7 +32,6 @@ private:
 	std::string handshakeMessage = "Handshake realizado entre servers";
 
 public:
-	void ReceivePacket(sf::Packet packet, std::optional<sf::IpAddress>& senderIp, unsigned short senderPort);
 	void SendHandshake(sf::TcpSocket& client);
 	void SendUpdatedPlayerCount(sf::TcpSocket& client, int playerCount);
 
@@ -48,10 +47,6 @@ private:
 
 	void SendLobbyCreateResponse(sf::TcpSocket& client, bool success);
 	void SendLobbyJoinResponse(sf::TcpSocket& client, bool success);
-
-	void ReceiveLobbyPacket(sf::Packet data, std::optional<sf::IpAddress> senderIp, unsigned short senderPort);
-
-	void ProcessPacket(sf::Packet packet);
 
 	void ReceiveHandshakePacket(sf::Packet data);
 
