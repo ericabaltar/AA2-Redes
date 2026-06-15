@@ -87,9 +87,6 @@
     <ClCompile Include="Ranking.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="LobbyManager.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
     <ClCompile Include="Ground.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
@@ -209,7 +206,7 @@
     <ClInclude Include="Ranking.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="LobbyManager.h">
+    <ClInclude Include="MatchManager.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="AABB.h">

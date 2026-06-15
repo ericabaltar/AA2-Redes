@@ -1,8 +1,7 @@
 #include "ServerPacketTypesManager.h"
 #include "NetworkManager.h"
-//#include "LobbyManager.h"
 #include "User.h"
-#include "LobbyManager.h"
+#include "MatchManager.h"
 #include "MapManager.h"
 #include "RankingManager.h"
 
@@ -328,7 +327,7 @@ void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
 	data >> roomId;
 	data >> playerIndex;
 
-	LM->StoreGameInfo(roomId, playerIndex);
+	MM->Initialize(roomId, playerIndex);
 	NT->SendMatchConnect(roomId, (uint8_t)playerIndex);
 }
 

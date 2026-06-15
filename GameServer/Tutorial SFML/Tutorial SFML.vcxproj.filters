@@ -27,6 +27,9 @@
     <ClCompile Include="UdpManager.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
+    <ClCompile Include="MapReader.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NetworkManager.h">
@@ -50,13 +53,19 @@
     <ClInclude Include="ThreadManager.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Server\Tutorial SFML\Player.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
     <ClInclude Include="GameRoomManager.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="UdpManager.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="AABB.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="MapReader.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>

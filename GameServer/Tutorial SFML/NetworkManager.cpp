@@ -16,6 +16,11 @@ void NetworkManager::Update()
 	udp.AttemptToSendPendingCriticalPackets();
 }
 
+void NetworkManager::SendTaunt(const sf::IpAddress& ip, unsigned short port)
+{
+	udp.SendTaunt(ip, port);
+}
+
 void NetworkManager::EstablishConnectionWithLauncherServer()
 {
 	closeServer = false;

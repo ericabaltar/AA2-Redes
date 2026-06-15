@@ -5,7 +5,7 @@
 #include "Button.h"
 #include "ServerPacketTypesManager.h"
 #include "NetworkManager.h"
-#include "LobbyManager.h"
+#include "MatchManager.h"
 #include <iostream>
 
 class LobbyWaitingScene : public Scene
@@ -43,7 +43,7 @@ public:
 
 	bool Update(sf::RenderWindow& window, float dt) override
 	{
-		if (LM->GetGameStarted())
+		if (MM->GetGameStarted())
 			nextScene = SceneOption::GAME;
 
 		timeElapsed += dt;

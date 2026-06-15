@@ -13,7 +13,7 @@
 #include "Scene.h" 
 #include "Ground.h"
 #include "MapReader.h"
-#include "LobbyManager.h"
+#include "MatchManager.h"
 
 class GameScene : public Scene {
 private:
@@ -34,7 +34,7 @@ public:
 		// Usuario de rival
 		opponentUser.nickname = "testOpponent";
 		opponentUser.score = 0;
-		opponentUser.userIndex = (LM->GetPlayerIndex() == 0) ? 1 : 0;
+		opponentUser.userIndex = (MM->GetPlayerIndex() == 0) ? 1 : 0;
 		opponentUser.position = 0;
 		opponentUser.speed = 1.f;
 
@@ -42,7 +42,7 @@ public:
 			MAP->Init();
 		}
 
-		int myIndex = LM->GetPlayerIndex();
+		int myIndex = MM->GetPlayerIndex();
 		TileType myTileType = (myIndex == 0) ? TileType::PLAYER : TileType::OPONENT;
 		TileType oppTileType = (myIndex == 0) ? TileType::OPONENT : TileType::PLAYER;
 
@@ -71,6 +71,8 @@ public:
 				}
 			}
 		}
+
+		MM->StoreCharacters(player, oponent);
 
 		// Configurar el paquete inicial para que el rival no aparezca en (0,0)
 		MovementPacket initialPacket;
