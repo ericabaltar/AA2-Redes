@@ -1,4 +1,5 @@
 #pragma once
+
 #include <SFML/Network.hpp>
 #include <iostream>
 #include <queue>
@@ -22,20 +23,20 @@ public:
 
 private:
 	bool closeServer = false;
-	
+
 	UdpManager udp;
 
 	sf::TcpSocket mainServerSocket;
 
 	std::queue<Task> pendingTasks;
-	
+
+	sf::Packet receivePacket;
+
 public:
 	void Init();
-	
+
 	void Update();
-	//void EstablishConnectionWithClient();
-	//void CheckForDisconnection();
-	
+
 	inline void AddTask(Task task) { pendingTasks.push(task); }
 
 	inline void CloseServer() { closeServer = true; }
@@ -50,4 +51,3 @@ private:
 	void EstablishConnectionWithLauncherServer();
 	void HandleReceivedTcpPackets();
 };
-

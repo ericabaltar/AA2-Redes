@@ -1,4 +1,5 @@
 #pragma once
+
 #include <SFML/Network.hpp>
 #include <iostream>
 #include <string>
@@ -32,6 +33,8 @@ private:
 
 	MovementPacket lastValidatedMovementPacket;
 	bool hasValidatedMovementPacket = false;
+
+	sf::Packet receivePacket;
 
 public:
 	void Init();
