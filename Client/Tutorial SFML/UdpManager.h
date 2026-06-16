@@ -12,7 +12,7 @@
 
 class UdpManager {
 public:
-	enum class PacketType : uint8_t { MATCH_CONNECT, MATCH_START, MOVEMENT, SHOT, TAUNT, HEALTH_UPDATE, ACKNOWLEDGEMENT };
+	enum class PacketType : uint8_t { MATCH_CONNECT, MATCH_START, MOVEMENT, SHOT, TAUNT, HEALTH_UPDATE, ACKNOWLEDGEMENT, PING, DISCONNECT };
 
 private:
 	sf::UdpSocket socket;
@@ -41,6 +41,10 @@ private:
 	void ReceiveHealthUpdate(char* buffer, size_t dataRead);
 	void ReceiveMatchStart(char* buffer, size_t dataRead);
 
+	void ReceivePing(char* buffer, size_t dataRead);
+
+	void ReceiveDisconnect(char* buffer, size_t dataRead);
+
 public:
 	bool Init();
 	void AttemptToSendPendingCriticalPackets();
@@ -50,4 +54,6 @@ public:
 	void SendMovement(MovementPacket movement);
 	void SendShot(bool towardsRight);
 	void SendTaunt();
+
+	void SendPing();
 };

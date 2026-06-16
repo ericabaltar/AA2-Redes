@@ -14,7 +14,7 @@
 
 class UdpManager {
 public:
-	enum class PacketType : uint8_t { MATCH_CONNECT, MATCH_START, MOVEMENT, SHOT, TAUNT, HEALTH_UPDATE, ACKNOWLEDGEMENT };
+	enum class PacketType : uint8_t { MATCH_CONNECT, MATCH_START, MOVEMENT, SHOT, TAUNT, HEALTH_UPDATE, ACKNOWLEDGEMENT, PING, DISCONNECT };
 
 private:
 	struct PendingCriticalPacket { int id; char* buffer; size_t bufferSize; sf::IpAddress ip; unsigned short port; };
@@ -43,6 +43,8 @@ private:
 	void ReceiveTaunt(const sf::IpAddress& ip, unsigned short port);
 	void ReceiveMatchConnect(char* buffer, size_t dataRead, const sf::IpAddress& ip, unsigned short port);
 
+	void ReceivePing(char* buffer, size_t dataRead, const sf::IpAddress& ip, unsigned short port);
+
 public:
 	bool Init();
 	void AttemptToSendPendingCriticalPackets();
@@ -53,4 +55,8 @@ public:
 	void SendMovement(MovementPacket movement);
 	void SendShot(bool towardsRight);
 	void SendTaunt(const sf::IpAddress& ip, unsigned short port);
+
+	void SendPing(const sf::IpAddress& ip, unsigned short port);
+
+	void SendDisconnect(const sf::IpAddress& ip, unsigned short port);
 };

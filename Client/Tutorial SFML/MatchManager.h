@@ -52,6 +52,10 @@ public:
 		std::cout << "Iniciando partida. ID: " << roomId << " | PlayerIndex: " << playerIndex << std::endl;
 	}
 
+	void EndGame() {
+		gameStarted = false;
+	}
+
 	bool GetGameStarted() const { return gameStarted; }
 	int GetRoomId() const { return roomId; }
 	int GetPlayerIndex() const { return playerIndex; }
