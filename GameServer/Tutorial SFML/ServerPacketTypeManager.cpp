@@ -1,16 +1,24 @@
 #include "ServerPacketTypeManager.h"
+#include "NetworkManager.h"
 #include <iostream>
 #include "MovementPacket.h"
+#include "ThreadManager.h"
+#include "Utils.h"
+#include <thread>
+#include <optional>
+#include "Player.h"
+#include "Game.h"
+#include "GameRoomManager.h"
 
-sf::Packet& operator>>(sf::Packet& packet, PacketTypes& type) {
+sf::Packet& operator>>(sf::Packet& packet, TcpPacketTypes& type) {
 	int temp;
 	packet >> temp;
-	type = static_cast<PacketTypes>(temp);
+	type = static_cast<TcpPacketTypes>(temp);
 
 	return packet;
 }
 
-sf::Packet& operator<<(sf::Packet& packet, PacketTypes& type) {
+sf::Packet& operator<<(sf::Packet& packet, TcpPacketTypes& type) {
 	int temp;
 	temp = static_cast<int>(type);
 	packet << temp;
@@ -34,25 +42,6 @@ sf::Packet& operator<<(sf::Packet& packet, UdpPacketTypes& type) {
 	return packet;
 }
 
-void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, std::optional<sf::IpAddress>& senderIp, unsigned short senderPort)
-{
-	UdpPacketTypes packetType;
-
-	packet >> packetType;
-
-	switch (packetType)
-	{
-	case MOVEMENT:
-		ReceiveMovementPacket(packet);
-		break;
-	default:
-		std::cout << "No se ha identificado el tipo de packete" << std::endl;
-		break;
-	}
-
-	packet.clear();
-}
-
 void ServerPacketTypesManager::SendData(sf::TcpSocket& client, sf::Packet& packet)
 {
 	if (client.send(packet) == sf::Socket::Status::Done) {
@@ -66,47 +55,48 @@ void ServerPacketTypesManager::SendData(sf::TcpSocket& client, sf::Packet& packe
 void ServerPacketTypesManager::SendHandshake(sf::TcpSocket& client)
 {
 	sf::Packet packet;
-	packet << PacketTypes::HANDSHAKE << handshakeMessage;
+	packet << TcpPacketTypes::HANDSHAKE << handshakeMessage;
 	SendData(client, packet);
 }
 
 void ServerPacketTypesManager::SendUpdatedPlayerCount(sf::TcpSocket& client, int playerCount)
 {
 	sf::Packet packet;
-	packet << PacketTypes::WAITING_ROOM_PLAYERS;
+	packet << TcpPacketTypes::WAITING_ROOM_PLAYERS;
 	packet << playerCount;
 
 	SendData(client, packet);
 }
 
-void ServerPacketTypesManager::SendLoginResponse(sf::TcpSocket& client, bool success, const std::string& username)
+void ServerPacketTypesManager::ReceiveTcpPacket(sf::Packet packet)
 {
-	sf::Packet packet;
-	packet << PacketTypes::LOGIN;
-	packet << success;
-	packet << username;
+	TcpPacketTypes packetType;
 
-	SendData(client, packet);
+	packet >> packetType;
 
-	std::cout << "Respuesta de login enviada" << std::endl;
-}
+	switch (packetType)
+	{
+	case TcpPacketTypes::HANDSHAKE:
+		ReceiveHandshakePacket(packet);
+		break;
+	case TcpPacketTypes::START_GAME:
+		ReceiveStartGamePacket(packet);
+		break;
+	case TcpPacketTypes::END_GAME:
+		ReceiveEndGamePacket(packet);
+		break;
+	default:
+		std::cout << "No se ha identificado el tipo de paquete tcp" << std::endl;
+		break;
+	}
 
-void ServerPacketTypesManager::SendRegisterResponse(sf::TcpSocket& client, bool success, const std::string& username)
-{
-	sf::Packet packet;
-	packet << PacketTypes::REGISTER;
-	packet << success;
-	packet << username;
-
-	SendData(client, packet);
-
-	std::cout << "Respuesta de registro enviada" << std::endl;
+	packet.clear();
 }
 
 void ServerPacketTypesManager::SendLobbyCreateResponse(sf::TcpSocket& client, bool success)
 {
 	sf::Packet packet;
-	packet << PacketTypes::LOBBY_CREATE;
+	packet << TcpPacketTypes::LOBBY_CREATE;
 	packet << success;
 
 	SendData(client, packet);
@@ -117,7 +107,7 @@ void ServerPacketTypesManager::SendLobbyCreateResponse(sf::TcpSocket& client, bo
 void ServerPacketTypesManager::SendLobbyJoinResponse(sf::TcpSocket& client, bool success)
 {
 	sf::Packet packet;
-	packet << PacketTypes::LOBBY_JOIN;
+	packet << TcpPacketTypes::LOBBY_JOIN;
 	packet << success;
 
 	SendData(client, packet);
@@ -143,10 +133,27 @@ void ServerPacketTypesManager::ReceiveMovementPacket(sf::Packet data)
 	std::cout << "(" << movement.pos.x << ", " << movement.pos.y << ")" << std::endl;
 }
 
+void ServerPacketTypesManager::ReceiveTauntPacket(sf::Packet data)
+{
+	std::cout << "Burla recibida" << std::endl;
+}
+
 void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
 {
+	std::cout << "Recibido paquete para crear sala" << std::endl;
+
+	int roomId;
+	uint8_t mode;
+
+	data >> roomId;
+	data >> mode;
+
+	GameMode gameMode = static_cast<GameMode>(mode);
+
+	GRM->CreateRoom(gameMode, roomId);
 }
 
 void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)
 {
 }
+

@@ -4,6 +4,8 @@
 #include "MovementPacket.h"
 #include "User.h"
 #include "MovementManager.h"
+#include "NetworkManager.h"
+#include "Utils.h"
 
 sf::Packet& operator>>(sf::Packet& packet, PacketTypes& tipo) {
 	int temp;
@@ -21,16 +23,46 @@ sf::Packet& operator<<(sf::Packet& packet, PacketTypes& tipo) {
 	return packet;
 }
 
+inline sf::Packet& operator<<(sf::Packet& packet, TileType type) {
+	return packet << static_cast<uint8_t>(type);
+}
+
+sf::Packet& operator>>(sf::Packet& packet, TileType& type) {
+	uint8_t value;
+	packet >> value;
+	type = static_cast<TileType>(value);
+	return packet;
+}
+
+inline sf::Packet& operator<<(sf::Packet& packet, const Tile& tile) {
+	return packet << tile.type << tile.x << tile.y << static_cast<uint8_t>(tile.originalChar);
+}
+
+sf::Packet& operator>>(sf::Packet& packet, Tile& tile) {
+	uint8_t c;
+
+	packet >> tile.type;
+	packet >> tile.x;
+	packet >> tile.y;
+	packet >> c;
+
+	tile.originalChar = static_cast<char>(c);
+
+	return packet;
+}
+
 void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, sf::TcpSocket& client)
 {
 	PacketTypes packetType;
 
 	packet >> packetType;
 
+	std::cout << "Recibiendo paquete del cliente, tipo: " << static_cast<int>(packetType) << std::endl;
+
 	switch (packetType)
 	{
 	case PacketTypes::HANDSHAKE:
-		ReceiveHandshakePacket(packet);
+		ReceiveHandshakePacket(packet, client);
 		break;
 	case PacketTypes::LOGIN:
 		ReceiveLoginPacket(packet, client);
@@ -44,9 +76,6 @@ void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, sf::TcpSocket& c
 	case PacketTypes::LOBBY_JOIN:
 		ReceiveLobbyJoinPacket(packet, client);
 		break;
-	case PacketTypes::MOVEMENT:
-		ReceiveMovementPacket(packet, client);
-		break;
 	case PacketTypes::RANKING:
 		ReceiveRankingPacket(packet, client);
 		break;
@@ -55,6 +84,9 @@ void ServerPacketTypesManager::ReceivePacket(sf::Packet packet, sf::TcpSocket& c
 		break;
 	case PacketTypes::END_GAME:
 		ReceiveEndGamePacket(packet);
+		break;
+	case PacketTypes::MAP_CHECK:
+		ManageMapPacket(packet, client);
 		break;
 	default:
 		std::cout << "No se ha identificado el tipo de packete" << std::endl;
@@ -88,6 +120,39 @@ void ServerPacketTypesManager::SendUpdatedPlayerCount(sf::TcpSocket& client, int
 	packet << playerCount;
 
 	SendData(client, packet);
+}
+
+void ServerPacketTypesManager::SendInfoToStartGame(GameRoom game, int roomId)
+{
+	const float playerAmount = 2;
+
+	// Info for game server
+	sf::Packet packet;
+
+	packet << PacketTypes::START_GAME;
+
+	packet << roomId;
+	packet << (uint8_t)game.GetMode();
+
+	sf::TcpSocket* gameServer = NT->GetGameServerSocket();
+	if (gameServer != nullptr) {
+		SendData(*gameServer, packet);
+		std::cout << "Enviada información al game server de sala" << std::endl;
+	}
+
+	// Info for player clients
+	for (int i = 0; i < playerAmount; i++)
+	{
+		sf::Packet packet;
+
+		packet << PacketTypes::START_GAME;
+
+		packet << roomId;
+		packet << i;
+
+		SendData(*game.GetPlayer(i)->client, packet);
+		std::cout << "Enviada información a jugador " << i << " de la sala.";
+	}
 }
 
 void ServerPacketTypesManager::SendLoginResponse(sf::TcpSocket& client, bool success, const std::string& username)
@@ -149,7 +214,7 @@ void ServerPacketTypesManager::SendRankingPacket(sf::TcpSocket& client, std::vec
 		packet << entry.username;
 		packet << entry.points;
 
-		
+
 		std::cout << entry.position << ". " << entry.userId << " - "
 			<< entry.username << " - "
 			<< entry.points << " puntos" << std::endl;
@@ -159,10 +224,15 @@ void ServerPacketTypesManager::SendRankingPacket(sf::TcpSocket& client, std::vec
 	std::cout << "Ranking packet enviado con " << rankings.size() << " entradas." << std::endl;
 }
 
-void ServerPacketTypesManager::ReceiveHandshakePacket(sf::Packet data)
+void ServerPacketTypesManager::ReceiveHandshakePacket(sf::Packet data, sf::TcpSocket& client)
 {
 	std::string receiveMesage;
 	data >> receiveMesage;
+
+	if (receiveMesage == serversHandshakeMessage)
+	{
+		NT->SetGameServerSocket(&client);
+	}
 
 	std::cout << "Mensaje enviado del cliente: " << receiveMesage << std::endl;
 }
@@ -181,10 +251,10 @@ void ServerPacketTypesManager::ReceiveLoginPacket(sf::Packet data, sf::TcpSocket
 
 	SendLoginResponse(client, correctLogin, loginUsername);
 
-	// Si es correcto, guardar tambi�n los datos del usuario (nombre y puntos del ranking)
-	
+	// Si es correcto, guardar tambin los datos del usuario (nombre y puntos del ranking)
+
 	if (correctLogin) {
-		MM->AddConnectedPlayer(&client, loginUsername, 15);
+		//MM->AddConnectedPlayer(&client, loginUsername, 15);
 	}
 }
 
@@ -197,13 +267,13 @@ void ServerPacketTypesManager::ReceiveRegisterPacket(sf::Packet data, sf::TcpSoc
 	data >> registerPassword;
 
 	std::string passwordHash = bcrypt::generateHash(registerPassword);
-	
+
 	bool correctRegister = DB->RegisterUser(registerUsername, passwordHash);
 
 	SendRegisterResponse(client, correctRegister, registerUsername);
 
 	if (correctRegister) {
-		MM->AddConnectedPlayer(&client, registerUsername, 15);
+		//MM->AddConnectedPlayer(&client, registerUsername, 15);
 	}
 }
 
@@ -213,10 +283,11 @@ void ServerPacketTypesManager::ReceiveLobbyCreatePacket(sf::Packet data, sf::Tcp
 
 	data >> lobbyID;
 
-	bool successfulLobbyCreation = MM->CreateWaitingRoom(lobbyID, &client);
-	 
+	bool successfulLobbyCreation = false;//MM->CreateWaitingRoom(lobbyID, &client);
+
 	if (successfulLobbyCreation) {
 		std::cout << "Lobby " << lobbyID << "creado exitosamente, pasando jugador a la sala de espera" << std::endl;
+		//LM->JoinRoom();
 	}
 	else {
 		std::cout << "El ID " << lobbyID << " ya esta en uso" << std::endl;
@@ -227,12 +298,20 @@ void ServerPacketTypesManager::ReceiveLobbyCreatePacket(sf::Packet data, sf::Tcp
 
 void ServerPacketTypesManager::ReceiveLobbyJoinPacket(sf::Packet data, sf::TcpSocket& client)
 {
+	int mode;
+	data >> mode;
+
+	GameMode gameMode = static_cast<GameMode>(mode);
+
+	MM->AddPlayerToWaitingRoom(&client, gameMode);
+
+	/*
 	std::string lobbyID;
 
 	data >> lobbyID;
 
 	std::cout << "Servidor recibe join packet" << std::endl;
-	bool successfulLobbyJoin = MM->JoinWaitingRoom(lobbyID, &client);
+	bool successfulLobbyJoin = true; // = MM->JoinWaitingRoom(lobbyID, &client);
 
 	if (successfulLobbyJoin) {
 		std::cout << "Jugador se ha unido a lobby con ID: " << lobbyID << std::endl;
@@ -241,7 +320,7 @@ void ServerPacketTypesManager::ReceiveLobbyJoinPacket(sf::Packet data, sf::TcpSo
 		std::cout << "El lobby " << lobbyID << " esta lleno o no existe" << std::endl;
 	}
 
-	SendLobbyJoinResponse(client, successfulLobbyJoin);
+	SendLobbyJoinResponse(client, successfulLobbyJoin);*/
 }
 
 void ServerPacketTypesManager::ReceiveMovementPacket(sf::Packet data, sf::TcpSocket& client) {
@@ -268,8 +347,62 @@ void ServerPacketTypesManager::ReceiveRankingPacket(sf::Packet data, sf::TcpSock
 
 void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
 {
+
 }
 
 void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)
 {
+
+}
+
+void ServerPacketTypesManager::ManageMapPacket(sf::Packet data, sf::TcpSocket& client)
+{
+	std::cout << "Recibida solicitud de paquete de Mapa" << std::endl;
+
+	mapReader = new MapReader();
+	mapReader->Init();
+
+	int width, height;
+	data >> width >> height;
+
+	int tileCount = 0;
+	data >> tileCount;
+
+	std::vector<Tile> tempTileVector;
+
+	for (int i = 0; i < tileCount; i++) {
+		Tile tile;
+		data >> tile;
+		tempTileVector.push_back(tile);
+	}
+
+	bool isInformationValid = mapReader->CheckIfInformationIsCorrect(width, height, tempTileVector);
+
+	sf::Packet packet;
+	packet << PacketTypes::MAP_CHECK;
+	if (isInformationValid) {
+		std::cout << "El mapa enviado por el cliente es correcto" << std::endl;
+		packet << true;
+	}
+	else {
+		std::cout << "El mapa enviado por el cliente es incorrecto" << std::endl;
+		packet << false;
+
+		packet << mapReader->GetWidth() << mapReader->GetHeight();
+
+		int validTileCount = 0;
+		for (Tile* tile : mapReader->GetTiles()) {
+			if (tile != nullptr) validTileCount++;
+		}
+
+		packet << validTileCount;
+
+		for (Tile* tile : mapReader->GetTiles()) {
+			if (tile != nullptr) {
+				packet << *tile;
+			}
+		}
+	}
+
+	SendData(client, packet);
 }

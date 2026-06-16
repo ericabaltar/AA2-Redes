@@ -17,12 +17,12 @@ bool Database::Connect()
         con = driver->connect(SERVER, USERNAME, PASSWORD);
         con->setSchema(DATABASE);
 
-        std::cout << "Connection done." << std::endl;
+        std::cout << "Database connection done." << std::endl;
         return true;
     }
     catch (sql::SQLException& e)
     {
-        std::cout << "Could not connect to server. Error message: " << e.what() << std::endl;
+        std::cout << "Database could not connect to server. Error message: " << e.what() << std::endl;
         con = nullptr;
         return false;
     }

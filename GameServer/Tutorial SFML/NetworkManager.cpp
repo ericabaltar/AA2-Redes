@@ -2,84 +2,51 @@
 
 void NetworkManager::Init()
 {
-    closeServer = false;
+	EstablishConnectionWithLauncherServer();
 
-    if(socket.bind(BIND_PORT) == sf::Socket::Status::Done)
-    {
-        std::cout << "Puerto bindeado correctamente." << std::endl;
-    }
-    else
-    {
-        std::cout << "Error: No se pudo bindear el puerto." << std::endl;
-        closeServer = true;
-    }
-
-    //selector.add(listener);
-    std::cout << "Servidor Abierto" << std::endl;
+	if (!udp.Init())
+		closeServer = true;
 }
 
 void NetworkManager::Update()
 {
+	HandleReceivedTcpPackets();
 
-    //EstablishConnectionWithClient();
-    ReceiveClientPacket();
-    //CheckForDisconnection();
+	udp.ReceivePacket();
+	udp.AttemptToSendPendingCriticalPackets();
 }
-/*
-void NetworkManager::EstablishConnectionWithClient()
+
+void NetworkManager::SendTaunt(const sf::IpAddress& ip, unsigned short port)
 {
-    if (selector.isReady(listener)) {
-        newClient = new sf::TcpSocket();
-
-        if (listener.accept(*newClient) == sf::Socket::Status::Done) {
-            newClient->setBlocking(false);
-            
-            SPTM->SendHandshake(*newClient);
-            selector.add(*newClient);
-
-            //Se crearia aqui el cliente con su clase Cliente
-
-            clients.push_back(newClient);
-            std::cout << "Nueva conexion establecida" << std::endl;
-        }
-    }
-}*/
-
-void NetworkManager::ReceiveClientPacket()
-{
-    char buffer[1024];
-    std::size_t receivedSize;
-    std::optional<sf::IpAddress> senderIp;
-    unsigned short senderPort;        
-
-    if (socket.receive(buffer, sizeof(buffer), receivedSize, senderIp, senderPort) == sf::Socket::Status::Done)
-    {
-        std::cout << "Paquete recibido de " << senderIp.value() << ":" << senderPort << std::endl;
-
-        sf::Packet packet;
-        packet.append(buffer, receivedSize);
-
-        SPTM->ReceivePacket(packet, senderIp, senderPort);
-    }
+	udp.SendTaunt(ip, port);
 }
-/*
-void NetworkManager::CheckForDisconnection()
+
+void NetworkManager::EstablishConnectionWithLauncherServer()
 {
-    if (!selector.isReady(listener)) {
-        for (int i = 0; i < clients.size(); i++) {
-            if (selector.isReady(*clients[i])) {
-                sf::Packet packet;
+	closeServer = false;
 
-                if (clients[i]->receive(packet) == sf::Socket::Status::Disconnected) {
-                    selector.remove(*clients[i]);
-                    delete clients[i];
-                    clients.erase(clients.begin() + i);
-                    i--;
+	if (mainServerSocket.connect(MAIN_SERVER_IP, MAIN_SERVER_PORT) != sf::Socket::Status::Done) {
+		std::cerr << "Error al conectar con el servidor" << std::endl;
+		closeServer = true;
+	}
+	else {
+		mainServerSocket.setBlocking(false);
+		SPTM->SendHandshake(mainServerSocket);
+		HandleReceivedTcpPackets();
+		std::cout << "Conectado al servidor" << std::endl;
+	}
+}
 
-                    std::cout << "Cliente desconectado" << std::endl;
-                }
-            }
-        }
-    }
-}*/
+void NetworkManager::HandleReceivedTcpPackets()
+{
+	sf::Socket::Status status = mainServerSocket.receive(receivePacket);
 
+	if (status == sf::Socket::Status::Done) {
+		SPTM->ReceiveTcpPacket(receivePacket);
+		receivePacket.clear();
+	}
+	else if (status == sf::Socket::Status::Disconnected) {
+		std::cout << "Servidor desconectado" << std::endl;
+		closeServer = true;
+	}
+}

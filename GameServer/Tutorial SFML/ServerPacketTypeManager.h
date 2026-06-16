@@ -5,14 +5,18 @@
 
 #define SPTM ServerPacketTypesManager::Instance()
 
-enum PacketTypes
+#define NORMAL_PACKET 0b00000000
+#define CRITICAL_PACKET 0b00000001
+#define URGENT_PACKET 0b00000010
+
+enum TcpPacketTypes
 {
-	HANDSHAKE, LOGIN, REGISTER, LOBBY_CREATE, LOBBY_JOIN, WAITING_ROOM_PLAYERS, RANKING, START_GAME, END_GAME
+	HANDSHAKE, LOGIN, REGISTER, LOBBY_CREATE, LOBBY_JOIN, WAITING_ROOM_PLAYERS, MOVEMENT_TCP, RANKING, START_GAME, END_GAME, MAP_CHECK
 };
 
 enum UdpPacketTypes
 {
-	MOVEMENT
+	MOVEMENT, SHOT, TAUNT
 };
 
 class ServerPacketTypesManager
@@ -25,12 +29,13 @@ public:
 	}
 
 private:
-	std::string handshakeMessage = "Handshake realizado";
+	std::string handshakeMessage = "Handshake realizado entre servers";
 
 public:
-	void ReceivePacket(sf::Packet packet, std::optional<sf::IpAddress>& senderIp, unsigned short senderPort);
 	void SendHandshake(sf::TcpSocket& client);
 	void SendUpdatedPlayerCount(sf::TcpSocket& client, int playerCount);
+
+	void ReceiveTcpPacket(sf::Packet packet);
 
 private:
 	ServerPacketTypesManager() = default;
@@ -40,18 +45,14 @@ private:
 
 	void SendData(sf::TcpSocket& client, sf::Packet& packet);
 
-	void SendLoginResponse(sf::TcpSocket& client, bool success, const std::string& message);
-	void SendRegisterResponse(sf::TcpSocket& client, bool success, const std::string& message);
 	void SendLobbyCreateResponse(sf::TcpSocket& client, bool success);
 	void SendLobbyJoinResponse(sf::TcpSocket& client, bool success);
 
 	void ReceiveHandshakePacket(sf::Packet data);
+
 	void ReceiveMovementPacket(sf::Packet data);
-	/*
-	void ReceiveLoginPacket(sf::Packet data, sf::TcpSocket& client);
-	void ReceiveRegisterPacket(sf::Packet data, sf::TcpSocket& client);
-	void ReceiveLobbyCreatePacket(sf::Packet data, sf::TcpSocket& client);
-	void ReceiveLobbyJoinPacket(sf::Packet data, sf::TcpSocket& client);*/
+	void ReceiveTauntPacket(sf::Packet data);
+
 	void ReceiveStartGamePacket(sf::Packet data);
 	void ReceiveEndGamePacket(sf::Packet data);
 };

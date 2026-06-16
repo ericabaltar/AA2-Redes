@@ -106,12 +106,12 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\include;$(SolutionDir)\Dependencies\mysqlConnector\include\jdbc</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\lib;$(SolutionDir)Dependencies\mysqlConnector\lib64\vs14;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>sfml-graphics-d.lib;sfml-window-d.lib;sfml-audio-d.lib;sfml-network-d.lib;sfml-system-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -136,15 +136,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="MapReader.cpp" />
     <ClCompile Include="NetworkManager.cpp" />
     <ClCompile Include="ServerPacketTypeManager.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="UdpManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AABB.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GameRoomManager.h" />
+    <ClInclude Include="MapReader.h" />
     <ClInclude Include="MovementPacket.h" />
     <ClInclude Include="NetworkManager.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="ServerPacketTypeManager.h" />
+    <ClInclude Include="Task.h" />
+    <ClInclude Include="ThreadManager.h" />
+    <ClInclude Include="UdpManager.h" />
     <ClInclude Include="Vector2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
