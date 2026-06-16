@@ -4,6 +4,8 @@
 #include <unordered_map> 
 #include "MovementPacket.h"
 
+#define PACKET_SIZE 1024
+
 #define NORMAL_PACKET 0b00000000 
 #define CRITICAL_PACKET 0b00000001 
 #define URGENT_PACKET 0b00000010
@@ -15,28 +17,29 @@ public:
 private:
 	sf::UdpSocket socket;
 
-	std::vector<std::pair<int, sf::Packet>> pendingCriticalPacketsToSend;
+	struct PendingCriticalPacket { int id; char* buffer; size_t bufferSize; };
+	std::vector<PendingCriticalPacket> pendingCriticalPacketsToSend;
 	std::unordered_map<std::string, std::unordered_set<int>> processedCriticalPackets;
 	int currentCriticalPacketId = 0;
 
 	std::string MakeClientKey(const sf::IpAddress& ip, unsigned short port);
 
 	int GetNextCriticalPacketId();
-	void SendCriticalPacket(int id, sf::Packet packet);
+	void SendCriticalPacket(int id, char* buffer, size_t bufferSize);
 	void RemoveCriticalPacketFromPending(int id);
 	bool PacketIsAlreadyProcessed(const std::string& key, int id);
 	void ProcessedCriticalPacket(const std::string& key, int id);
 	void SendAcknowledgement(int id);
 
-	void SendData(const sf::Packet& packet);
+	void SendData(char* buffer, size_t size);
 
-	void ProcessPacket(PacketType type, sf::Packet data);
+	void ProcessPacket(PacketType type, char* buffer, size_t dataRead);
 
-	void ReceiveMovement(sf::Packet data);
-	void ReceiveShot(sf::Packet data);
-	void ReceiveTaunt(sf::Packet data);
-	void ReceiveHealthUpdate(sf::Packet data);
-	void ReceiveMatchStart(sf::Packet data);
+	void ReceiveMovement(char* buffer, size_t dataRead);
+	void ReceiveShot(char* buffer, size_t dataRead);
+	void ReceiveTaunt(char* buffer, size_t dataRead);
+	void ReceiveHealthUpdate(char* buffer, size_t dataRead);
+	void ReceiveMatchStart(char* buffer, size_t dataRead);
 
 public:
 	bool Init();
