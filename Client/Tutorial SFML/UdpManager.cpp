@@ -153,6 +153,12 @@ void UdpManager::ProcessPacket(PacketType type, char* buffer, size_t dataRead) {
 	case PacketType::MATCH_START:
 		ReceiveMatchStart(buffer, dataRead);
 		break;
+	case PacketType::PING:
+		ReceivePing(buffer, dataRead);
+		break;
+	case PacketType::DISCONNECT:
+		ReceiveDisconnect(buffer, dataRead);
+		break;
 	default:
 		std::cout << "No se ha identificado el tipo de paquete de udp" << std::endl;
 		break;
@@ -195,6 +201,16 @@ void UdpManager::ReceiveHealthUpdate(char* buffer, size_t dataRead) {
 void UdpManager::ReceiveMatchStart(char* buffer, size_t dataRead) {
 	std::cout << "Se han conectado ambos clientes. MATCH START recibido. Iniciando gameplay..." << std::endl;
 	MM->StartGame();
+}
+
+void UdpManager::ReceivePing(char* buffer, size_t dataRead)
+{
+	SendPing();
+}
+
+void UdpManager::ReceiveDisconnect(char* buffer, size_t dataRead)
+{
+	MM->EndGame();
 }
 
 bool UdpManager::Init() {
@@ -292,6 +308,23 @@ void UdpManager::SendTaunt()
 
 	uint8_t priority = URGENT_PACKET;
 	PacketType type = PacketType::TAUNT;
+
+	std::memcpy(buffer + bufferSize, &priority, sizeof(priority));
+	bufferSize += sizeof(priority);
+
+	std::memcpy(buffer + bufferSize, &type, sizeof(type));
+	bufferSize += sizeof(type);
+
+	SendData(buffer, bufferSize);
+}
+
+void UdpManager::SendPing()
+{
+	char buffer[PACKET_SIZE];
+	size_t bufferSize = 0;
+
+	uint8_t priority = URGENT_PACKET;
+	PacketType type = PacketType::PING;
 
 	std::memcpy(buffer + bufferSize, &priority, sizeof(priority));
 	bufferSize += sizeof(priority);

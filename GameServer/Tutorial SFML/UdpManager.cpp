@@ -3,6 +3,7 @@
 #include "GameRoomManager.h"
 #include <iostream>
 #include <cstdint>
+#include "PingManager.h"
 
 std::string UdpManager::MakeClientKey(const sf::IpAddress& ip, unsigned short port) {
 	return ip.toString() + ":" + std::to_string(port);
@@ -92,6 +93,9 @@ void UdpManager::ProcessPacket(PacketType type, char* buffer, size_t dataRead, s
 	case PacketType::MATCH_CONNECT:
 		ReceiveMatchConnect(buffer, dataRead, senderIp.value(), senderPort);
 		break;
+	case PacketType::PING:
+		ReceivePing(buffer, dataRead, senderIp.value(), senderPort);
+		break;
 	default:
 		std::cout << "No se ha identificado el tipo de paquete udp" << std::endl;
 		break;
@@ -135,6 +139,11 @@ void UdpManager::ReceiveMatchConnect(char* buffer, size_t dataRead, const sf::Ip
 	std::cout << "Recibida conexion de player " << (int)playerIndex << " para la sala " << roomId << std::endl;
 
 	GRM->ConnectPlayerToRoom(roomId, playerIndex, ip, port);
+}
+
+void UdpManager::ReceivePing(char* buffer, size_t dataRead, const sf::IpAddress& ip, unsigned short port)
+{
+	PingM->ReceivePing(ip, port);
 }
 
 bool UdpManager::Init() {
@@ -291,6 +300,40 @@ void UdpManager::SendTaunt(const sf::IpAddress& ip, unsigned short port)
 	bufferSize += sizeof(type);
 
 	std::cout << "Burla enviada a " << ip.toString() << ":" << port << std::endl;
+
+	SendData(ip, port, buffer, bufferSize);
+}
+
+void UdpManager::SendPing(const sf::IpAddress& ip, unsigned short port)
+{
+	char buffer[PACKET_SIZE];
+	size_t bufferSize = 0;
+
+	uint8_t priority = URGENT_PACKET;
+	PacketType type = PacketType::PING;
+
+	std::memcpy(buffer + bufferSize, &priority, sizeof(priority));
+	bufferSize += sizeof(priority);
+
+	std::memcpy(buffer + bufferSize, &type, sizeof(type));
+	bufferSize += sizeof(type);
+
+	SendData(ip, port, buffer, bufferSize);
+}
+
+void UdpManager::SendDisconnect(const sf::IpAddress& ip, unsigned short port)
+{
+	char buffer[PACKET_SIZE];
+	size_t bufferSize = 0;
+
+	uint8_t priority = URGENT_PACKET;
+	PacketType type = PacketType::DISCONNECT;
+
+	std::memcpy(buffer + bufferSize, &priority, sizeof(priority));
+	bufferSize += sizeof(priority);
+
+	std::memcpy(buffer + bufferSize, &type, sizeof(type));
+	bufferSize += sizeof(type);
 
 	SendData(ip, port, buffer, bufferSize);
 }
