@@ -17,7 +17,7 @@ public:
 	enum class PacketType : uint8_t { MATCH_CONNECT, MATCH_START, MOVEMENT, SHOT, TAUNT, HEALTH_UPDATE, ACKNOWLEDGEMENT };
 
 private:
-	struct PendingCriticalPacket { int id; sf::Packet packet; sf::IpAddress ip; unsigned short port; };
+	struct PendingCriticalPacket { int id; char* buffer; size_t bufferSize; sf::IpAddress ip; unsigned short port; };
 
 	sf::UdpSocket socket;
 
@@ -28,7 +28,7 @@ private:
 	std::string MakeClientKey(const sf::IpAddress& ip, unsigned short port);
 
 	int GetNextCriticalPacketId();
-	void SendCriticalPacket(const sf::IpAddress& ip, unsigned short port, int id, sf::Packet packet);
+	void SendCriticalPacket(const sf::IpAddress& ip, unsigned short port, int id, char* buffer, size_t bufferSize);
 	void RemoveCriticalPacketFromPending(int id);
 	bool PacketIsAlreadyProcessed(const std::string& key, int id);
 	void ProcessedCriticalPacket(const std::string& key, const sf::IpAddress& ip, unsigned short port, int id);
@@ -39,7 +39,7 @@ private:
 	void ProcessPacket(PacketType type, char* buffer, size_t dataRead, std::optional<sf::IpAddress>& senderIp, unsigned short senderPort);
 
 	void ReceiveMovement(char* buffer, size_t dataRead, const sf::IpAddress & ip, unsigned short port);
-	void ReceiveShot(sf::Packet data, const sf::IpAddress& ip, unsigned short port);
+	void ReceiveShot(char* buffer, size_t dataRead, const sf::IpAddress& ip, unsigned short port);
 	void ReceiveTaunt(const sf::IpAddress& ip, unsigned short port);
 	void ReceiveMatchConnect(char* buffer, size_t dataRead, const sf::IpAddress& ip, unsigned short port);
 
