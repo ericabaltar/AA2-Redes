@@ -27,9 +27,19 @@ int UdpManager::GetNextCriticalPacketId() {
 	return currentCriticalPacketId;
 }
 
-void UdpManager::SendCriticalPacket(const sf::IpAddress& ip, unsigned short port, int id, sf::Packet packet) {
-	pendingCriticalPacketsToSend.push_back({ id, packet, ip, port });
+void UdpManager::SendCriticalPacket(const sf::IpAddress& ip, unsigned short port, int id, sf::Packet packet)
+{	
+	pendingCriticalPacketsToSend.push_back({
+		id,
+		packet,
+		ip,
+		port,
+		sf::seconds(0.f)
+		});
+
 	SendData(ip, port, packet);
+
+	pendingCriticalPacketsToSend.back().lastSendTime = resendClock.getElapsedTime();
 }
 
 void UdpManager::RemoveCriticalPacketFromPending(int id) {
@@ -111,9 +121,13 @@ void UdpManager::ReceiveMovement(sf::Packet data, const sf::IpAddress& ip, unsig
 	GRM->HandleMovement(ip, port, movement);
 }
 
-void UdpManager::ReceiveShot(sf::Packet data, const sf::IpAddress& ip, unsigned short port) {
+void UdpManager::ReceiveShot(sf::Packet data, const sf::IpAddress& ip, unsigned short port)
+{
+	std::cout << "Recibido disparo de " << ip.toString() << ":" << port << std::endl;
+
 	bool facingRight;
 	data >> facingRight;
+
 	GRM->HandleShot(ip, port, facingRight);
 }
 
@@ -149,9 +163,17 @@ bool UdpManager::Init() {
 	return successful;
 }
 
-void UdpManager::AttemptToSendPendingCriticalPackets() {
-	for (const PendingCriticalPacket& criticalPacket : pendingCriticalPacketsToSend) {
-		SendData(criticalPacket.ip, criticalPacket.port, criticalPacket.packet);
+void UdpManager::AttemptToSendPendingCriticalPackets()
+{
+	sf::Time now = resendClock.getElapsedTime();
+
+	for (PendingCriticalPacket& criticalPacket : pendingCriticalPacketsToSend)
+	{
+		if ((now - criticalPacket.lastSendTime).asMilliseconds() >= criticalPacketCooldown)
+		{
+			SendData(criticalPacket.ip, criticalPacket.port, criticalPacket.packet);
+			criticalPacket.lastSendTime = now;
+		}
 	}
 }
 
@@ -161,7 +183,7 @@ void UdpManager::ReceivePacket() {
 	std::optional<sf::IpAddress> senderIp;
 	unsigned short senderPort;
 
-	if (socket.receive(buffer, sizeof(buffer), receivedSize, senderIp, senderPort) == sf::Socket::Status::Done)
+	while (socket.receive(buffer, sizeof(buffer), receivedSize, senderIp, senderPort) == sf::Socket::Status::Done)
 	{
 		sf::Packet packet;
 		packet.append(buffer, receivedSize);
@@ -251,7 +273,21 @@ void UdpManager::SendHealthUpdate(const sf::IpAddress& ip, unsigned short port, 
 }
 
 void UdpManager::SendMovement(MovementPacket movement) {}
-void UdpManager::SendShot(bool towardsRight) {}
+
+void UdpManager::SendShot(const sf::IpAddress& ip, unsigned short port, bool towardsRight)
+{
+	sf::Packet packet;
+	uint8_t priority = CRITICAL_PACKET | URGENT_PACKET;
+	int id = GetNextCriticalPacketId();
+
+	packet << priority;
+	packet << id;
+	packet << PacketType::SHOT;
+	packet << towardsRight;
+
+	std::cout << "Disparo enviado a " << ip.toString() << ":" << port << std::endl;
+	SendCriticalPacket(ip, port, id, packet);
+}
 
 void UdpManager::SendTaunt(const sf::IpAddress& ip, unsigned short port)
 {
@@ -260,7 +296,7 @@ void UdpManager::SendTaunt(const sf::IpAddress& ip, unsigned short port)
 
 	packet << priority;
 	packet << PacketType::TAUNT;
-	std::cout << "Burla enviada a " << ip.toString() << ":" << port << std::endl;
 
+	std::cout << "Burla enviada a " << ip.toString() << ":" << port << std::endl;
 	SendData(ip, port, packet);
 }

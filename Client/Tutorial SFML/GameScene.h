@@ -96,7 +96,6 @@ public:
 
 		Vector2 interpolatedPos = movementInterpolation.GetInterpolatedPosition(opponentUser);
 		oponent->SetInterpolatedPosition(Vector2(interpolatedPos.x, interpolatedPos.y));
-		oponent->Update(dt);
 
 		Scene::Update(window, dt);
 

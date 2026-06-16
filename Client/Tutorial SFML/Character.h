@@ -44,6 +44,7 @@ public:
 	void Update(float dt) override;
 
 	virtual void Quack();
+	virtual void Shoot(bool towardsRight);
 	virtual void Shoot();
 
 	void Render(sf::RenderWindow& window) override { window.draw(sprite.GetSprite()); }

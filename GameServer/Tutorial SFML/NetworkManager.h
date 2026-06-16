@@ -40,6 +40,7 @@ public:
 	inline void CloseServer() { closeServer = true; }
 	inline bool GetCloseServer() { return closeServer; }
 
+	void SendShot(const sf::IpAddress& ip, unsigned short port, bool towardsRight);
 	void SendTaunt(const sf::IpAddress& ip, unsigned short port);
 
 	inline UdpManager* GetUdpManager() { return &udp; }

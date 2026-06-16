@@ -13,9 +13,20 @@ public:
 	enum class PacketType : uint8_t { MATCH_CONNECT, MATCH_START, MOVEMENT, SHOT, TAUNT, HEALTH_UPDATE, ACKNOWLEDGEMENT };
 
 private:
+	struct PendingCriticalPacket
+	{
+		int id;
+		sf::Packet packet;
+
+		sf::Time lastSendTime;
+	};
+
+	sf::Clock resendClock;
+	const float criticalPacketCooldown = 100; //milliseconds
+
 	sf::UdpSocket socket;
 
-	std::vector<std::pair<int, sf::Packet>> pendingCriticalPacketsToSend;
+	std::vector<PendingCriticalPacket> pendingCriticalPacketsToSend;
 	std::unordered_map<std::string, std::unordered_set<int>> processedCriticalPackets;
 	int currentCriticalPacketId = 0;
 
