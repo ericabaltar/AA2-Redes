@@ -18,7 +18,8 @@ private:
 	struct PendingCriticalPacket
 	{
 		int id;
-		sf::Packet packet;
+		char* buffer;
+		size_t bufferSize;
 
 		sf::Time lastSendTime;
 	};

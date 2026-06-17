@@ -18,11 +18,11 @@ public:
 	enum class PacketType : uint8_t { MATCH_CONNECT, MATCH_START, MOVEMENT, SHOT, TAUNT, HEALTH_UPDATE, ACKNOWLEDGEMENT, PING, DISCONNECT };
 
 private:
-	struct PendingCriticalPacket { int id; char* buffer; size_t bufferSize; sf::IpAddress ip; unsigned short port; };
 	struct PendingCriticalPacket
 	{
 		int id;
-		sf::Packet packet;
+		char* buffer;
+		size_t bufferSize;
 		sf::IpAddress ip;
 		unsigned short port;
 

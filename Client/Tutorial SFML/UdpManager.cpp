@@ -13,15 +13,16 @@ int UdpManager::GetNextCriticalPacketId() {
 	return currentCriticalPacketId;
 }
 
-void UdpManager::SendCriticalPacket(int id, sf::Packet packet)
+void UdpManager::SendCriticalPacket(int id, char* buffer, size_t bufferSize)
 {
 	pendingCriticalPacketsToSend.push_back({
 		id,
-		packet,
+		buffer,
+		bufferSize,
 		sf::seconds(0.f)
 		});
 
-	SendData(packet);
+	SendData(buffer, bufferSize);
 
 	pendingCriticalPacketsToSend.back().lastSendTime = resendClock.getElapsedTime();
 }
@@ -35,7 +36,7 @@ void UdpManager::AttemptToSendPendingCriticalPackets()
 	{
 		if ((now - criticalPacket.lastSendTime).asMilliseconds() >= criticalPacketCooldown)
 		{
-			SendData(criticalPacket.packet);
+			SendData(criticalPacket.buffer, criticalPacket.bufferSize);
 			criticalPacket.lastSendTime = now;
 		}
 	}
@@ -191,16 +192,17 @@ void UdpManager::ReceiveMovement(char* buffer, size_t dataRead) {
 	NT->SetLastValidatedMovementPacket(movementPacket);
 }
 
-void UdpManager::ReceiveShot(sf::Packet data)
+void UdpManager::ReceiveShot(char* buffer, size_t dataRead)
 {
 	bool towardsRight;
-	data >> towardsRight;
+	std::memcpy(&towardsRight, buffer + dataRead, sizeof(towardsRight));
+	dataRead += sizeof(towardsRight);
 
 	std::cout << "Recibido disparo" << std::endl;
 	MM->HandleEnemyShot(towardsRight);
 }
 
-void UdpManager::ReceiveTaunt(sf::Packet data)
+void UdpManager::ReceiveTaunt(char* buffer, size_t dataRead)
 {
 	std::cout << "Recibida burla" << std::endl;
 	MM->HandleEnemyQuack();

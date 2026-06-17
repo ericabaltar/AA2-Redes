@@ -14,17 +14,18 @@ int UdpManager::GetNextCriticalPacketId() {
 	return currentCriticalPacketId;
 }
 
-void UdpManager::SendCriticalPacket(const sf::IpAddress& ip, unsigned short port, int id, sf::Packet packet)
+void UdpManager::SendCriticalPacket(const sf::IpAddress& ip, unsigned short port, int id, char* buffer, size_t bufferSize)
 {	
 	pendingCriticalPacketsToSend.push_back({
 		id,
-		packet,
+		buffer,
+		bufferSize,
 		ip,
 		port,
 		sf::seconds(0.f)
 		});
 
-	SendData(ip, port, packet);
+	SendData(ip, port, buffer, bufferSize);
 
 	pendingCriticalPacketsToSend.back().lastSendTime = resendClock.getElapsedTime();
 }
@@ -178,7 +179,7 @@ void UdpManager::AttemptToSendPendingCriticalPackets()
 	{
 		if ((now - criticalPacket.lastSendTime).asMilliseconds() >= criticalPacketCooldown)
 		{
-			SendData(criticalPacket.ip, criticalPacket.port, criticalPacket.packet);
+			SendData(criticalPacket.ip, criticalPacket.port, criticalPacket.buffer, criticalPacket.bufferSize);
 			criticalPacket.lastSendTime = now;
 		}
 	}
@@ -304,17 +305,27 @@ void UdpManager::SendMovement(MovementPacket movement) {}
 
 void UdpManager::SendShot(const sf::IpAddress& ip, unsigned short port, bool towardsRight)
 {
-	sf::Packet packet;
+	char buffer[PACKET_SIZE];
+	size_t bufferSize = 0;
+
 	uint8_t priority = CRITICAL_PACKET | URGENT_PACKET;
 	int id = GetNextCriticalPacketId();
+	PacketType type = PacketType::SHOT;
 
-	packet << priority;
-	packet << id;
-	packet << PacketType::SHOT;
-	packet << towardsRight;
+	std::memcpy(buffer + bufferSize, &priority, sizeof(priority));
+	bufferSize += sizeof(priority);
+
+	std::memcpy(buffer + bufferSize, &id, sizeof(id));
+	bufferSize += sizeof(id);
+
+	std::memcpy(buffer + bufferSize, &type, sizeof(type));
+	bufferSize += sizeof(type);
+
+	std::memcpy(buffer + bufferSize, &towardsRight, sizeof(towardsRight));
+	bufferSize += sizeof(towardsRight);
 
 	std::cout << "Disparo enviado a " << ip.toString() << ":" << port << std::endl;
-	SendCriticalPacket(ip, port, id, packet);
+	SendCriticalPacket(ip, port, id, buffer, bufferSize);
 }
 
 void UdpManager::SendTaunt(const sf::IpAddress& ip, unsigned short port)
