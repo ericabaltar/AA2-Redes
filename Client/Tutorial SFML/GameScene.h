@@ -85,7 +85,7 @@ public:
 	{
 		if (!MM->GetGameStarted()) {
 			nextScene = SceneOption::RANKING;
-			return;
+			return true;
 		}
 
 		if (player->IsDead())

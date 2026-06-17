@@ -8,6 +8,7 @@
 #include "AABB.h"
 #include "MovementPacket.h"
 #include "NetworkManager.h"
+#include "PingManager.h"
 
 struct HeadlessBullet {
 	Vector2 position;

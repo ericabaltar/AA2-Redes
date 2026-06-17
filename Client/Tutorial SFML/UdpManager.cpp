@@ -273,8 +273,6 @@ void UdpManager::SendMovement(MovementPacket movement)
 	bufferSize += sizeof(movement);
 
 	SendData(buffer, bufferSize);
-
-	delete buffer;
 }
 
 void UdpManager::SendShot(bool towardsRight) {

@@ -138,6 +138,7 @@
   <ItemGroup>
     <ClCompile Include="MapReader.cpp" />
     <ClCompile Include="NetworkManager.cpp" />
+    <ClCompile Include="PingManager.cpp" />
     <ClCompile Include="ServerPacketTypeManager.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="UdpManager.cpp" />
@@ -149,11 +150,13 @@
     <ClInclude Include="MapReader.h" />
     <ClInclude Include="MovementPacket.h" />
     <ClInclude Include="NetworkManager.h" />
+    <ClInclude Include="PingManager.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="ServerPacketTypeManager.h" />
     <ClInclude Include="Task.h" />
     <ClInclude Include="ThreadManager.h" />
     <ClInclude Include="UdpManager.h" />
+    <ClInclude Include="Utils.h" />
     <ClInclude Include="Vector2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
