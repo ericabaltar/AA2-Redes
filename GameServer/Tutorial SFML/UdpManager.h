@@ -21,8 +21,7 @@ private:
 	struct PendingCriticalPacket
 	{
 		int id;
-		char* buffer;
-		size_t bufferSize;
+		std::vector<char> buffer;
 		sf::IpAddress ip;
 		unsigned short port;
 
