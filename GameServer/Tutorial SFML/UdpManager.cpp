@@ -18,8 +18,7 @@ void UdpManager::SendCriticalPacket(const sf::IpAddress& ip, unsigned short port
 {	
 	pendingCriticalPacketsToSend.push_back({
 		id,
-		buffer,
-		bufferSize,
+		std::vector<char>(buffer, buffer + bufferSize),
 		ip,
 		port,
 		sf::seconds(0.f)
@@ -179,7 +178,7 @@ void UdpManager::AttemptToSendPendingCriticalPackets()
 	{
 		if ((now - criticalPacket.lastSendTime).asMilliseconds() >= criticalPacketCooldown)
 		{
-			SendData(criticalPacket.ip, criticalPacket.port, criticalPacket.buffer, criticalPacket.bufferSize);
+			SendData(criticalPacket.ip, criticalPacket.port, criticalPacket.buffer.data(), criticalPacket.buffer.size());
 			criticalPacket.lastSendTime = now;
 		}
 	}
@@ -235,16 +234,18 @@ void UdpManager::ReceivePacket()
 		}
 		else
 		{
+			std::vector<char> bufferCopy(buffer, buffer + receivedSize);
+
 			if (priority & URGENT_PACKET)
 			{
-				ThrdM->AddUrgentTask(new Task([this, packetType, buffer, dataRead, senderIp, senderPort]() mutable {
-					this->ProcessPacket(packetType, buffer, dataRead, senderIp, senderPort);
+				ThrdM->AddUrgentTask(new Task([this, packetType, bufferCopy, dataRead, senderIp, senderPort]() mutable {
+					this->ProcessPacket(packetType, (char*)bufferCopy.data(), dataRead, senderIp, senderPort);
 					}));
 			}
 			else
 			{
-				ThrdM->AddTask(new Task([this, packetType, buffer, dataRead, senderIp, senderPort]() mutable {
-					this->ProcessPacket(packetType, buffer, dataRead, senderIp, senderPort);
+				ThrdM->AddTask(new Task([this, packetType, bufferCopy, dataRead, senderIp, senderPort]() mutable {
+					this->ProcessPacket(packetType, (char*)bufferCopy.data(), dataRead, senderIp, senderPort);
 					}));
 			}
 		}

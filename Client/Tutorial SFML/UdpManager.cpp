@@ -17,8 +17,7 @@ void UdpManager::SendCriticalPacket(int id, char* buffer, size_t bufferSize)
 {
 	pendingCriticalPacketsToSend.push_back({
 		id,
-		buffer,
-		bufferSize,
+		std::vector<char>(buffer, buffer + bufferSize),
 		sf::seconds(0.f)
 		});
 
@@ -36,7 +35,7 @@ void UdpManager::AttemptToSendPendingCriticalPackets()
 	{
 		if ((now - criticalPacket.lastSendTime).asMilliseconds() >= criticalPacketCooldown)
 		{
-			SendData(criticalPacket.buffer, criticalPacket.bufferSize);
+			SendData(criticalPacket.buffer.data(), criticalPacket.buffer.size());
 			criticalPacket.lastSendTime = now;
 		}
 	}
