@@ -8,8 +8,6 @@
 
 #define ThrdM ThreadManager::Instance()
 
-#define THREAD_COUNT std::thread::hardware_concurrency()
-
 class ThreadManager
 {
 private:
@@ -17,6 +15,7 @@ private:
     std::deque<Task*> tasks;
 
     std::mutex tasksMutex;
+    std::condition_variable cv;
 
     bool stop = false;
 
@@ -27,48 +26,65 @@ public:
     }
 
     ~ThreadManager() {
-        tasksMutex.lock();
-        stop = true;
-        tasksMutex.unlock();
+        {
+            std::lock_guard<std::mutex> lock(tasksMutex);
+            stop = true;
+        }
+        cv.notify_all();
 
-        for (std::thread& t : threads)
+        for (auto& t : threads)
             if (t.joinable())
                 t.join();
     }
 
     void Init() {
-        for (int i = 0; i < THREAD_COUNT; ++i)
+        int count = std::thread::hardware_concurrency();
+
+        for (int i = 0; i < count; ++i)
             threads.emplace_back(&ThreadManager::Worker, this);
     }
 
     void AddTask(Task* task) {
-        tasksMutex.lock();
-        tasks.push_back(task);
-        tasksMutex.unlock();
+        {
+            std::lock_guard<std::mutex> lock(tasksMutex);
+            tasks.push_back(task);
+        }
+        cv.notify_one();
     }
 
     void AddUrgentTask(Task* task) {
-        std::thread t([&]() { task->Invoke(); });
-        t.detach();
+        {
+            std::lock_guard<std::mutex> lock(tasksMutex);
+            tasks.push_front(task);
+        }
+        cv.notify_one();
     }
 
 private:
 
     void Worker() {
-        while (!stop) {
-            Task* task = new Task([]() {});
+        while (true) {
+            Task* task = nullptr;
 
-            tasksMutex.lock();
-            
-            if (!tasks.empty()) {
+            {
+                std::unique_lock<std::mutex> lock(tasksMutex);
+
+                cv.wait(lock, [&] {
+                    return stop || !tasks.empty();
+                    });
+
+                if (stop && tasks.empty())
+                    return;
+
                 task = tasks.front();
                 tasks.pop_front();
             }
 
-            tasksMutex.unlock();
-
-            task->Invoke();
-            delete task;
+            if (task != nullptr)
+            {
+                task->Invoke();
+                delete task;
+            }
         }
     }
 };
