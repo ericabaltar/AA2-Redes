@@ -14,9 +14,20 @@ int UdpManager::GetNextCriticalPacketId() {
 	return currentCriticalPacketId;
 }
 
-void UdpManager::SendCriticalPacket(const sf::IpAddress& ip, unsigned short port, int id, char* buffer, size_t bufferSize) {
-	pendingCriticalPacketsToSend.push_back({ id, buffer, bufferSize, ip, port });
+void UdpManager::SendCriticalPacket(const sf::IpAddress& ip, unsigned short port, int id, char* buffer, size_t bufferSize)
+{	
+	pendingCriticalPacketsToSend.push_back({
+		id,
+		buffer,
+		bufferSize,
+		ip,
+		port,
+		sf::seconds(0.f)
+		});
+
 	SendData(ip, port, buffer, bufferSize);
+
+	pendingCriticalPacketsToSend.back().lastSendTime = resendClock.getElapsedTime();
 }
 
 void UdpManager::RemoveCriticalPacketFromPending(int id) {
@@ -160,9 +171,17 @@ bool UdpManager::Init() {
 	return successful;
 }
 
-void UdpManager::AttemptToSendPendingCriticalPackets() {
-	for (const PendingCriticalPacket& criticalPacket : pendingCriticalPacketsToSend) {
-		SendData(criticalPacket.ip, criticalPacket.port, criticalPacket.buffer, criticalPacket.bufferSize);
+void UdpManager::AttemptToSendPendingCriticalPackets()
+{
+	sf::Time now = resendClock.getElapsedTime();
+
+	for (PendingCriticalPacket& criticalPacket : pendingCriticalPacketsToSend)
+	{
+		if ((now - criticalPacket.lastSendTime).asMilliseconds() >= criticalPacketCooldown)
+		{
+			SendData(criticalPacket.ip, criticalPacket.port, criticalPacket.buffer, criticalPacket.bufferSize);
+			criticalPacket.lastSendTime = now;
+		}
 	}
 }
 
@@ -174,7 +193,7 @@ void UdpManager::ReceivePacket()
 	std::optional<sf::IpAddress> senderIp;
 	unsigned short senderPort;
 
-	if (socket.receive(buffer, sizeof(buffer), receivedSize, senderIp, senderPort) == sf::Socket::Status::Done)
+	while (socket.receive(buffer, sizeof(buffer), receivedSize, senderIp, senderPort) == sf::Socket::Status::Done)
 	{
 		uint8_t priority;
 		std::memcpy(&priority, buffer + dataRead, sizeof(priority));
@@ -283,7 +302,31 @@ void UdpManager::SendHealthUpdate(const sf::IpAddress& ip, unsigned short port, 
 }
 
 void UdpManager::SendMovement(MovementPacket movement) {}
-void UdpManager::SendShot(bool towardsRight) {}
+
+void UdpManager::SendShot(const sf::IpAddress& ip, unsigned short port, bool towardsRight)
+{
+	char buffer[PACKET_SIZE];
+	size_t bufferSize = 0;
+
+	uint8_t priority = CRITICAL_PACKET | URGENT_PACKET;
+	int id = GetNextCriticalPacketId();
+	PacketType type = PacketType::SHOT;
+
+	std::memcpy(buffer + bufferSize, &priority, sizeof(priority));
+	bufferSize += sizeof(priority);
+
+	std::memcpy(buffer + bufferSize, &id, sizeof(id));
+	bufferSize += sizeof(id);
+
+	std::memcpy(buffer + bufferSize, &type, sizeof(type));
+	bufferSize += sizeof(type);
+
+	std::memcpy(buffer + bufferSize, &towardsRight, sizeof(towardsRight));
+	bufferSize += sizeof(towardsRight);
+
+	std::cout << "Disparo enviado a " << ip.toString() << ":" << port << std::endl;
+	SendCriticalPacket(ip, port, id, buffer, bufferSize);
+}
 
 void UdpManager::SendTaunt(const sf::IpAddress& ip, unsigned short port)
 {

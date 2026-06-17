@@ -68,6 +68,11 @@ public:
 		enemyPlayer->Quack();
 	}
 
+	void HandleEnemyShot(bool towardsRight)
+	{
+		enemyPlayer->Shoot(towardsRight);
+	}
+
 private:
 	MatchManager() = default;
 	MatchManager(const MatchManager&) = delete;

@@ -192,7 +192,12 @@ public:
 			b.collider.SetTopLeft(b.position - Vector2(8.f, 8.f));
 			b.ownerIndex = players[playerIndex].index;
 			b.lifeTime = 5.f;
+
 			bullets.push_back(b);
+
+			int otherPlayerIndex = playerIndex == 0 ? 1 : 0;
+			Player* otherPlayer = GetPlayer(otherPlayerIndex);
+			NT->SendShot(otherPlayer->udpIp.value(), otherPlayer->udpPort, facingRight);
 		}
 	}
 

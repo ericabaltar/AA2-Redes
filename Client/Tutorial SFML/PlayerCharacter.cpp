@@ -93,12 +93,14 @@ void PlayerCharacter::Update(float dt) {
 	Character::Update(dt);
 }
 
-void PlayerCharacter::Quack() {
+void PlayerCharacter::Quack()
+{
 	Character::Quack();
 	NT->SendTaunt();
 }
 
-void PlayerCharacter::Shoot() {
+void PlayerCharacter::Shoot()
+{
 	Character::Shoot();
 	NT->SendShot(facingRight);
 }

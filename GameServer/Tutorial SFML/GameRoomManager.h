@@ -120,7 +120,8 @@ public:
 		}
 	}
 
-	void HandleShot(const sf::IpAddress& ip, unsigned short port, bool facingRight) {
+	void HandleShot(const sf::IpAddress& ip, unsigned short port, bool facingRight)
+	{
 		int playerIndex;
 		GameRoom* room = FindRoomByUdp(ip, port, playerIndex);
 		if (room) {

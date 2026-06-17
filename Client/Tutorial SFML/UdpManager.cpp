@@ -13,14 +13,32 @@ int UdpManager::GetNextCriticalPacketId() {
 	return currentCriticalPacketId;
 }
 
-void UdpManager::SendCriticalPacket(int id, char* buffer, size_t bufferSize) {
-	pendingCriticalPacketsToSend.push_back({ id, buffer, bufferSize });
+void UdpManager::SendCriticalPacket(int id, char* buffer, size_t bufferSize)
+{
+	pendingCriticalPacketsToSend.push_back({
+		id,
+		buffer,
+		bufferSize,
+		sf::seconds(0.f)
+		});
+
 	SendData(buffer, bufferSize);
+
+	pendingCriticalPacketsToSend.back().lastSendTime = resendClock.getElapsedTime();
 }
 
-void UdpManager::AttemptToSendPendingCriticalPackets() {
-	for (const PendingCriticalPacket& packet : pendingCriticalPacketsToSend) {
-		SendData(packet.buffer, packet.bufferSize);
+
+void UdpManager::AttemptToSendPendingCriticalPackets()
+{
+	sf::Time now = resendClock.getElapsedTime();
+
+	for (PendingCriticalPacket& criticalPacket : pendingCriticalPacketsToSend)
+	{
+		if ((now - criticalPacket.lastSendTime).asMilliseconds() >= criticalPacketCooldown)
+		{
+			SendData(criticalPacket.buffer, criticalPacket.bufferSize);
+			criticalPacket.lastSendTime = now;
+		}
 	}
 }
 
@@ -31,7 +49,7 @@ void UdpManager::ReceivePacket() {
 	std::optional<sf::IpAddress> senderIp;
 	unsigned short senderPort;
 
-	if (socket.receive(buffer, sizeof(buffer), receivedSize, senderIp, senderPort) == sf::Socket::Status::Done)
+	while (socket.receive(buffer, sizeof(buffer), receivedSize, senderIp, senderPort) == sf::Socket::Status::Done)
 	{
 		uint8_t priority;
 		std::memcpy(&priority, buffer + dataRead, sizeof(priority));
@@ -174,7 +192,15 @@ void UdpManager::ReceiveMovement(char* buffer, size_t dataRead) {
 	NT->SetLastValidatedMovementPacket(movementPacket);
 }
 
-void UdpManager::ReceiveShot(char* buffer, size_t dataRead) {}
+void UdpManager::ReceiveShot(char* buffer, size_t dataRead)
+{
+	bool towardsRight;
+	std::memcpy(&towardsRight, buffer + dataRead, sizeof(towardsRight));
+	dataRead += sizeof(towardsRight);
+
+	std::cout << "Recibido disparo" << std::endl;
+	MM->HandleEnemyShot(towardsRight);
+}
 
 void UdpManager::ReceiveTaunt(char* buffer, size_t dataRead)
 {
@@ -280,7 +306,7 @@ void UdpManager::SendShot(bool towardsRight) {
 	char buffer[PACKET_SIZE];
 	size_t bufferSize = 0;
 
-	uint8_t priority = CRITICAL_PACKET;
+	uint8_t priority = CRITICAL_PACKET | URGENT_PACKET;
 	int id = GetNextCriticalPacketId();
 	PacketType type = PacketType::SHOT;
 

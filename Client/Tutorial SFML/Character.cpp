@@ -23,10 +23,7 @@ void Character::HandleAnimation(float dt) {
 	else
 		sprite.StartAnimation("idle");
 
-	if (facingRight)
-		sprite.FlipHorizontally(false);
-	else
-		sprite.FlipHorizontally(true);
+	sprite.FlipHorizontally(!facingRight);
 
 	sprite.Update(dt);
 }
@@ -75,18 +72,27 @@ void Character::Quack() {
 	quackSound.play();
 }
 
-void Character::Shoot() {
+void Character::Shoot(bool towardsRight)
+{
+	facingRight = towardsRight;
+	sprite.FlipHorizontally(!facingRight);
+
 	isShooting = true;
 	sprite.StartAnimation("shoot");
 
 	Bullet* bullet = new Bullet();
 
-	float offset = facingRight ? 40.f : -40.f;
+	float offset = towardsRight ? 40.f : -40.f;
 	Vector2 position = Vector2(transform->position.x + offset, transform->position.y);
 
-	bullet->Init(this, position, facingRight);
+	bullet->Init(this, position, towardsRight);
 
 	SPAWN.SpawnObject(bullet);
+}
+
+void Character::Shoot()
+{
+	Shoot(facingRight);
 }
 
 void Character::OnCollisionEnter(Object* other, const CollisionInfo& collisionInfo) {

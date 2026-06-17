@@ -39,6 +39,11 @@ void NetworkManager::Update()
 	}
 }
 
+void NetworkManager::SendShot(const sf::IpAddress& ip, unsigned short port, bool towardsRight)
+{
+	udp.SendShot(ip, port, towardsRight);
+}
+
 void NetworkManager::SendTaunt(const sf::IpAddress& ip, unsigned short port)
 {
 	udp.SendTaunt(ip, port);

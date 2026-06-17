@@ -2,6 +2,7 @@
 #include <SFML/Network.hpp> 
 #include <unordered_set> 
 #include <unordered_map> 
+#include <SFML/System/Time.hpp>
 #include "MovementPacket.h"
 
 #define PACKET_SIZE 1024
@@ -17,7 +18,19 @@ public:
 	enum class PacketType : uint8_t { MATCH_CONNECT, MATCH_START, MOVEMENT, SHOT, TAUNT, HEALTH_UPDATE, ACKNOWLEDGEMENT, PING, DISCONNECT };
 
 private:
-	struct PendingCriticalPacket { int id; char* buffer; size_t bufferSize; sf::IpAddress ip; unsigned short port; };
+	struct PendingCriticalPacket
+	{
+		int id;
+		char* buffer;
+		size_t bufferSize;
+		sf::IpAddress ip;
+		unsigned short port;
+
+		sf::Time lastSendTime;
+	};
+
+	sf::Clock resendClock;
+	const float criticalPacketCooldown = 100; //milliseconds
 
 	sf::UdpSocket socket;
 
@@ -53,7 +66,7 @@ public:
 	void SendMatchStart(const sf::IpAddress& ip, unsigned short port);
 	void SendHealthUpdate(const sf::IpAddress& ip, unsigned short port, uint8_t playerIndex, int health, int lives);
 	void SendMovement(MovementPacket movement);
-	void SendShot(bool towardsRight);
+	void SendShot(const sf::IpAddress& ip, unsigned short port, bool towardsRight);
 	void SendTaunt(const sf::IpAddress& ip, unsigned short port);
 
 	void SendPing(const sf::IpAddress& ip, unsigned short port);
