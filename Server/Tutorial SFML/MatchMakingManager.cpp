@@ -1,15 +1,23 @@
 #include "MatchMakingManager.h"
 #include "NetworkManager.h"
 #include <iostream>
+#include "GameRoom.h"
+#include "GameManager.h"
 
-bool MatchMakingManager::IsAvailableRoomId(std::string roomId)
+void MatchMakingManager::AddPlayerToWaitingRoom(sf::TcpSocket* playerClient, GameMode mode)
 {
-	for (int i = 0; i < waitingRooms.size(); i++)
-	{
-		if (roomId == waitingRooms[i].GetId())
-			return false;
+	Player* player = GetPlayer(playerClient);
+
+	std::cout << "Player añadido a la cola" << std::endl;
+	if (waitingPlayers[mode].empty()) {
+		waitingPlayers[mode].push(*player);
+		return;
 	}
-	return true;
+
+	Player other = waitingPlayers[mode].front();
+	waitingPlayers[mode].pop();
+
+	GM->AddRoom(GameRoom(other, *player, mode));
 }
 
 Player* MatchMakingManager::GetPlayer(sf::TcpSocket* playerClient)
@@ -20,16 +28,8 @@ Player* MatchMakingManager::GetPlayer(sf::TcpSocket* playerClient)
 			return &connectedPlayers[i];
 	}
 
-	return nullptr;
-}
-
-GameRoom* MatchMakingManager::GetGameInfo(std::string roomId)
-{
-	for (int i = 0; i < waitingRooms.size(); i++)
-	{
-		if (roomId == waitingRooms[i].GetId())
-			return &waitingRooms[i];
-	}
+	// TEMPORAL: Crea un player generico para no tener que iniciar sesión
+	return new Player(playerClient, "Player", 0);
 
 	return nullptr;
 }
@@ -37,48 +37,4 @@ GameRoom* MatchMakingManager::GetGameInfo(std::string roomId)
 void MatchMakingManager::AddConnectedPlayer(sf::TcpSocket* playerClient, std::string username, int playerPoints)
 {
 	connectedPlayers.push_back(Player(playerClient, username, playerPoints));
-}
-
-bool MatchMakingManager::CreateWaitingRoom(std::string roomId, sf::TcpSocket* playerClient)
-{		
-	if (!IsAvailableRoomId(roomId))
-		return false;
-	
-	Player* player = GetPlayer(playerClient);
-
-	if (player == nullptr)
-	{
-		std::cout << "Error: Jugador no encontrado";
-		return false;
-	}
-
-	GameRoom room(roomId);
-	room.AddPlayer(*player);
-
-	waitingRooms.push_back(room);
-
-	return true;
-}
-
-bool MatchMakingManager::JoinWaitingRoom(std::string roomId, sf::TcpSocket* playerClient)
-{
-	for (int i = 0; i < waitingRooms.size(); i++)
-	{
-		if (roomId == waitingRooms[i].GetId())
-		{
-			if (waitingRooms[i].IsFull()) return false;
-			std::cout << "Es waiting room " << i << std::endl;
-			waitingRooms[i].AddPlayer(*GetPlayer(playerClient));
-
-			for (int j = 0; j < waitingRooms[i].GetPlayerAmount(); j++)
-			{
-				sf::TcpSocket* currentClient = waitingRooms[i].GetPlayer(j)->client;
-				SPTM->SendUpdatedPlayerCount(*currentClient, waitingRooms[i].GetPlayerAmount());
-				std::cout << "Matchmaking ha enviado mensaje al cliente " << j << " de la sala " << std::endl;
-			}
-
-			return true;
-		}
-	}
-	return false;
 }

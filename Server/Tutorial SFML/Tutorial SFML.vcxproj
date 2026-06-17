@@ -103,7 +103,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>STATIC_CONCPP;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\include</AdditionalIncludeDirectories>
@@ -139,21 +139,47 @@
     <ClCompile Include="Bcrypt\bcrypt.cpp" />
     <ClCompile Include="Bcrypt\blowfish.cpp" />
     <ClCompile Include="Database.cpp" />
+    <ClCompile Include="GameManager.cpp" />
+    <ClCompile Include="MapReader.cpp" />
     <ClCompile Include="MatchMakingManager.cpp" />
+    <ClCompile Include="MovementManager.cpp" />
+    <ClCompile Include="MovementPacket.cpp" />
     <ClCompile Include="NetworkManager.cpp" />
     <ClCompile Include="ServerPacketTypeManager.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="Task.cpp" />
+    <ClCompile Include="User.cpp" />
+    <ClCompile Include="Utils.cpp" />
+    <ClCompile Include="Vector2.cpp" />
+    <ClCompile Include="XMLReader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bcrypt\bcrypt.h" />
     <ClInclude Include="Bcrypt\node_blf.h" />
     <ClInclude Include="Bcrypt\openbsd.h" />
     <ClInclude Include="Database.h" />
-    <ClInclude Include="Game.h" />
+    <ClInclude Include="dep\inc\xml\rapidxml.hpp" />
+    <ClInclude Include="dep\inc\xml\rapidxml_iterators.hpp" />
+    <ClInclude Include="dep\inc\xml\rapidxml_print.hpp" />
+    <ClInclude Include="dep\inc\xml\rapidxml_utils.hpp" />
+    <ClInclude Include="GameManager.h" />
+    <ClInclude Include="GameRoom.h" />
+    <ClInclude Include="MapReader.h" />
     <ClInclude Include="MatchMakingManager.h" />
+    <ClInclude Include="MovementManager.h" />
+    <ClInclude Include="MovementPacket.h" />
     <ClInclude Include="NetworkManager.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="ServerPacketTypeManager.h" />
+    <ClInclude Include="Task.h" />
+    <ClInclude Include="ThreadManager.h" />
+    <ClInclude Include="User.h" />
+    <ClInclude Include="Utils.h" />
+    <ClInclude Include="Vector2.h" />
+    <ClInclude Include="XMLReader.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="gameConfig.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,0 +1,159 @@
+#include "ServerPacketTypeManager.h"
+#include "NetworkManager.h"
+#include <iostream>
+#include "MovementPacket.h"
+#include "ThreadManager.h"
+#include "Utils.h"
+#include <thread>
+#include <optional>
+#include "Player.h"
+#include "Game.h"
+#include "GameRoomManager.h"
+
+sf::Packet& operator>>(sf::Packet& packet, TcpPacketTypes& type) {
+	int temp;
+	packet >> temp;
+	type = static_cast<TcpPacketTypes>(temp);
+
+	return packet;
+}
+
+sf::Packet& operator<<(sf::Packet& packet, TcpPacketTypes& type) {
+	int temp;
+	temp = static_cast<int>(type);
+	packet << temp;
+
+	return packet;
+}
+
+sf::Packet& operator>>(sf::Packet& packet, UdpPacketTypes& type) {
+	int temp;
+	packet >> temp;
+	type = static_cast<UdpPacketTypes>(temp);
+
+	return packet;
+}
+
+sf::Packet& operator<<(sf::Packet& packet, UdpPacketTypes& type) {
+	int temp;
+	temp = static_cast<int>(type);
+	packet << temp;
+
+	return packet;
+}
+
+void ServerPacketTypesManager::SendData(sf::TcpSocket& client, sf::Packet& packet)
+{
+	if (client.send(packet) == sf::Socket::Status::Done) {
+		std::cout << "Enviando paquete..." << std::endl;
+	}
+	else {
+		std::cerr << "Error al enviar el paquete" << std::endl;
+	}
+}
+
+void ServerPacketTypesManager::SendHandshake(sf::TcpSocket& client)
+{
+	sf::Packet packet;
+	packet << TcpPacketTypes::HANDSHAKE << handshakeMessage;
+	SendData(client, packet);
+}
+
+void ServerPacketTypesManager::SendUpdatedPlayerCount(sf::TcpSocket& client, int playerCount)
+{
+	sf::Packet packet;
+	packet << TcpPacketTypes::WAITING_ROOM_PLAYERS;
+	packet << playerCount;
+
+	SendData(client, packet);
+}
+
+void ServerPacketTypesManager::ReceiveTcpPacket(sf::Packet packet)
+{
+	TcpPacketTypes packetType;
+
+	packet >> packetType;
+
+	switch (packetType)
+	{
+	case TcpPacketTypes::HANDSHAKE:
+		ReceiveHandshakePacket(packet);
+		break;
+	case TcpPacketTypes::START_GAME:
+		ReceiveStartGamePacket(packet);
+		break;
+	case TcpPacketTypes::END_GAME:
+		ReceiveEndGamePacket(packet);
+		break;
+	default:
+		std::cout << "No se ha identificado el tipo de paquete tcp" << std::endl;
+		break;
+	}
+
+	packet.clear();
+}
+
+void ServerPacketTypesManager::SendLobbyCreateResponse(sf::TcpSocket& client, bool success)
+{
+	sf::Packet packet;
+	packet << TcpPacketTypes::LOBBY_CREATE;
+	packet << success;
+
+	SendData(client, packet);
+
+	std::cout << "Respuesta de creacion de lobby enviada" << std::endl;
+}
+
+void ServerPacketTypesManager::SendLobbyJoinResponse(sf::TcpSocket& client, bool success)
+{
+	sf::Packet packet;
+	packet << TcpPacketTypes::LOBBY_JOIN;
+	packet << success;
+
+	SendData(client, packet);
+
+	std::cout << "Respuesta de join a lobby enviada" << std::endl;
+}
+
+void ServerPacketTypesManager::ReceiveHandshakePacket(sf::Packet data)
+{
+	std::string receiveMesage;
+	data >> receiveMesage;
+
+	std::cout << "Mensaje enviado del cliente: " << receiveMesage << std::endl;
+}
+
+void ServerPacketTypesManager::ReceiveMovementPacket(sf::Packet data)
+{
+	MovementPacket movement;
+	data >> movement;
+
+	std::cout << "Recibido movimiento: ";
+	std::cout << "ID " << movement.ID << " | ";
+	std::cout << "(" << movement.pos.x << ", " << movement.pos.y << ")" << std::endl;
+}
+
+void ServerPacketTypesManager::ReceiveTauntPacket(sf::Packet data)
+{
+	std::cout << "Burla recibida" << std::endl;
+}
+
+void ServerPacketTypesManager::ReceiveStartGamePacket(sf::Packet data)
+{
+	std::cout << "Recibido paquete para crear sala" << std::endl;
+
+	int roomId;
+	uint8_t mode;
+
+	data >> roomId;
+	data >> mode;
+
+	GameMode gameMode = static_cast<GameMode>(mode);
+
+	GRM->CreateRoom(gameMode, roomId);
+}
+
+void ServerPacketTypesManager::ReceiveEndGamePacket(sf::Packet data)
+{
+}
+

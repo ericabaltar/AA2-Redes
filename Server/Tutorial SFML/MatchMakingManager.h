@@ -1,6 +1,9 @@
 #pragma once
 #include <SFML/Network.hpp>
-#include "Game.h"
+#include "GameRoom.h"
+#include <queue>
+#include <map>
+#include "Utils.h"
 
 #define MM MatchMakingManager::Instance()
 
@@ -15,16 +18,13 @@ public:
 
 private:
 	std::vector<Player> connectedPlayers;
-	std::vector<GameRoom> waitingRooms;
+	std::map<GameMode, std::queue<Player>> waitingPlayers;
 
-	bool IsAvailableRoomId(std::string roomId);	
 	Player* GetPlayer(sf::TcpSocket* playerClient);
-	GameRoom* GetGameInfo(std::string roomId);
 
 public:
-	void AddConnectedPlayer(sf::TcpSocket* playerClient, std::string username, int playerPoints);
-	bool CreateWaitingRoom(std::string roomId, sf::TcpSocket* playerClient);
-	bool JoinWaitingRoom(std::string roomId, sf::TcpSocket* playerClient);
+	void AddPlayerToWaitingRoom(sf::TcpSocket* playerClient, GameMode mode);
 
+	void AddConnectedPlayer(sf::TcpSocket* playerClient, std::string username, int playerPoints);
 };
 
