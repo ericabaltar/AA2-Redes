@@ -67,6 +67,16 @@ void PlayerCharacter::ApplyPhysics(float dt) {
 	isOnGround = false;
 }
 
+MovementPacket PlayerCharacter::GenerateMovementPacket()
+{
+	movementPacketIndex++;
+	MovementPacket packet;
+	packet.ID = movementPacketIndex;
+	packet.pos = GetPosition();
+	movementPackets.push_back(packet);
+	return packet;
+}
+
 void PlayerCharacter::HandleEvent(const sf::Event& event) {
 	if (event.is<sf::Event::FocusGained>()) {
 		isFocused = true;
@@ -91,6 +101,7 @@ void PlayerCharacter::Update(float dt) {
 	HandleInput(dt);
 	ApplyPhysics(dt);
 	Character::Update(dt);
+	NT->SendMovementPacket(GenerateMovementPacket());
 }
 
 void PlayerCharacter::Quack()

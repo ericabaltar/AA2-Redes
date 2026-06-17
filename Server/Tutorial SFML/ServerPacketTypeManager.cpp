@@ -329,6 +329,8 @@ void ServerPacketTypesManager::ReceiveMovementPacket(sf::Packet data, sf::TcpSoc
 
 	User u; //from client
 
+
+
 	MovM->AddPacket(u, movement);
 }
 

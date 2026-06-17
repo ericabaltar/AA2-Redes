@@ -137,6 +137,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="MapReader.cpp" />
+    <ClCompile Include="MovementManager.cpp" />
     <ClCompile Include="NetworkManager.cpp" />
     <ClCompile Include="PingManager.cpp" />
     <ClCompile Include="ServerPacketTypeManager.cpp" />
@@ -148,6 +149,7 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameRoomManager.h" />
     <ClInclude Include="MapReader.h" />
+    <ClInclude Include="MovementManager.h" />
     <ClInclude Include="MovementPacket.h" />
     <ClInclude Include="NetworkManager.h" />
     <ClInclude Include="PingManager.h" />

@@ -6,6 +6,7 @@
 #include "ServerPacketTypeManager.h" 
 #include "Task.h" 
 #include "UdpManager.h"
+#include "MovementPacket.h"
 
 #define NT NetworkManager::Instance() 
 #define MAIN_SERVER_PORT 55000
@@ -40,6 +41,7 @@ public:
 	inline void CloseServer() { closeServer = true; }
 	inline bool GetCloseServer() { return closeServer; }
 
+	void SendMovement(const sf::IpAddress& ip, unsigned short port, MovementPacket movement, bool isPlayer);
 	void SendShot(const sf::IpAddress& ip, unsigned short port, bool towardsRight);
 	void SendTaunt(const sf::IpAddress& ip, unsigned short port);
 
