@@ -1,4 +1,7 @@
 #include "NetworkManager.h"
+#include "Player.h"
+#include "PingManager.h"
+#include "GameRoomManager.h"
 
 void NetworkManager::Init()
 {
@@ -14,6 +17,26 @@ void NetworkManager::Update()
 
 	udp.ReceivePacket();
 	udp.AttemptToSendPendingCriticalPackets();
+	while (!PingM->GetPlayersToPing().empty()) {
+		Player* player = PingM->GetPlayersToPing().back();
+		udp.SendPing(player->udpIp.value(), player->udpPort);
+		PingM->GetPlayersToPing().pop_back();
+	}
+	while(!PingM->GetDisconnectedPlayers().empty()) {
+		Player* player = PingM->GetDisconnectedPlayers().back();
+		PingM->RemovePlayer(player);
+		int playerIndex = -1;
+		GameRoom* room = GRM->FindRoomByUdp(player->udpIp.value(), player->udpPort, playerIndex);
+		for (int i = 0; i < room->GetPlayerAmount(); i++) {
+			if (i != playerIndex) {
+				Player* playerI = room->GetPlayer(i);
+				PingM->RemovePlayer(playerI);
+				udp.SendDisconnect(playerI->udpIp.value(), playerI->udpPort);
+			}
+		}
+		//Delete room
+		PingM->GetDisconnectedPlayers().pop_back();
+	}
 }
 
 void NetworkManager::SendShot(const sf::IpAddress& ip, unsigned short port, bool towardsRight)

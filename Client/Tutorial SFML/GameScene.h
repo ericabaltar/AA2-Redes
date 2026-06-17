@@ -83,6 +83,11 @@ public:
 
 	virtual bool Update(sf::RenderWindow& window, float dt) override
 	{
+		if (!MM->GetGameStarted()) {
+			nextScene = SceneOption::RANKING;
+			return true;
+		}
+
 		if (player->IsDead())
 		{
 			std::cout << "DERROTA" << std::endl;

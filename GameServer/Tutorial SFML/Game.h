@@ -8,6 +8,7 @@
 #include "AABB.h"
 #include "MovementPacket.h"
 #include "NetworkManager.h"
+#include "PingManager.h"
 
 struct HeadlessBullet {
 	Vector2 position;
@@ -82,8 +83,10 @@ public:
 	void StartGame()
 	{
 		std::lock_guard<std::mutex> lock(roomMutex);
-		if (CanStartGame())
+		if (CanStartGame()) {
 			gameStarted = true;
+			for (Player player : players) PingM->AddPlayer(&player);
+		}
 	}
 
 	bool HasStarted()
