@@ -1,5 +1,7 @@
 #pragma once 
 #include "Character.h"
+#include "MovementPacket.h"
+#include <vector>
 
 class PlayerCharacter : public Character {
 private:
@@ -19,6 +21,10 @@ private:
 	void HandleInput(float dt);
 
 	void ApplyPhysics(float dt);
+
+	int movementPacketIndex = 0;
+	MovementPacket GenerateMovementPacket();
+	std::vector<MovementPacket> movementPackets;
 
 public:
 	PlayerCharacter() : Character("assets/white_duck.png") {

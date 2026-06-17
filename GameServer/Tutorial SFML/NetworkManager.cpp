@@ -39,6 +39,11 @@ void NetworkManager::Update()
 	}
 }
 
+void NetworkManager::SendMovement(const sf::IpAddress& ip, unsigned short port, MovementPacket movement, bool isPlayer)
+{
+	udp.SendMovement(ip, port, movement, isPlayer);
+}
+
 void NetworkManager::SendShot(const sf::IpAddress& ip, unsigned short port, bool towardsRight)
 {
 	udp.SendShot(ip, port, towardsRight);

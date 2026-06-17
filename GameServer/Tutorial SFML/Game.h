@@ -9,6 +9,7 @@
 #include "MovementPacket.h"
 #include "NetworkManager.h"
 #include "PingManager.h"
+#include "MovementManager.h"
 
 struct HeadlessBullet {
 	Vector2 position;
@@ -171,13 +172,14 @@ public:
 
 	void HandleMovement(int playerIndex, MovementPacket movement)
 	{
-		std::lock_guard<std::mutex> lock(roomMutex);
-		if (playerIndex >= 0 && playerIndex < playersAdded)
-		{
-			players[playerIndex].position = movement.pos;
-			Vector2 offset(-32.f, -21.33f);
-			players[playerIndex].collider.SetTopLeft(movement.pos + offset);
-		}
+		roomMutex.lock();
+
+		MovementPacket lastValidMovement = MovM->ValidatePacket(&players[playerIndex], movement);
+
+		for (int i = 0; i < maxPlayers; i++) 
+			NT->SendMovement(players[i].udpIp.value(), players[i].udpPort, movement, i == playerIndex);
+
+		roomMutex.unlock();
 	}
 
 	void HandleShot(int playerIndex, bool facingRight)

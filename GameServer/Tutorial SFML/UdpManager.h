@@ -64,7 +64,7 @@ public:
 
 	void SendMatchStart(const sf::IpAddress& ip, unsigned short port);
 	void SendHealthUpdate(const sf::IpAddress& ip, unsigned short port, uint8_t playerIndex, int health, int lives);
-	void SendMovement(MovementPacket movement);
+	void SendMovement(const sf::IpAddress& ip, unsigned short port, MovementPacket movement, bool isPlayer);
 	void SendShot(const sf::IpAddress& ip, unsigned short port, bool towardsRight);
 	void SendTaunt(const sf::IpAddress& ip, unsigned short port);
 

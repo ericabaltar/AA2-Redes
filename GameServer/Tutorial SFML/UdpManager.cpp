@@ -302,7 +302,28 @@ void UdpManager::SendHealthUpdate(const sf::IpAddress& ip, unsigned short port, 
 	SendCriticalPacket(ip, port, id, buffer, bufferSize);
 }
 
-void UdpManager::SendMovement(MovementPacket movement) {}
+void UdpManager::SendMovement(const sf::IpAddress& ip, unsigned short port, MovementPacket movement, bool isPlayer) {
+	char buffer[PACKET_SIZE];
+	size_t bufferSize = 0;
+
+	uint8_t priority = URGENT_PACKET;
+	PacketType type = PacketType::MOVEMENT;
+
+	std::memcpy(buffer + bufferSize, &priority, sizeof(priority));
+	bufferSize += sizeof(priority);
+
+	std::memcpy(buffer + bufferSize, &type, sizeof(type));
+	bufferSize += sizeof(type);
+
+	std::memcpy(buffer + bufferSize, &movement, sizeof(movement));
+	bufferSize += sizeof(movement);
+
+	std::memcpy(buffer + bufferSize, &isPlayer, sizeof(isPlayer));
+	bufferSize += sizeof(isPlayer);
+
+	std::cout << "Movimiento enviado a " << ip.toString() << ":" << port << std::endl;
+	SendData(ip, port, buffer, bufferSize);
+}
 
 void UdpManager::SendShot(const sf::IpAddress& ip, unsigned short port, bool towardsRight)
 {

@@ -63,22 +63,20 @@ public:
 private:
 
     void Worker() {
-        while (true) {
+        while (!stop) {
             Task* task = nullptr;
 
-            {
-                std::unique_lock<std::mutex> lock(tasksMutex);
+            tasksMutex.lock();
 
-                cv.wait(lock, [&] {
-                    return stop || !tasks.empty();
-                    });
-
-                if (stop && tasks.empty())
-                    return;
-
-                task = tasks.front();
-                tasks.pop_front();
+            if (tasks.empty()) {
+                tasksMutex.unlock();
+                return;
             }
+
+            task = tasks.front();
+            tasks.pop_front();
+
+            tasksMutex.unlock();
 
             if (task != nullptr)
             {
